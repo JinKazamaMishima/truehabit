@@ -83,28 +83,28 @@ export default async function ExportPage({
       </div>
 
       {/* Print header */}
-      <div className="rounded-lg border bg-emerald-50 p-6 dark:bg-emerald-950/20">
+      <div className="rounded-lg border bg-brand/10 p-6 dark:bg-brand/10">
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="text-xl font-bold text-emerald-800 dark:text-emerald-300">
+            <h2 className="text-xl font-bold text-brand-dark dark:text-brand">
               {plan.name}
             </h2>
-            <p className="mt-1 text-sm text-emerald-600 dark:text-emerald-400">
+            <p className="mt-1 text-sm text-brand dark:text-brand">
               Client: {plan.client?.name ?? "—"}
             </p>
             {plan.startDate && plan.endDate && (
-              <p className="text-sm text-emerald-600/70 dark:text-emerald-400/70">
+              <p className="text-sm text-brand/70 dark:text-brand/70">
                 {plan.startDate} → {plan.endDate}
               </p>
             )}
           </div>
           <div className="text-right">
             {plan.calorieTarget && (
-              <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">
+              <p className="text-2xl font-bold text-brand-dark dark:text-brand">
                 {plan.calorieTarget} kcal
               </p>
             )}
-            <div className="mt-1 flex gap-3 text-sm text-emerald-600 dark:text-emerald-400">
+            <div className="mt-1 flex gap-3 text-sm text-brand dark:text-brand">
               {plan.proteinGPerKg && <span>P: {plan.proteinGPerKg} g/kg</span>}
               {plan.carbsGPerKg && <span>C: {plan.carbsGPerKg} g/kg</span>}
               {plan.fatGPerKg && <span>F: {plan.fatGPerKg} g/kg</span>}

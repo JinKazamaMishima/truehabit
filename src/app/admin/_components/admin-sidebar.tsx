@@ -59,10 +59,10 @@ function NavLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () 
             href={item.href}
             onClick={onNavigate}
             className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+              "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
               active
-                ? "bg-emerald-600 text-white"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                ? "border-l-[3px] border-brand bg-brand/10 text-brand"
+                : "border-l-[3px] border-transparent text-muted-foreground hover:bg-muted hover:text-foreground"
             )}
           >
             <item.icon className="size-5 shrink-0" />
@@ -89,10 +89,10 @@ export function AdminSidebar({
   const sidebarContent = (
     <>
       <div className="flex h-14 items-center gap-2 border-b px-4">
-        <div className="flex size-8 items-center justify-center rounded-lg bg-emerald-600 text-sm font-bold text-white">
+        <div className="flex size-8 items-center justify-center rounded-lg bg-brand text-sm font-bold text-white">
           TH
         </div>
-        <span className="text-base font-semibold">TrueHabit</span>
+        <span className="font-heading text-base font-semibold">TrueHabit</span>
       </div>
 
       <div className="flex-1 overflow-y-auto py-4">

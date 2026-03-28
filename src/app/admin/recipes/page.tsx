@@ -72,7 +72,7 @@ export default async function AdminRecipesPage({
           </p>
         </div>
         <Button
-          className="bg-emerald-600 text-white hover:bg-emerald-700"
+          className="bg-brand text-white hover:bg-brand-dark"
           render={<Link href="/admin/recipes/new" />}
         >
           <Plus className="size-4" />
@@ -140,10 +140,10 @@ export default async function AdminRecipesPage({
               href={`/admin/recipes/${recipe.id}`}
               className="group block h-full outline-none"
             >
-              <Card className="h-full transition-all group-hover:shadow-md group-hover:ring-1 group-hover:ring-emerald-600/25 group-focus-visible:ring-2 group-focus-visible:ring-emerald-600">
+              <Card className="h-full transition-all group-hover:shadow-md group-hover:ring-1 group-hover:ring-brand/25 group-focus-visible:ring-2 group-focus-visible:ring-brand">
                 <CardHeader className="pb-2">
                   <div className="flex flex-wrap items-start justify-between gap-2">
-                    <h2 className="font-heading text-base font-semibold leading-snug group-hover:text-emerald-700">
+                    <h2 className="font-heading text-base font-semibold leading-snug group-hover:text-brand-dark">
                       {recipe.name}
                     </h2>
                     {recipe.prepTimeMin != null && (
@@ -162,7 +162,7 @@ export default async function AdminRecipesPage({
                         <Badge
                           key={m}
                           variant="secondary"
-                          className="bg-emerald-50 text-xs font-normal text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200"
+                          className="bg-brand/10 text-xs font-normal text-brand-dark dark:bg-brand/10 dark:text-brand"
                         >
                           {MEAL_LABELS[m] ?? m}
                         </Badge>

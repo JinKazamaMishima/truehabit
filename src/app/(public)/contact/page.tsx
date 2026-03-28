@@ -90,7 +90,7 @@ const contactInfo = [
 
 export default function ContactPage() {
   return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="text-lg text-slate-500">Cargando...</div></div>}>
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="text-lg text-muted-foreground">Cargando...</div></div>}>
       <ContactPageContent />
     </Suspense>
   );
@@ -142,9 +142,8 @@ function ContactPageContent() {
 
   return (
     <>
-      {/* Hero Banner */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-700 to-emerald-800 py-20 sm:py-28">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-40" />
+      <section className="relative overflow-hidden bg-charcoal py-20 sm:py-28">
+        <div className="absolute inset-0 bg-gradient-to-br from-charcoal via-charcoal-light/50 to-charcoal opacity-80" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <motion.div
             className="mx-auto max-w-3xl text-center"
@@ -152,21 +151,22 @@ function ContactPageContent() {
             animate="visible"
             variants={stagger}
           >
-            <motion.p
-              variants={fadeUp}
-              className="mb-3 text-sm font-semibold uppercase tracking-widest text-emerald-200"
-            >
-              Contáctanos
-            </motion.p>
+            <motion.div variants={fadeUp} className="mb-4 flex items-center justify-center gap-3">
+              <span className="h-px w-8 bg-brand" />
+              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+                Contáctanos
+              </span>
+              <span className="h-px w-8 bg-brand" />
+            </motion.div>
             <motion.h1
               variants={fadeUp}
-              className="text-4xl font-extrabold text-white sm:text-5xl"
+              className="font-heading text-4xl font-bold text-white sm:text-5xl"
             >
               Agenda Tu Cita
             </motion.h1>
             <motion.p
               variants={fadeUp}
-              className="mx-auto mt-4 max-w-xl text-lg text-emerald-100"
+              className="mx-auto mt-5 max-w-xl text-base text-white/70"
             >
               Estamos listos para ayudarte a alcanzar tus metas de nutrición.
               Completa el formulario y te contactaremos pronto.
@@ -175,8 +175,7 @@ function ContactPageContent() {
         </div>
       </section>
 
-      {/* Contact Content */}
-      <section ref={formRef} className="bg-white py-20 sm:py-24">
+      <section ref={formRef} className="bg-white py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <motion.div
             className="grid gap-12 lg:grid-cols-5"
@@ -184,12 +183,11 @@ function ContactPageContent() {
             animate={formInView ? "visible" : "hidden"}
             variants={stagger}
           >
-            {/* Left - Contact Info */}
             <motion.div variants={fadeUp} className="lg:col-span-2">
-              <h2 className="text-2xl font-bold text-slate-900">
+              <h2 className="font-heading text-2xl font-bold text-charcoal">
                 Información de Contacto
               </h2>
-              <p className="mt-3 text-sm leading-relaxed text-slate-600">
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                 No dudes en contactarnos por cualquiera de estos medios. Nos
                 encantará ayudarte en tu camino hacia una mejor nutrición.
               </p>
@@ -197,22 +195,22 @@ function ContactPageContent() {
               <div className="mt-8 space-y-6">
                 {contactInfo.map((info) => (
                   <div key={info.label} className="flex items-start gap-4">
-                    <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+                    <div className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-brand/10 text-brand">
                       <info.icon className="size-5" />
                     </div>
                     <div>
-                      <p className="text-xs font-medium uppercase tracking-wider text-slate-400">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                         {info.label}
                       </p>
                       {info.href ? (
                         <a
                           href={info.href}
-                          className="mt-0.5 text-sm font-medium text-slate-900 hover:text-emerald-600"
+                          className="mt-1 text-sm font-medium text-charcoal hover:text-brand"
                         >
                           {info.value}
                         </a>
                       ) : (
-                        <p className="mt-0.5 text-sm font-medium text-slate-900">
+                        <p className="mt-1 text-sm font-medium text-charcoal">
                           {info.value}
                         </p>
                       )}
@@ -222,20 +220,19 @@ function ContactPageContent() {
               </div>
             </motion.div>
 
-            {/* Right - Form */}
             <motion.div
               variants={fadeUp}
-              className="rounded-2xl border border-slate-100 bg-white p-6 shadow-lg sm:p-8 lg:col-span-3"
+              className="rounded-2xl border border-gray-100 bg-white p-6 shadow-xl sm:p-8 lg:col-span-3"
             >
               {submitted ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
-                  <div className="mb-4 flex size-16 items-center justify-center rounded-full bg-emerald-100">
-                    <CheckCircle className="size-8 text-emerald-600" />
+                  <div className="mb-4 flex size-16 items-center justify-center rounded-full bg-brand/10">
+                    <CheckCircle className="size-8 text-brand" />
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900">
+                  <h3 className="font-heading text-xl font-bold text-charcoal">
                     ¡Cita Agendada!
                   </h3>
-                  <p className="mt-2 max-w-sm text-sm text-slate-600">
+                  <p className="mt-2 max-w-sm text-sm text-muted-foreground">
                     Hemos recibido tu solicitud. Te contactaremos pronto para
                     confirmar los detalles de tu cita.
                   </p>
@@ -245,7 +242,7 @@ function ContactPageContent() {
                   onSubmit={handleSubmit(onSubmit)}
                   className="space-y-5"
                 >
-                  <h3 className="text-lg font-bold text-slate-900">
+                  <h3 className="font-heading text-lg font-bold text-charcoal">
                     Formulario de Cita
                   </h3>
 
@@ -346,7 +343,7 @@ function ContactPageContent() {
 
                   <Button
                     type="submit"
-                    className="h-11 w-full bg-emerald-600 text-white hover:bg-emerald-700"
+                    className="h-11 w-full bg-brand text-white hover:bg-brand-dark"
                     disabled={isPending}
                   >
                     {isPending ? (

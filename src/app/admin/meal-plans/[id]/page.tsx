@@ -30,7 +30,7 @@ import { updateMealPlanStatus, deleteMealPlan } from "@/actions/meal-plans";
 
 const statusStyles: Record<string, string> = {
   draft: "bg-amber-100 text-amber-700",
-  active: "bg-emerald-100 text-emerald-700",
+  active: "bg-brand/15 text-brand-dark",
   completed: "bg-slate-100 text-slate-700",
 };
 
@@ -130,7 +130,7 @@ export default async function MealPlanDetailPage({
         </Card>
         <Card size="sm">
           <CardContent className="flex items-center gap-3">
-            <div className="rounded-lg bg-emerald-50 p-2 text-emerald-600 dark:bg-emerald-950/30">
+            <div className="rounded-lg bg-brand/10 p-2 text-brand dark:bg-brand/10">
               <Calendar className="size-4" />
             </div>
             <div>
@@ -160,7 +160,7 @@ export default async function MealPlanDetailPage({
         <Card size="sm">
           <CardContent>
             <p className="text-xs text-muted-foreground">Calorie Target</p>
-            <p className="text-2xl font-bold text-emerald-600">
+            <p className="text-2xl font-bold text-brand">
               {plan.calorieTarget ?? "—"}{" "}
               <span className="text-sm font-normal text-muted-foreground">
                 kcal

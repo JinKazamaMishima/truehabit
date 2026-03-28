@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import Link from "next/link";
-import { User, Star, ArrowRight } from "lucide-react";
+import { User, Clock, Star, Award, ArrowRight } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { AnimatedCounter } from "./animated-counter";
@@ -12,9 +12,25 @@ const fadeUp = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" as const } },
 };
 
+const fadeLeft = {
+  hidden: { opacity: 0, x: -40 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease: "easeOut" as const } },
+};
+
+const fadeRight = {
+  hidden: { opacity: 0, x: 40 },
+  visible: { opacity: 1, x: 0, transition: { duration: 0.7, ease: "easeOut" as const } },
+};
+
 const stagger = {
   visible: { transition: { staggerChildren: 0.12 } },
 };
+
+const highlights = [
+  { icon: Clock, label: "Atención Puntual" },
+  { icon: Star, label: "Servicio Premium" },
+  { icon: Award, label: "Profesionales Certificados" },
+];
 
 export type AboutPreviewData = {
   name: string;
@@ -30,61 +46,78 @@ export function AboutPreview({ data }: { data: AboutPreviewData }) {
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section ref={ref} className="bg-slate-50 py-20 sm:py-24">
+    <section ref={ref} className="bg-gray-50 py-20 sm:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <motion.div
-          className="grid items-center gap-12 lg:grid-cols-2"
+          className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16"
           initial="hidden"
           animate={inView ? "visible" : "hidden"}
           variants={stagger}
         >
-          <motion.div variants={fadeUp}>
-            <p className="mb-2 text-sm font-semibold uppercase tracking-widest text-emerald-600">
-              {data.title}
-            </p>
-            <h2 className="text-3xl font-extrabold text-slate-900 sm:text-4xl">
-              {data.name}
-            </h2>
-            <p className="mt-4 leading-relaxed text-slate-600">{data.bio1}</p>
-            <p className="mt-3 leading-relaxed text-slate-600">{data.bio2}</p>
-
-            <div className="mt-6 inline-flex items-center gap-3 rounded-full bg-emerald-100 px-5 py-2.5">
-              <Star className="size-5 text-emerald-600" />
-              <span className="text-sm font-bold text-emerald-800">
-                <AnimatedCounter target={data.yearsExperience} suffix="+" /> Años de Experiencia
+          <motion.div variants={fadeLeft}>
+            <div className="mb-6 flex items-center gap-3">
+              <span className="h-px w-8 bg-brand" />
+              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+                {data.title}
               </span>
+              <span className="h-px w-8 bg-brand" />
             </div>
 
-            <div className="mt-6">
+            <h2 className="font-heading text-3xl font-bold text-charcoal sm:text-4xl lg:text-[2.75rem] lg:leading-[1.15]">
+              Bienvenidos a{" "}
+              <span className="text-brand">TrueHabit</span>
+            </h2>
+
+            <p className="mt-6 text-base leading-[1.8] text-muted-foreground">{data.bio1}</p>
+            <p className="mt-4 text-base leading-[1.8] text-muted-foreground">{data.bio2}</p>
+
+            <div className="mt-8 flex flex-wrap items-center gap-6">
+              {highlights.map((h) => (
+                <div key={h.label} className="flex items-center gap-2.5">
+                  <div className="flex size-10 items-center justify-center rounded-full bg-brand/10 text-brand">
+                    <h.icon className="size-4" />
+                  </div>
+                  <span className="text-sm font-medium text-charcoal">{h.label}</span>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-8">
               <Button
-                className="bg-emerald-600 text-white hover:bg-emerald-700"
-                size="lg"
+                className="h-12 rounded-md bg-brand px-8 text-sm font-semibold text-white shadow-md transition-all hover:bg-brand-dark hover:shadow-lg"
                 render={<Link href="/about" />}
               >
                 Más Sobre Nosotros
-                <ArrowRight className="ml-1 size-4" />
+                <ArrowRight className="ml-1.5 size-4" />
               </Button>
             </div>
           </motion.div>
 
-          <motion.div variants={fadeUp} className="flex justify-center">
-            {data.imageUrl ? (
-              <div className="relative size-80 overflow-hidden rounded-2xl lg:size-96">
-                <img
-                  src={data.imageUrl}
-                  alt={data.name}
-                  className="size-full object-cover"
-                />
+          <motion.div variants={fadeRight} className="flex justify-center lg:justify-end">
+            <div className="relative">
+              <div className="relative overflow-hidden rounded-2xl border-[6px] border-brand shadow-2xl">
+                {data.imageUrl ? (
+                  <img
+                    src={data.imageUrl}
+                    alt={data.name}
+                    className="size-80 object-cover lg:h-[28rem] lg:w-96"
+                  />
+                ) : (
+                  <div className="flex size-80 items-center justify-center bg-gradient-to-br from-brand/10 to-brand/5 lg:h-[28rem] lg:w-96">
+                    <User className="size-24 text-brand/30" />
+                  </div>
+                )}
               </div>
-            ) : (
-              <div className="relative flex size-80 items-center justify-center rounded-2xl bg-emerald-100 lg:size-96">
-                <User className="size-24 text-emerald-300" />
-                <div className="absolute -bottom-4 -right-4 rounded-xl bg-emerald-600 px-5 py-3 shadow-lg">
-                  <p className="text-xs font-medium text-emerald-200">Certificada</p>
-                  <p className="text-sm font-bold text-white">Nutrición Deportiva</p>
-                </div>
+
+              <div className="absolute -bottom-6 -left-6 rounded-xl bg-charcoal px-6 py-4 shadow-xl">
+                <p className="text-3xl font-bold text-brand">
+                  <AnimatedCounter target={data.yearsExperience} suffix="+" />
+                </p>
+                <p className="text-xs font-medium tracking-wide text-white/80">
+                  Años de Experiencia
+                </p>
               </div>
-            )}
+            </div>
           </motion.div>
         </motion.div>
       </div>

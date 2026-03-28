@@ -52,8 +52,8 @@ export function FoodForm({
   const [isFree, setIsFree] = useState(defaults?.isFree ?? false);
 
   return (
-    <Card className="border-emerald-600/15">
-      <CardHeader className="border-b border-emerald-600/10">
+    <Card className="border-brand/15">
+      <CardHeader className="border-b border-brand/10">
         <CardTitle>Food details</CardTitle>
       </CardHeader>
       <CardContent className="pt-6">
@@ -168,7 +168,7 @@ export function FoodForm({
             </div>
           </div>
 
-          <div className="flex items-center gap-3 rounded-lg border border-emerald-600/20 bg-emerald-600/5 px-4 py-3">
+          <div className="flex items-center gap-3 rounded-lg border border-brand/20 bg-brand/5 px-4 py-3">
             <Checkbox
               id="is_free"
               checked={isFree}
@@ -201,7 +201,7 @@ export function FoodForm({
             </Button>
             <Button
               type="submit"
-              className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500"
+              className="bg-brand hover:bg-brand-dark dark:bg-brand dark:hover:bg-brand"
             >
               {submitLabel}
             </Button>

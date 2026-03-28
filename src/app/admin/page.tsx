@@ -5,12 +5,14 @@ import {
   CalendarClock,
   ChefHat,
   Plus,
+  ArrowRight,
+  TrendingUp,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { db } from "@/lib/db";
 import { clients, mealPlans, appointments, recipes } from "@/lib/db/schema";
-import { eq, count } from "drizzle-orm";
+import { eq, count, desc } from "drizzle-orm";
 
 export default async function AdminDashboardPage() {
   const [
@@ -18,6 +20,7 @@ export default async function AdminDashboardPage() {
     [{ value: activePlans }],
     [{ value: pendingAppointments }],
     [{ value: totalRecipes }],
+    recentClients,
   ] = await Promise.all([
     db.select({ value: count() }).from(clients),
     db
@@ -29,57 +32,90 @@ export default async function AdminDashboardPage() {
       .from(appointments)
       .where(eq(appointments.status, "pending")),
     db.select({ value: count() }).from(recipes),
+    db.select({ id: clients.id, name: clients.name, goal: clients.goal, createdAt: clients.createdAt })
+      .from(clients)
+      .orderBy(desc(clients.createdAt))
+      .limit(5),
   ]);
 
   const stats = [
     {
-      label: "Total Clients",
+      label: "Total Clientes",
       value: totalClients,
       icon: Users,
-      color: "text-blue-600 bg-blue-50",
+      color: "text-blue-600",
+      bg: "bg-blue-50",
+      border: "border-l-blue-500",
     },
     {
-      label: "Active Plans",
+      label: "Planes Activos",
       value: activePlans,
       icon: ClipboardList,
-      color: "text-emerald-600 bg-emerald-50",
+      color: "text-brand",
+      bg: "bg-brand/10",
+      border: "border-l-brand",
     },
     {
-      label: "Pending Appointments",
+      label: "Citas Pendientes",
       value: pendingAppointments,
       icon: CalendarClock,
-      color: "text-amber-600 bg-amber-50",
+      color: "text-amber-600",
+      bg: "bg-amber-50",
+      border: "border-l-amber-500",
     },
     {
-      label: "Total Recipes",
+      label: "Total Recetas",
       value: totalRecipes,
       icon: ChefHat,
-      color: "text-purple-600 bg-purple-50",
+      color: "text-purple-600",
+      bg: "bg-purple-50",
+      border: "border-l-purple-500",
     },
   ];
 
+  const goalLabels: Record<string, string> = {
+    fat_loss: "Pérdida de grasa",
+    muscle_gain: "Ganancia muscular",
+    weight_cut: "Corte de peso",
+    maintenance: "Mantenimiento",
+    pre_competition: "Pre-competencia",
+  };
+
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Overview of your nutrition practice.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="font-heading text-2xl font-bold tracking-tight">Dashboard</h1>
+          <p className="text-sm text-muted-foreground">
+            Resumen de tu práctica de nutrición.
+          </p>
+        </div>
+        <Button
+          className="bg-brand text-white hover:bg-brand-dark"
+          render={<Link href="/admin/clients/new" />}
+        >
+          <Plus className="size-4" />
+          Nuevo Cliente
+        </Button>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
-          <Card key={stat.label}>
+          <Card key={stat.label} className={`border-l-4 ${stat.border}`}>
             <CardHeader className="flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 {stat.label}
               </CardTitle>
-              <div className={`rounded-lg p-2 ${stat.color}`}>
-                <stat.icon className="size-4" />
+              <div className={`rounded-lg p-2.5 ${stat.bg}`}>
+                <stat.icon className={`size-4 ${stat.color}`} />
               </div>
             </CardHeader>
             <CardContent>
-              <p className="text-3xl font-bold">{stat.value}</p>
+              <p className="text-3xl font-bold tracking-tight">{stat.value}</p>
+              <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                <TrendingUp className="size-3 text-brand" />
+                <span>Actualizado</span>
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -87,32 +123,68 @@ export default async function AdminDashboardPage() {
 
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
+          <CardHeader className="flex-row items-center justify-between">
+            <CardTitle className="text-base font-semibold">Clientes Recientes</CardTitle>
+            <Button variant="ghost" size="sm" className="text-brand" render={<Link href="/admin/clients" />}>
+              Ver todos
+              <ArrowRight className="ml-1 size-3" />
+            </Button>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">
-              No recent activity to display.
-            </p>
+            {recentClients.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <Users className="mb-2 size-8 text-muted-foreground/30" />
+                <p className="text-sm text-muted-foreground">
+                  No hay clientes registrados aún.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {recentClients.map((client) => (
+                  <Link
+                    key={client.id}
+                    href={`/admin/clients/${client.id}`}
+                    className="flex items-center justify-between rounded-lg border border-transparent p-3 transition-colors hover:border-brand/20 hover:bg-brand/5"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex size-9 items-center justify-center rounded-full bg-brand/10 text-xs font-semibold text-brand">
+                        {client.name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2)}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">{client.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {client.goal ? goalLabels[client.goal] ?? client.goal : "Sin objetivo"}
+                        </p>
+                      </div>
+                    </div>
+                    <ArrowRight className="size-4 text-muted-foreground" />
+                  </Link>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
+            <CardTitle className="text-base font-semibold">Acciones Rápidas</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-2">
-            <Button variant="outline" className="justify-start gap-2" render={<Link href="/admin/clients/new" />}>
+            <Button variant="outline" className="justify-start gap-2 border-brand/20 hover:bg-brand/5 hover:text-brand" render={<Link href="/admin/clients/new" />}>
               <Plus className="size-4" />
-              New Client
+              Nuevo Cliente
             </Button>
-            <Button variant="outline" className="justify-start gap-2" render={<Link href="/admin/recipes" />}>
+            <Button variant="outline" className="justify-start gap-2 border-brand/20 hover:bg-brand/5 hover:text-brand" render={<Link href="/admin/recipes/new" />}>
               <Plus className="size-4" />
-              New Recipe
+              Nueva Receta
             </Button>
-            <Button variant="outline" className="justify-start gap-2" render={<Link href="/admin/meal-plans" />}>
+            <Button variant="outline" className="justify-start gap-2 border-brand/20 hover:bg-brand/5 hover:text-brand" render={<Link href="/admin/meal-plans/builder" />}>
               <Plus className="size-4" />
-              New Meal Plan
+              Nuevo Plan Alimenticio
+            </Button>
+            <Button variant="outline" className="justify-start gap-2 border-brand/20 hover:bg-brand/5 hover:text-brand" render={<Link href="/admin/appointments" />}>
+              <CalendarClock className="size-4" />
+              Ver Citas
             </Button>
           </CardContent>
         </Card>

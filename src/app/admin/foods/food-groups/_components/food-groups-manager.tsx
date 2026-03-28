@@ -55,7 +55,7 @@ export function FoodGroupsManager({ groups }: { groups: FoodGroupRow[] }) {
         <Dialog open={addOpen} onOpenChange={setAddOpen}>
           <DialogTrigger
             render={
-              <Button className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500" />
+              <Button className="bg-brand hover:bg-brand-dark dark:bg-brand dark:hover:bg-brand" />
             }
           >
             <Plus className="size-4" />
@@ -95,7 +95,7 @@ export function FoodGroupsManager({ groups }: { groups: FoodGroupRow[] }) {
                 </Button>
                 <Button
                   type="submit"
-                  className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500"
+                  className="bg-brand hover:bg-brand-dark dark:bg-brand dark:hover:bg-brand"
                 >
                   Create
                 </Button>
@@ -106,12 +106,12 @@ export function FoodGroupsManager({ groups }: { groups: FoodGroupRow[] }) {
       </div>
 
       {groups.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-emerald-600/25 bg-emerald-600/[0.03] py-12 text-center text-sm text-muted-foreground">
+        <div className="rounded-xl border border-dashed border-brand/25 bg-brand/[0.03] py-12 text-center text-sm text-muted-foreground">
           No food groups yet. Use <span className="font-medium text-foreground">Add group</span>{" "}
           to create one.
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-emerald-600/10">
+        <div className="overflow-x-auto rounded-xl border border-brand/10">
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
@@ -195,7 +195,7 @@ export function FoodGroupsManager({ groups }: { groups: FoodGroupRow[] }) {
                   </Button>
                   <Button
                     type="submit"
-                    className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500"
+                    className="bg-brand hover:bg-brand-dark dark:bg-brand dark:hover:bg-brand"
                   >
                     Save
                   </Button>

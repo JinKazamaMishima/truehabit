@@ -373,9 +373,9 @@ export function PlanBuilderForm({
             onClick={() => i < step && setStep(i)}
             className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
               i === step
-                ? "bg-emerald-600 text-white"
+                ? "bg-brand text-white"
                 : i < step
-                  ? "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                  ? "bg-brand/10 text-brand-dark hover:bg-brand/15"
                   : "bg-muted text-muted-foreground"
             }`}
           >
@@ -518,13 +518,13 @@ export function PlanBuilderForm({
               </div>
             </div>
 
-            <div className="rounded-lg border bg-emerald-50 p-4 dark:bg-emerald-950/20">
-              <p className="mb-3 text-sm font-medium text-emerald-800 dark:text-emerald-300">
+            <div className="rounded-lg border bg-brand/10 p-4 dark:bg-brand/10">
+              <p className="mb-3 text-sm font-medium text-brand-dark dark:text-brand">
                 Computed Daily Targets
               </p>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <div>
-                  <p className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">
+                  <p className="text-2xl font-bold text-brand-dark dark:text-brand">
                     {macros.calories}
                   </p>
                   <p className="text-xs text-muted-foreground">kcal</p>
@@ -824,7 +824,7 @@ export function PlanBuilderForm({
           <Card>
             <CardHeader className="flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
-                <Pill className="size-4 text-emerald-600" />
+                <Pill className="size-4 text-brand" />
                 Supplements
               </CardTitle>
               <Button variant="outline" size="sm" onClick={addSupplement}>
@@ -996,7 +996,7 @@ export function PlanBuilderForm({
             <Button
               onClick={handleSubmit}
               disabled={isPending || !clientId || !planName.trim()}
-              className="bg-emerald-600 hover:bg-emerald-700"
+              className="bg-brand hover:bg-brand-dark"
             >
               {isPending ? "Saving…" : "Create Meal Plan"}
             </Button>

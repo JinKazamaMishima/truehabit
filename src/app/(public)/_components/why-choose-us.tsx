@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import { Shield, Heart } from "lucide-react";
+import { Shield, Heart, Target, Lightbulb } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 
 const fadeUp = {
@@ -13,74 +13,82 @@ const stagger = {
   visible: { transition: { staggerChildren: 0.12 } },
 };
 
+const reasons = [
+  {
+    icon: Shield,
+    title: "Estrategias Nutricionales",
+    desc: "Protocolos basados en la evidencia científica más reciente, ajustados continuamente según tu progreso.",
+  },
+  {
+    icon: Heart,
+    title: "Soporte y Motivación",
+    desc: "Acompañamiento continuo con seguimiento semanal, ajustes en tiempo real y la motivación que necesitas.",
+  },
+  {
+    icon: Target,
+    title: "Enfoque Individualizado",
+    desc: "Cada plan es único porque cada persona es diferente. Nos adaptamos a tu metabolismo y estilo de vida.",
+  },
+  {
+    icon: Lightbulb,
+    title: "Educación Nutricional",
+    desc: "Te enseñamos a tomar decisiones informadas para mantener tus resultados a largo plazo.",
+  },
+];
+
 export function WhyChooseUs() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
   return (
-    <section ref={ref} className="bg-slate-900 py-20 sm:py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <motion.div
-          className="mx-auto mb-14 max-w-2xl text-center"
-          initial="hidden"
-          animate={inView ? "visible" : "hidden"}
-          variants={stagger}
-        >
-          <motion.p
-            variants={fadeUp}
-            className="mb-2 text-sm font-semibold uppercase tracking-widest text-emerald-400"
-          >
-            Nuestra diferencia
-          </motion.p>
-          <motion.h2
-            variants={fadeUp}
-            className="text-3xl font-extrabold text-white sm:text-4xl"
-          >
-            ¿Por Qué Elegirnos?
-          </motion.h2>
-        </motion.div>
-
-        <motion.div
-          className="grid gap-8 md:grid-cols-2"
-          initial="hidden"
-          animate={inView ? "visible" : "hidden"}
-          variants={stagger}
-        >
-          <motion.div
-            variants={fadeUp}
-            className="rounded-2xl border border-slate-700 bg-slate-800/50 p-8"
-          >
-            <div className="mb-4 flex size-12 items-center justify-center rounded-xl bg-emerald-600/20 text-emerald-400">
-              <Shield className="size-6" />
+    <section ref={ref} className="overflow-hidden">
+      <div className="grid lg:grid-cols-2">
+        <div className="relative min-h-[400px] bg-gradient-to-br from-charcoal to-charcoal-light lg:min-h-[600px]">
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="text-center text-white/10">
+              <svg className="mx-auto size-40" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+              </svg>
+              <p className="mt-3 text-sm font-medium text-white/20">Imagen de estilo de vida</p>
             </div>
-            <h3 className="mb-3 text-xl font-bold text-white">
-              Estrategias Nutricionales
-            </h3>
-            <p className="leading-relaxed text-slate-400">
-              Desarrollamos estrategias basadas en la evidencia científica más
-              reciente, utilizando herramientas de evaluación avanzadas para
-              crear planes que realmente funcionan. Cada protocolo se ajusta
-              continuamente según tu progreso y respuesta individual.
-            </p>
-          </motion.div>
+          </div>
+        </div>
 
+        <div className="bg-brand px-8 py-16 sm:px-12 lg:px-16 lg:py-20">
           <motion.div
-            variants={fadeUp}
-            className="rounded-2xl border border-slate-700 bg-slate-800/50 p-8"
+            initial="hidden"
+            animate={inView ? "visible" : "hidden"}
+            variants={stagger}
           >
-            <div className="mb-4 flex size-12 items-center justify-center rounded-xl bg-emerald-600/20 text-emerald-400">
-              <Heart className="size-6" />
-            </div>
-            <h3 className="mb-3 text-xl font-bold text-white">
-              Soporte y Motivación
-            </h3>
-            <p className="leading-relaxed text-slate-400">
-              No estás solo en tu camino. Ofrecemos acompañamiento continuo con
-              seguimiento semanal, ajustes en tiempo real y la motivación que
-              necesitas para mantener el rumbo. Tu éxito es nuestra prioridad.
-            </p>
+            <motion.div variants={fadeUp} className="mb-4 flex items-center gap-3">
+              <span className="h-px w-8 bg-white/40" />
+              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-white/80">
+                Nuestra Diferencia
+              </span>
+            </motion.div>
+
+            <motion.h2
+              variants={fadeUp}
+              className="mb-10 font-heading text-3xl font-bold text-white sm:text-4xl"
+            >
+              ¿Por Qué Elegirnos?
+            </motion.h2>
+
+            <motion.div className="space-y-8" variants={stagger}>
+              {reasons.map((r) => (
+                <motion.div key={r.title} variants={fadeUp} className="flex gap-5">
+                  <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-white text-brand">
+                    <r.icon className="size-6" />
+                  </div>
+                  <div>
+                    <h3 className="mb-1.5 text-lg font-semibold text-white">{r.title}</h3>
+                    <p className="text-sm leading-relaxed text-white/80">{r.desc}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </motion.div>
           </motion.div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

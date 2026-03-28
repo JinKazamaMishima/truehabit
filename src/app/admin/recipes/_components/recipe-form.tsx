@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useCallback, useMemo, useState, useTransition } from "react";
 import { isRedirectError } from "next/dist/client/components/redirect-error";
-import { ArrowLeft, ChevronDown, Plus, Trash2, X } from "lucide-react";
+import { ArrowLeft, ChevronDown, Plus, Trash2, X, ImageIcon } from "lucide-react";
+import { ImageUpload } from "@/components/ui/image-upload";
 import {
   createRecipe,
   deleteRecipe,
@@ -131,6 +132,7 @@ type RecipeFormProps =
         prepInstructions: string;
         prepTimeMin: number | null;
         mealTypes: string[];
+        imageUrl?: string | null;
         ingredients: Omit<IngredientRow, "key">[];
         tags: string[];
       };
@@ -152,6 +154,9 @@ export function RecipeForm(props: RecipeFormProps) {
     props.initialRecipe?.prepTimeMin != null
       ? String(props.initialRecipe.prepTimeMin)
       : ""
+  );
+  const [imageUrl, setImageUrl] = useState(
+    props.initialRecipe?.imageUrl ?? ""
   );
   const [mealTypes, setMealTypes] = useState<string[]>(
     props.initialRecipe?.mealTypes ?? []
@@ -227,6 +232,7 @@ export function RecipeForm(props: RecipeFormProps) {
       prepTimeMin:
         ptm !== null && Number.isFinite(ptm) ? Math.max(0, ptm) : null,
       mealTypes,
+      imageUrl: imageUrl.trim() || null,
       ingredients: ingredientsPayload,
       tags,
     };
@@ -324,6 +330,15 @@ export function RecipeForm(props: RecipeFormProps) {
             />
           </div>
           <div className="space-y-2">
+            <Label>Recipe Image</Label>
+            <ImageUpload
+              folder="recipes"
+              currentUrl={imageUrl || undefined}
+              onUpload={(_key, proxyUrl) => setImageUrl(proxyUrl)}
+              onRemove={() => setImageUrl("")}
+            />
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="recipe-prep">Prep instructions</Label>
             <Textarea
               id="recipe-prep"
@@ -358,7 +373,7 @@ export function RecipeForm(props: RecipeFormProps) {
                   <Checkbox
                     checked={mealTypes.includes(opt.value)}
                     onCheckedChange={() => toggleMealType(opt.value)}
-                    className="data-checked:border-emerald-600 data-checked:bg-emerald-600 data-checked:text-white"
+                    className="data-checked:border-brand data-checked:bg-brand data-checked:text-white"
                   />
                   <span>{opt.label}</span>
                 </label>
@@ -536,7 +551,7 @@ export function RecipeForm(props: RecipeFormProps) {
                         )
                       )
                     }
-                    className="data-checked:border-emerald-600 data-checked:bg-emerald-600 data-checked:text-white"
+                    className="data-checked:border-brand data-checked:bg-brand data-checked:text-white"
                   />
                   Optional
                 </label>
@@ -590,9 +605,9 @@ export function RecipeForm(props: RecipeFormProps) {
         </CardContent>
       </Card>
 
-      <Card className="border-emerald-600/20 bg-emerald-50/40 dark:bg-emerald-950/20">
+      <Card className="border-brand/20 bg-brand/10 dark:bg-brand/10">
         <CardHeader>
-          <CardTitle className="text-emerald-900 dark:text-emerald-100">
+          <CardTitle className="text-foreground dark:text-foreground">
             Macro preview (base portions)
           </CardTitle>
         </CardHeader>
@@ -660,7 +675,7 @@ export function RecipeForm(props: RecipeFormProps) {
         </Button>
         <Button
           type="submit"
-          className="bg-emerald-600 text-white hover:bg-emerald-700"
+          className="bg-brand text-white hover:bg-brand-dark"
           disabled={pending}
         >
           {pending ? "Saving…" : mode === "create" ? "Create recipe" : "Save changes"}

@@ -12,18 +12,18 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { upsertSettings } from "@/actions/settings";
 import { Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
 
-const FIELDS = [
-  { key: "hero_badge", label: "Badge Text", placeholder: "Nutrición basada en ciencia", type: "input" },
-  { key: "hero_heading", label: "Heading", placeholder: "Transforma Tu Nutrición", type: "input" },
-  { key: "hero_subheading", label: "Subheading", placeholder: "Planes de alimentación personalizados...", type: "textarea" },
-  { key: "hero_cta_primary", label: "Primary CTA Text", placeholder: "Agenda Tu Cita", type: "input" },
-  { key: "hero_cta_secondary", label: "Secondary CTA Text", placeholder: "Conoce Más", type: "input" },
-  { key: "hero_image_url", label: "Background Image URL (optional)", placeholder: "https://...", type: "input" },
-] as const;
+const TEXT_FIELDS = [
+  { key: "hero_badge", label: "Badge Text", placeholder: "Nutrición basada en ciencia", type: "input" as const },
+  { key: "hero_heading", label: "Heading", placeholder: "Transforma Tu Nutrición", type: "input" as const },
+  { key: "hero_subheading", label: "Subheading", placeholder: "Planes de alimentación personalizados...", type: "textarea" as const },
+  { key: "hero_cta_primary", label: "Primary CTA Text", placeholder: "Agenda Tu Cita", type: "input" as const },
+  { key: "hero_cta_secondary", label: "Secondary CTA Text", placeholder: "Conoce Más", type: "input" as const },
+];
 
 export function HeroForm({
   initialValues,
@@ -36,13 +36,19 @@ export function HeroForm({
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     startTransition(async () => {
-      await upsertSettings(
-        FIELDS.map((f) => ({
+      const settings = [
+        ...TEXT_FIELDS.map((f) => ({
           key: f.key,
           value: values[f.key] ?? "",
           section: "hero",
-        }))
-      );
+        })),
+        {
+          key: "hero_image_url",
+          value: values.hero_image_url ?? "",
+          section: "hero",
+        },
+      ];
+      await upsertSettings(settings);
       toast.success("Hero section updated");
     });
   }
@@ -56,8 +62,32 @@ export function HeroForm({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {FIELDS.map((f) => (
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-1.5">
+            <Label>Hero Image</Label>
+            <ImageUpload
+              folder="heroes"
+              currentUrl={values.hero_image_url || undefined}
+              onUpload={(_key, proxyUrl) =>
+                setValues((prev) => ({ ...prev, hero_image_url: proxyUrl }))
+              }
+              onRemove={() =>
+                setValues((prev) => ({ ...prev, hero_image_url: "" }))
+              }
+            />
+            <p className="text-xs text-muted-foreground">
+              Or enter a URL directly:
+            </p>
+            <Input
+              placeholder="https://..."
+              value={values.hero_image_url ?? ""}
+              onChange={(e) =>
+                setValues((prev) => ({ ...prev, hero_image_url: e.target.value }))
+              }
+            />
+          </div>
+
+          {TEXT_FIELDS.map((f) => (
             <div key={f.key} className="space-y-1.5">
               <Label htmlFor={f.key}>{f.label}</Label>
               {f.type === "textarea" ? (
@@ -81,10 +111,11 @@ export function HeroForm({
               )}
             </div>
           ))}
+
           <Button
             type="submit"
             disabled={isPending}
-            className="bg-emerald-600 text-white hover:bg-emerald-700"
+            className="bg-brand text-white hover:bg-brand-dark"
           >
             {isPending ? (
               <Loader2 className="size-4 animate-spin" />

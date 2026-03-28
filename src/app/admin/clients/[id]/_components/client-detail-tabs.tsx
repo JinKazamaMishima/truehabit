@@ -76,7 +76,7 @@ const sexOptions = [
 
 const planStatusColors: Record<string, string> = {
   draft: "bg-gray-100 text-gray-700",
-  active: "bg-emerald-100 text-emerald-700",
+  active: "bg-brand/15 text-brand-dark",
   completed: "bg-blue-100 text-blue-700",
 };
 

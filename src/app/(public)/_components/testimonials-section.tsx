@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef } from "react";
-import { Quote, User } from "lucide-react";
-import { motion, useInView } from "framer-motion";
+import { useRef, useState, useCallback, useEffect } from "react";
+import { Quote, User, ChevronLeft, ChevronRight } from "lucide-react";
+import { motion, useInView, AnimatePresence } from "framer-motion";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -23,61 +23,123 @@ export type TestimonialItem = {
 export function TestimonialsSection({ items }: { items: TestimonialItem[] }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
+  const [current, setCurrent] = useState(0);
+
+  const next = useCallback(() => {
+    setCurrent((c) => (c + 1) % items.length);
+  }, [items.length]);
+
+  const prev = useCallback(() => {
+    setCurrent((c) => (c - 1 + items.length) % items.length);
+  }, [items.length]);
+
+  useEffect(() => {
+    if (items.length <= 1) return;
+    const interval = setInterval(next, 6000);
+    return () => clearInterval(interval);
+  }, [next, items.length]);
 
   if (items.length === 0) return null;
 
+  const item = items[current];
+
   return (
-    <section ref={ref} className="bg-white py-20 sm:py-24">
+    <section ref={ref} className="bg-gray-50 py-20 sm:py-28">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <motion.div
-          className="mx-auto mb-14 max-w-2xl text-center"
           initial="hidden"
           animate={inView ? "visible" : "hidden"}
           variants={stagger}
         >
-          <motion.p
-            variants={fadeUp}
-            className="mb-2 text-sm font-semibold uppercase tracking-widest text-emerald-600"
-          >
-            Testimonios
-          </motion.p>
-          <motion.h2
-            variants={fadeUp}
-            className="text-3xl font-extrabold text-slate-900 sm:text-4xl"
-          >
-            Lo Que Dicen Nuestros Clientes
-          </motion.h2>
-        </motion.div>
+          <motion.div variants={fadeUp} className="mx-auto mb-16 max-w-2xl text-center">
+            <div className="mb-4 flex items-center justify-center gap-3">
+              <span className="h-px w-8 bg-brand" />
+              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+                Testimonios
+              </span>
+              <span className="h-px w-8 bg-brand" />
+            </div>
+            <h2 className="font-heading text-3xl font-bold text-charcoal sm:text-4xl lg:text-[2.75rem]">
+              Lo Que Dicen Nuestros Clientes
+            </h2>
+          </motion.div>
 
-        <motion.div
-          className="grid gap-8 md:grid-cols-3"
-          initial="hidden"
-          animate={inView ? "visible" : "hidden"}
-          variants={stagger}
-        >
-          {items.map((t) => (
-            <motion.div
-              key={t.id}
-              variants={fadeUp}
-              className="rounded-2xl border border-slate-100 bg-white p-8 shadow-sm"
-            >
-              <Quote className="mb-4 size-8 text-emerald-200" />
-              <p className="mb-6 leading-relaxed text-slate-600">
-                &ldquo;{t.quote}&rdquo;
-              </p>
-              <div className="flex items-center gap-3">
-                <div className="flex size-10 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-                  <User className="size-5" />
+          <motion.div variants={fadeUp}>
+            <div className="mx-auto max-w-4xl">
+              <div className="grid items-center gap-8 lg:grid-cols-5">
+                <div className="flex items-center justify-center lg:col-span-2">
+                  <div className="relative">
+                    <div className="flex size-48 items-center justify-center rounded-full bg-brand/10 sm:size-56">
+                      <User className="size-20 text-brand/30" />
+                    </div>
+                    <div className="absolute -right-2 -top-2 flex size-12 items-center justify-center rounded-full bg-brand text-white shadow-lg">
+                      <Quote className="size-5" />
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-bold text-slate-900">{t.clientName}</p>
-                  {t.clientTitle && (
-                    <p className="text-xs text-slate-500">{t.clientTitle}</p>
-                  )}
+
+                <div className="lg:col-span-3">
+                  <div className="rounded-2xl bg-brand px-8 py-10 shadow-xl sm:px-10 sm:py-12">
+                    <Quote className="mb-4 size-10 text-white/30" />
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={item.id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.4 }}
+                      >
+                        <p className="text-lg leading-relaxed text-white/90 italic sm:text-xl">
+                          &ldquo;{item.quote}&rdquo;
+                        </p>
+                        <div className="mt-6 border-t border-white/20 pt-4">
+                          <p className="text-base font-semibold text-white">
+                            {item.clientName}
+                          </p>
+                          {item.clientTitle && (
+                            <p className="mt-0.5 text-sm text-white/60">
+                              {item.clientTitle}
+                            </p>
+                          )}
+                        </div>
+                      </motion.div>
+                    </AnimatePresence>
+
+                    {items.length > 1 && (
+                      <div className="mt-6 flex items-center gap-3">
+                        <button
+                          onClick={prev}
+                          className="flex size-9 items-center justify-center rounded-full bg-white/20 text-white transition-colors hover:bg-white/30"
+                          aria-label="Anterior"
+                        >
+                          <ChevronLeft className="size-4" />
+                        </button>
+                        <div className="flex gap-1.5">
+                          {items.map((_, i) => (
+                            <button
+                              key={i}
+                              onClick={() => setCurrent(i)}
+                              className={`size-2 rounded-full transition-all ${
+                                i === current ? "w-6 bg-white" : "bg-white/40"
+                              }`}
+                              aria-label={`Testimonio ${i + 1}`}
+                            />
+                          ))}
+                        </div>
+                        <button
+                          onClick={next}
+                          className="flex size-9 items-center justify-center rounded-full bg-white/20 text-white transition-colors hover:bg-white/30"
+                          aria-label="Siguiente"
+                        >
+                          <ChevronRight className="size-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </motion.div>
-          ))}
+            </div>
+          </motion.div>
         </motion.div>
       </div>
     </section>

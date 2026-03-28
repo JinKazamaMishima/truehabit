@@ -13,6 +13,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { ImageUpload } from "@/components/ui/image-upload";
 import { upsertSettings } from "@/actions/settings";
 import { Loader2, Save, Plus, X } from "lucide-react";
 import { toast } from "sonner";
@@ -88,7 +89,15 @@ export function AboutForm({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="about_image_url">Profile Image URL (optional)</Label>
+            <Label>Profile Image</Label>
+            <ImageUpload
+              folder="about"
+              currentUrl={values.about_image_url || undefined}
+              onUpload={(_key, proxyUrl) => set("about_image_url", proxyUrl)}
+              onRemove={() => set("about_image_url", "")}
+              aspectRatio="portrait"
+            />
+            <p className="text-xs text-muted-foreground">Or enter a URL directly:</p>
             <Input
               id="about_image_url"
               placeholder="https://..."
@@ -208,7 +217,7 @@ export function AboutForm({
           <Button
             type="submit"
             disabled={isPending}
-            className="bg-emerald-600 text-white hover:bg-emerald-700"
+            className="bg-brand text-white hover:bg-brand-dark"
           >
             {isPending ? (
               <Loader2 className="size-4 animate-spin" />

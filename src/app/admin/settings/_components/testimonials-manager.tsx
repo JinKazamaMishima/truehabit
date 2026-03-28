@@ -139,7 +139,7 @@ function TestimonialForm({
         <Button
           type="submit"
           disabled={isPending}
-          className="bg-emerald-600 text-white hover:bg-emerald-700"
+          className="bg-brand text-white hover:bg-brand-dark"
         >
           {isPending && <Loader2 className="size-4 animate-spin" />}
           {testimonial ? "Update" : "Create"}
@@ -222,7 +222,7 @@ export function TestimonialsManager({
                 key={t.id}
                 className="flex items-start gap-4 rounded-lg border p-4"
               >
-                <Quote className="mt-0.5 size-5 shrink-0 text-emerald-300" />
+                <Quote className="mt-0.5 size-5 shrink-0 text-brand" />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-muted-foreground line-clamp-2">
                     &ldquo;{t.quote}&rdquo;
@@ -234,7 +234,7 @@ export function TestimonialsManager({
                     </p>
                   )}
                   {t.isFeatured && (
-                    <span className="mt-1 inline-block rounded bg-emerald-100 px-1.5 py-0.5 text-xs font-medium text-emerald-700">
+                    <span className="mt-1 inline-block rounded bg-brand/15 px-1.5 py-0.5 text-xs font-medium text-brand-dark">
                       Featured
                     </span>
                   )}

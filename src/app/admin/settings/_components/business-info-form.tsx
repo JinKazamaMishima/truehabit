@@ -86,7 +86,7 @@ export function BusinessInfoForm({
           <Button
             type="submit"
             disabled={isPending}
-            className="bg-emerald-600 text-white hover:bg-emerald-700"
+            className="bg-brand text-white hover:bg-brand-dark"
           >
             {isPending ? (
               <Loader2 className="size-4 animate-spin" />

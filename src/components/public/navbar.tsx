@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, Leaf } from "lucide-react";
+import { Menu, Leaf, Phone, Mail, Camera, Globe, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -15,10 +15,10 @@ import {
 import { cn } from "@/lib/utils";
 
 const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/about", label: "About" },
-  { href: "/services", label: "Services" },
-  { href: "/contact", label: "Contact" },
+  { href: "/", label: "Inicio" },
+  { href: "/about", label: "Nosotros" },
+  { href: "/services", label: "Servicios" },
+  { href: "/contact", label: "Contacto" },
 ];
 
 export function Navbar({ businessName }: { businessName?: string }) {
@@ -34,102 +34,138 @@ export function Navbar({ businessName }: { businessName?: string }) {
   }, []);
 
   return (
-    <header
-      className={cn(
-        "sticky top-0 z-50 w-full transition-all duration-300",
-        scrolled
-          ? "bg-white/95 shadow-md backdrop-blur-sm"
-          : "bg-white"
-      )}
-    >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2">
-          <Leaf className="size-7 text-emerald-600" />
-          <span className="text-xl font-bold text-emerald-600">{name}</span>
-        </Link>
-
-        <nav className="hidden items-center gap-1 md:flex">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                "rounded-md px-3 py-2 text-sm font-medium transition-colors hover:text-emerald-600",
-                pathname === link.href
-                  ? "text-emerald-600"
-                  : "text-slate-700"
-              )}
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="hidden md:block">
-          <Button
-            className="bg-emerald-600 text-white hover:bg-emerald-700"
-            size="lg"
-            render={<Link href="/contact" />}
-          >
-            Book Appointment
-          </Button>
-        </div>
-
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger
-            className="md:hidden"
-            render={<Button variant="ghost" size="icon" />}
-          >
-            <Menu className="size-5" />
-            <span className="sr-only">Toggle menu</span>
-          </SheetTrigger>
-
-          <SheetContent side="right" className="w-72">
-            <SheetHeader>
-              <SheetTitle>
-                <Link
-                  href="/"
-                  className="flex items-center gap-2"
-                  onClick={() => setOpen(false)}
-                >
-                  <Leaf className="size-6 text-emerald-600" />
-                  <span className="text-lg font-bold text-emerald-600">
-                    {name}
-                  </span>
-                </Link>
-              </SheetTitle>
-            </SheetHeader>
-
-            <nav className="flex flex-col gap-1 px-4">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setOpen(false)}
-                  className={cn(
-                    "rounded-md px-3 py-2.5 text-sm font-medium transition-colors hover:bg-emerald-50 hover:text-emerald-600",
-                    pathname === link.href
-                      ? "bg-emerald-50 text-emerald-600"
-                      : "text-slate-700"
-                  )}
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
-
-            <div className="mt-4 px-4">
-              <Button
-                className="w-full bg-emerald-600 text-white hover:bg-emerald-700"
-                size="lg"
-                render={<Link href="/contact" onClick={() => setOpen(false)} />}
-              >
-                Book Appointment
-              </Button>
+    <>
+      <div className="hidden bg-charcoal text-white md:block">
+        <div className="mx-auto flex h-10 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-6 text-xs">
+            <a href="tel:+526641234567" className="flex items-center gap-1.5 text-white/70 transition-colors hover:text-brand">
+              <Phone className="size-3" />
+              <span>+52 (664) 123-4567</span>
+            </a>
+            <a href="mailto:contacto@truehabit.mx" className="flex items-center gap-1.5 text-white/70 transition-colors hover:text-brand">
+              <Mail className="size-3" />
+              <span>contacto@truehabit.mx</span>
+            </a>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <a href="#" className="flex size-7 items-center justify-center rounded-full text-white/50 transition-colors hover:bg-brand hover:text-white" aria-label="Instagram">
+                <Camera className="size-3" />
+              </a>
+              <a href="#" className="flex size-7 items-center justify-center rounded-full text-white/50 transition-colors hover:bg-brand hover:text-white" aria-label="Facebook">
+                <Globe className="size-3" />
+              </a>
+              <a href="#" className="flex size-7 items-center justify-center rounded-full text-white/50 transition-colors hover:bg-brand hover:text-white" aria-label="WhatsApp">
+                <MessageCircle className="size-3" />
+              </a>
             </div>
-          </SheetContent>
-        </Sheet>
+            <div className="ml-2 h-4 w-px bg-white/20" />
+            <Link href="/contact" className="text-xs font-medium text-brand transition-colors hover:text-brand-dark">
+              Agenda Tu Cita
+            </Link>
+          </div>
+        </div>
       </div>
-    </header>
+
+      <header
+        className={cn(
+          "sticky top-0 z-50 w-full transition-all duration-300",
+          scrolled
+            ? "bg-white/95 shadow-lg backdrop-blur-sm"
+            : "bg-white shadow-sm"
+        )}
+      >
+        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          <Link href="/" className="flex items-center gap-2.5">
+            <Leaf className="size-8 text-brand" />
+            <span className="font-heading text-2xl font-bold text-charcoal">{name}</span>
+          </Link>
+
+          <nav className="hidden items-center gap-1 lg:flex">
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  "relative px-4 py-2 text-sm font-medium transition-colors",
+                  pathname === link.href
+                    ? "text-brand"
+                    : "text-charcoal hover:text-brand"
+                )}
+              >
+                {link.label}
+                {pathname === link.href && (
+                  <span className="absolute bottom-0 left-4 right-4 h-0.5 bg-brand" />
+                )}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="hidden lg:block">
+            <Button
+              className="h-11 rounded-md bg-brand px-6 text-sm font-semibold text-white shadow-md transition-all hover:bg-brand-dark hover:shadow-lg"
+              render={<Link href="/contact" />}
+            >
+              Agenda Tu Cita
+            </Button>
+          </div>
+
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger
+              className="lg:hidden"
+              render={<Button variant="ghost" size="icon" />}
+            >
+              <Menu className="size-5" />
+              <span className="sr-only">Toggle menu</span>
+            </SheetTrigger>
+
+            <SheetContent side="right" className="w-72">
+              <SheetHeader>
+                <SheetTitle>
+                  <Link
+                    href="/"
+                    className="flex items-center gap-2"
+                    onClick={() => setOpen(false)}
+                  >
+                    <Leaf className="size-6 text-brand" />
+                    <span className="font-heading text-lg font-bold text-charcoal">
+                      {name}
+                    </span>
+                  </Link>
+                </SheetTitle>
+              </SheetHeader>
+
+              <nav className="flex flex-col gap-1 px-4">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      "rounded-md px-3 py-2.5 text-sm font-medium transition-colors hover:bg-brand-light hover:text-brand-dark",
+                      pathname === link.href
+                        ? "bg-brand-light text-brand-dark"
+                        : "text-charcoal"
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </nav>
+
+              <div className="mt-4 px-4">
+                <Button
+                  className="w-full bg-brand text-white hover:bg-brand-dark"
+                  size="lg"
+                  render={<Link href="/contact" onClick={() => setOpen(false)} />}
+                >
+                  Agenda Tu Cita
+                </Button>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+      </header>
+    </>
   );
 }

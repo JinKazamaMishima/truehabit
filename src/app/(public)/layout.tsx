@@ -2,6 +2,8 @@ import { Navbar } from "@/components/public/navbar";
 import { Footer } from "@/components/public/footer";
 import { getSiteSettingsBySection } from "@/lib/db/queries/settings";
 
+export const dynamic = "force-dynamic";
+
 export default async function PublicLayout({
   children,
 }: {

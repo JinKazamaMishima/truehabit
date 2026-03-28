@@ -35,7 +35,7 @@ const goalLabels: Record<string, string> = {
 
 const statusStyles: Record<string, string> = {
   draft: "bg-amber-100 text-amber-700",
-  active: "bg-emerald-100 text-emerald-700",
+  active: "bg-brand/15 text-brand-dark",
   completed: "bg-slate-100 text-slate-700",
 };
 
@@ -112,7 +112,7 @@ export default async function MealPlansPage() {
                 <Card key={t.id}>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <ClipboardList className="size-4 text-emerald-600" />
+                      <ClipboardList className="size-4 text-brand" />
                       {t.name}
                     </CardTitle>
                   </CardHeader>

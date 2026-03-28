@@ -27,7 +27,7 @@ export default function LoginPage() {
       <div className="mb-8 text-center">
         <Link
           href="/"
-          className="inline-flex items-baseline gap-1.5 text-2xl font-semibold tracking-tight text-emerald-600 dark:text-emerald-500"
+          className="inline-flex items-baseline gap-1.5 text-2xl font-semibold tracking-tight text-brand dark:text-brand"
         >
           <span className="font-heading">TrueHabit</span>
           <span className="text-sm font-normal text-muted-foreground">
@@ -39,7 +39,7 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <Card className="border-emerald-600/15 shadow-sm ring-emerald-600/10">
+      <Card className="border-brand/15 shadow-sm ring-brand/10">
         <CardHeader className="space-y-1">
           <CardTitle>Welcome back</CardTitle>
           <CardDescription>
@@ -87,7 +87,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               disabled={isPending}
-              className="h-9 w-full bg-emerald-600 text-white hover:bg-emerald-600/90 dark:bg-emerald-600 dark:hover:bg-emerald-600/90"
+              className="h-9 w-full bg-brand text-white hover:bg-brand/90 dark:bg-brand dark:hover:bg-brand/90"
             >
               {isPending ? "Signing in…" : "Sign In"}
             </Button>

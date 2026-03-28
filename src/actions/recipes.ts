@@ -26,6 +26,7 @@ export type RecipeSavePayload = {
   prepInstructions: string;
   prepTimeMin: number | null;
   mealTypes: string[];
+  imageUrl?: string | null;
   ingredients: RecipeIngredientInput[];
   tags: string[];
 };
@@ -98,6 +99,7 @@ export async function createRecipe(data: RecipeSavePayload) {
         prepInstructions: v.prepInstructions,
         prepTimeMin: v.prepTimeMin,
         mealTypes: v.mealTypes,
+        imageUrl: data.imageUrl ?? null,
         createdBy:
           (session?.user as { id?: string } | undefined)?.id ?? null,
       })
@@ -145,6 +147,7 @@ export async function updateRecipe(id: string, data: RecipeSavePayload) {
         description: v.description,
         prepInstructions: v.prepInstructions,
         prepTimeMin: v.prepTimeMin,
+        imageUrl: data.imageUrl ?? null,
         mealTypes: v.mealTypes,
       })
       .where(eq(recipes.id, id));

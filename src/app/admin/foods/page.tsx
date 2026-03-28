@@ -85,14 +85,14 @@ export default async function FoodsPage({
         <div className="flex flex-wrap gap-2">
           <Button
             variant="outline"
-            className="border-emerald-600/40 text-emerald-700 hover:bg-emerald-600/10 dark:text-emerald-400"
+            className="border-brand/40 text-brand-dark hover:bg-brand/10 dark:text-brand"
             render={<Link href="/admin/foods/food-groups" />}
           >
             <Tags className="size-4" />
             Food groups
           </Button>
           <Button
-            className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500"
+            className="bg-brand hover:bg-brand-dark dark:bg-brand dark:hover:bg-brand"
             render={<Link href="/admin/foods/new" />}
           >
             <Plus className="size-4" />
@@ -135,8 +135,8 @@ export default async function FoodsPage({
       </form>
 
       {rows.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-emerald-600/25 bg-emerald-600/[0.03] py-16">
-          <Apple className="mb-3 size-10 text-emerald-600/40" />
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-brand/25 bg-brand/[0.03] py-16">
+          <Apple className="mb-3 size-10 text-brand/40" />
           <p className="text-sm font-medium text-muted-foreground">
             {q || groupId
               ? "No foods match your filters."
@@ -145,7 +145,7 @@ export default async function FoodsPage({
           {!q && !groupId && (
             <Button
               variant="outline"
-              className="mt-4 border-emerald-600/40"
+              className="mt-4 border-brand/40"
               render={<Link href="/admin/foods/new" />}
             >
               <Plus className="size-4" />
@@ -154,7 +154,7 @@ export default async function FoodsPage({
           )}
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-emerald-600/10">
+        <div className="overflow-x-auto rounded-xl border border-brand/10">
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
@@ -175,7 +175,7 @@ export default async function FoodsPage({
                   <TableCell className="font-medium">
                     <Link
                       href={`/admin/foods/${food.id}`}
-                      className="text-emerald-700 hover:underline dark:text-emerald-400"
+                      className="text-brand-dark hover:underline dark:text-brand"
                     >
                       {food.name}
                     </Link>
@@ -192,7 +192,7 @@ export default async function FoodsPage({
                   <TableCell>{formatG(food.fatG)}</TableCell>
                   <TableCell>
                     {food.isFree ? (
-                      <Badge className="bg-emerald-600/15 text-emerald-800 dark:text-emerald-300">
+                      <Badge className="bg-brand/15 text-brand-dark dark:text-brand">
                         Yes
                       </Badge>
                     ) : (

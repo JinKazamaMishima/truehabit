@@ -57,6 +57,7 @@ export default async function EditRecipePage({
           prepInstructions: recipe.prepInstructions ?? "",
           prepTimeMin: recipe.prepTimeMin,
           mealTypes: recipe.mealTypes ?? [],
+          imageUrl: recipe.imageUrl,
           ingredients: ingredientRows.map((row) => ({
             foodId: row.foodId,
             name: row.name ?? "",

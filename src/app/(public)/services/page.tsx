@@ -20,7 +20,7 @@ const fadeUp = {
 };
 
 const stagger = {
-  visible: { transition: { staggerChildren: 0.12 } },
+  visible: { transition: { staggerChildren: 0.1 } },
 };
 
 const services = [
@@ -29,42 +29,42 @@ const services = [
     title: "Nutrición Personalizada",
     slug: "personalized_nutrition",
     short: "Planes alimenticios adaptados a tus requerimientos calóricos y preferencias.",
-    long: "Diseñamos un plan nutricional completamente personalizado basado en tus objetivos, composición corporal, metabolismo basal y estilo de vida. Incluye evaluación inicial completa, cálculo preciso de macronutrientes, menús variados con recetas prácticas y seguimiento continuo para ajustar el plan según tu progreso. Ideal para quienes buscan mejorar su alimentación de forma integral.",
+    long: "Diseñamos un plan nutricional completamente personalizado basado en tus objetivos, composición corporal, metabolismo basal y estilo de vida. Incluye evaluación inicial completa, cálculo preciso de macronutrientes, menús variados con recetas prácticas y seguimiento continuo para ajustar el plan según tu progreso.",
   },
   {
     icon: Scale,
     title: "Pérdida de Peso",
     slug: "weight_loss",
     short: "Estrategias sostenibles para alcanzar y mantener tu peso ideal.",
-    long: "Nuestro programa de pérdida de peso se basa en un déficit calórico moderado y sostenible, preservando tu masa muscular mientras reduces grasa corporal. Incluye planificación de comidas, educación nutricional para controlar porciones, estrategias para manejar antojos y seguimiento semanal con ajustes progresivos. Sin dietas extremas ni restricciones innecesarias.",
+    long: "Nuestro programa de pérdida de peso se basa en un déficit calórico moderado y sostenible, preservando tu masa muscular mientras reduces grasa corporal. Incluye planificación de comidas, educación nutricional y seguimiento semanal con ajustes progresivos.",
   },
   {
     icon: Dumbbell,
     title: "Nutrición Deportiva",
     slug: "sports_nutrition",
     short: "Optimiza tu rendimiento con nutrición específica para tu disciplina.",
-    long: "Programas de nutrición diseñados específicamente para atletas y deportistas. Incluye periodización nutricional adaptada a tu plan de entrenamiento, protocolos de hidratación, timing de nutrientes pre/intra/post entrenamiento, suplementación basada en evidencia y estrategias de recuperación. Trabajamos con deportistas de todas las disciplinas y niveles.",
+    long: "Programas de nutrición diseñados específicamente para atletas y deportistas. Incluye periodización nutricional adaptada a tu plan de entrenamiento, protocolos de hidratación, timing de nutrientes y suplementación basada en evidencia.",
   },
   {
     icon: Activity,
     title: "Composición Corporal",
     slug: "body_composition",
     short: "Análisis detallado y estrategias para mejorar tu composición corporal.",
-    long: "Evaluación completa de tu composición corporal mediante antropometría avanzada (ISAK). Medimos y analizamos tu porcentaje de grasa, masa muscular, grasa visceral y otros indicadores clave. Con base en los resultados, diseñamos estrategias nutricionales específicas para optimizar tu composición corporal, ya sea ganancia muscular o reducción de grasa.",
+    long: "Evaluación completa de tu composición corporal mediante antropometría avanzada (ISAK). Medimos y analizamos tu porcentaje de grasa, masa muscular y otros indicadores clave para diseñar estrategias nutricionales específicas.",
   },
   {
     icon: Trophy,
     title: "Plan Pre-Competencia",
     slug: "pre_competition",
     short: "Protocolos de nutrición y carga de carbohidratos para competidores.",
-    long: "Protocolo especializado para atletas que se preparan para competencias. Incluye planificación de la fase de preparación, protocolo de corte de peso seguro, carga de carbohidratos programada, plan de hidratación específico para el día de competencia y estrategias de recuperación post-evento. Experiencia con competidores de diversas disciplinas.",
+    long: "Protocolo especializado para atletas que se preparan para competencias. Incluye planificación de la fase de preparación, protocolo de corte de peso seguro, carga de carbohidratos programada y plan de hidratación específico.",
   },
   {
     icon: Users,
     title: "Coaching Individual",
     slug: "individual_coaching",
     short: "Acompañamiento personalizado para crear hábitos alimenticios duraderos.",
-    long: "Un programa de acompañamiento uno a uno enfocado en la transformación de hábitos alimenticios. Incluye sesiones semanales de seguimiento, educación nutricional práctica, estrategias de planificación de comidas, manejo de situaciones sociales y viajes, y herramientas para mantener la motivación a largo plazo. Ideal para quienes buscan un cambio de vida duradero.",
+    long: "Un programa de acompañamiento uno a uno enfocado en la transformación de hábitos alimenticios. Incluye sesiones semanales de seguimiento, educación nutricional práctica y herramientas para mantener la motivación a largo plazo.",
   },
 ];
 
@@ -74,9 +74,8 @@ export default function ServicesPage() {
 
   return (
     <>
-      {/* Hero Banner */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-emerald-600 via-emerald-700 to-emerald-800 py-20 sm:py-28">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIvPjwvZz48L2c+PC9zdmc+')] opacity-40" />
+      <section className="relative overflow-hidden bg-charcoal py-20 sm:py-28">
+        <div className="absolute inset-0 bg-gradient-to-br from-charcoal via-charcoal-light/50 to-charcoal opacity-80" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <motion.div
             className="mx-auto max-w-3xl text-center"
@@ -84,21 +83,22 @@ export default function ServicesPage() {
             animate="visible"
             variants={stagger}
           >
-            <motion.p
-              variants={fadeUp}
-              className="mb-3 text-sm font-semibold uppercase tracking-widest text-emerald-200"
-            >
-              Lo que ofrecemos
-            </motion.p>
+            <motion.div variants={fadeUp} className="mb-4 flex items-center justify-center gap-3">
+              <span className="h-px w-8 bg-brand" />
+              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
+                Lo que ofrecemos
+              </span>
+              <span className="h-px w-8 bg-brand" />
+            </motion.div>
             <motion.h1
               variants={fadeUp}
-              className="text-4xl font-extrabold text-white sm:text-5xl"
+              className="font-heading text-4xl font-bold text-white sm:text-5xl"
             >
               Nuestros Servicios
             </motion.h1>
             <motion.p
               variants={fadeUp}
-              className="mx-auto mt-4 max-w-xl text-lg text-emerald-100"
+              className="mx-auto mt-5 max-w-xl text-base text-white/70"
             >
               Soluciones integrales de nutrición diseñadas para ayudarte a
               alcanzar tus metas de salud y rendimiento.
@@ -107,8 +107,7 @@ export default function ServicesPage() {
         </div>
       </section>
 
-      {/* Services Grid */}
-      <section ref={gridRef} className="bg-white py-20 sm:py-24">
+      <section ref={gridRef} className="bg-white py-20 sm:py-28">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <motion.div
             className="grid gap-8 md:grid-cols-2 lg:grid-cols-3"
@@ -120,26 +119,32 @@ export default function ServicesPage() {
               <motion.div
                 key={s.slug}
                 variants={fadeUp}
-                className="group flex flex-col rounded-2xl border border-slate-100 bg-white p-8 transition-shadow hover:shadow-lg"
+                className="group flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-gray-100 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
               >
-                <div className="mb-5 flex size-14 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 transition-colors group-hover:bg-emerald-600 group-hover:text-white">
-                  <s.icon className="size-6" />
+                <div className="relative h-44 bg-gradient-to-br from-brand/10 via-brand/5 to-transparent">
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <s.icon className="size-14 text-brand/20" />
+                  </div>
+                  <div className="absolute -bottom-5 right-6 flex size-14 items-center justify-center rounded-full bg-brand text-white shadow-lg">
+                    <s.icon className="size-6" />
+                  </div>
                 </div>
-                <h3 className="mb-3 text-xl font-bold text-slate-900">
-                  {s.title}
-                </h3>
-                <p className="mb-6 flex-1 text-sm leading-relaxed text-slate-600">
-                  {s.long}
-                </p>
-                <Button
-                  className="mt-auto w-full bg-emerald-600 text-white hover:bg-emerald-700"
-                  render={
-                    <Link href={`/contact?service=${s.slug}`} />
-                  }
-                >
-                  Agendar Cita
-                  <ArrowRight className="ml-1 size-4" />
-                </Button>
+
+                <div className="flex flex-1 flex-col p-7 pt-8">
+                  <h3 className="mb-3 font-heading text-xl font-semibold text-charcoal">
+                    {s.title}
+                  </h3>
+                  <p className="mb-6 flex-1 text-sm leading-relaxed text-muted-foreground">
+                    {s.long}
+                  </p>
+                  <Button
+                    className="mt-auto w-full bg-brand text-white hover:bg-brand-dark"
+                    render={<Link href={`/contact?service=${s.slug}`} />}
+                  >
+                    Agendar Cita
+                    <ArrowRight className="ml-1 size-4" />
+                  </Button>
+                </div>
               </motion.div>
             ))}
           </motion.div>

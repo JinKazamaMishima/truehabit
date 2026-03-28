@@ -127,7 +127,7 @@ export default async function ClientsPage({
                       }
                       className={
                         client.status === "active"
-                          ? "bg-emerald-100 text-emerald-700"
+                          ? "bg-brand/15 text-brand-dark"
                           : ""
                       }
                     >

@@ -51,7 +51,7 @@ export default async function ClientDetailPage({
           variant={client.status === "active" ? "default" : "secondary"}
           className={
             client.status === "active"
-              ? "bg-emerald-100 text-emerald-700"
+              ? "bg-brand/15 text-brand-dark"
               : ""
           }
         >
