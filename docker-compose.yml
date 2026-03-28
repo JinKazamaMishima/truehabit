@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: truehabit
+      POSTGRES_PASSWORD: truehabit
+      POSTGRES_DB: truehabit
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U truehabit -d truehabit"]
+      interval: 3s
+      timeout: 3s
+      retries: 10
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    command: sh -c "npx drizzle-kit migrate && npx tsx src/lib/db/seed.ts"
+    environment:
+      DATABASE_URL: postgresql://truehabit:truehabit@db:5432/truehabit
+    depends_on:
+      db:
+        condition: service_healthy
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://truehabit:truehabit@db:5432/truehabit
+      NEXTAUTH_SECRET: truehabit-dev-secret-change-in-production
+      NEXTAUTH_URL: http://localhost:3000
+      AUTH_TRUST_HOST: "true"
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  pgdata:
