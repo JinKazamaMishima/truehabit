@@ -82,7 +82,7 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="font-heading text-2xl font-bold tracking-tight">{d.admin.dashboard.title}</h1>
           <p className="text-sm text-muted-foreground">
@@ -90,7 +90,7 @@ export default async function AdminDashboardPage() {
           </p>
         </div>
         <Button
-          className="bg-brand text-white hover:bg-brand-dark"
+          className="w-full sm:w-auto bg-brand text-white hover:bg-brand-dark"
           render={<Link href="/admin/clients/new" />}
         >
           <Plus className="size-4" />

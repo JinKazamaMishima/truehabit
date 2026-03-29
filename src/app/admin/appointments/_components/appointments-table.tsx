@@ -68,8 +68,8 @@ export function AppointmentsTable({
 
   return (
     <>
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex gap-1 rounded-lg bg-muted p-1">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex gap-1 overflow-x-auto no-scrollbar rounded-lg bg-muted p-1">
           {filterTabs.map((tab) => (
           <Link
             key={tab.value}
@@ -79,7 +79,7 @@ export function AppointmentsTable({
                 : `/admin/appointments?status=${tab.value}`
             }
             className={cn(
-              "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+              "shrink-0 rounded-md px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-colors",
               currentFilter === tab.value
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
@@ -91,7 +91,7 @@ export function AppointmentsTable({
         </div>
 
         <AppointmentFormDialog>
-          <Button className="bg-brand text-white hover:bg-brand-dark">
+          <Button className="w-full sm:w-auto bg-brand text-white hover:bg-brand-dark">
             <Plus className="size-4" />
             {d.admin.appointments.newAppointment}
           </Button>

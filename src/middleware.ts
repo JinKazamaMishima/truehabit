@@ -18,6 +18,10 @@ export default auth((req) => {
 
   if (isApiAuthRoute) return NextResponse.next();
 
+  if (pathname === "/" && isLoggedIn) {
+    return NextResponse.redirect(new URL(homeForRole(role), req.url));
+  }
+
   if (isLoginRoute && isLoggedIn) {
     return NextResponse.redirect(new URL(homeForRole(role), req.url));
   }
@@ -42,5 +46,5 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/admin/:path*", "/dashboard/:path*", "/login"],
+  matcher: ["/", "/admin/:path*", "/dashboard/:path*", "/login"],
 };

@@ -39,14 +39,14 @@ export default async function ClientsPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{d.admin.clients.title}</h1>
           <p className="text-muted-foreground">
             {d.admin.clients.subtitle}
           </p>
         </div>
-        <Button render={<Link href="/admin/clients/new" />}>
+        <Button className="w-full sm:w-auto" render={<Link href="/admin/clients/new" />}>
           <Plus className="size-4" />
           {d.admin.clients.addClient}
         </Button>
