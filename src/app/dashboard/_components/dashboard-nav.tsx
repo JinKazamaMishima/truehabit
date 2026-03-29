@@ -24,15 +24,8 @@ import {
   X,
 } from "lucide-react";
 import { useState } from "react";
-
-const navItems = [
-  { href: "/dashboard", label: "Inicio", icon: LayoutDashboard, exact: true },
-  { href: "/dashboard/meal-plans", label: "Plan Alimenticio", icon: UtensilsCrossed },
-  { href: "/dashboard/progress", label: "Progreso", icon: TrendingUp },
-  { href: "/dashboard/profile", label: "Perfil", icon: UserCircle },
-  { href: "/dashboard/protocols", label: "Protocolos", icon: Pill },
-  { href: "/dashboard/appointments", label: "Citas", icon: CalendarDays },
-];
+import { useDictionary } from "@/lib/i18n/context";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 export function DashboardNav({
   userName,
@@ -41,8 +34,18 @@ export function DashboardNav({
   userName: string;
   signOutAction: () => Promise<void>;
 }) {
+  const d = useDictionary();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const navItems = [
+    { href: "/dashboard", label: d.nav.dashboard.home, icon: LayoutDashboard, exact: true },
+    { href: "/dashboard/meal-plans", label: d.nav.dashboard.mealPlans, icon: UtensilsCrossed },
+    { href: "/dashboard/progress", label: d.nav.dashboard.progress, icon: TrendingUp },
+    { href: "/dashboard/profile", label: d.nav.dashboard.profile, icon: UserCircle },
+    { href: "/dashboard/protocols", label: d.nav.dashboard.protocols, icon: Pill },
+    { href: "/dashboard/appointments", label: d.nav.dashboard.appointments, icon: CalendarDays },
+  ];
 
   function isActive(href: string, exact?: boolean) {
     if (exact) return pathname === href;
@@ -84,6 +87,7 @@ export function DashboardNav({
         </div>
 
         <div className="flex items-center gap-3">
+          <LanguageSwitcher className="hidden md:inline-flex" />
           <DropdownMenu>
             <DropdownMenuTrigger className="hidden items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-charcoal/70 transition-colors hover:bg-muted md:flex">
               <div className="flex size-8 items-center justify-center rounded-full bg-brand-light text-brand-dark font-semibold text-xs">
@@ -98,7 +102,7 @@ export function DashboardNav({
                 render={<Link href="/dashboard/profile" />}
               >
                 <UserCircle className="size-4" />
-                Mi Perfil
+                {d.nav.dashboard.myProfile}
               </DropdownMenuItem>
               <form action={signOutAction}>
                 <DropdownMenuItem
@@ -107,7 +111,7 @@ export function DashboardNav({
                   render={<button type="submit" className="w-full" />}
                 >
                   <LogOut className="size-4" />
-                  Cerrar Sesión
+                  {d.common.signOut}
                 </DropdownMenuItem>
               </form>
             </DropdownMenuContent>
@@ -148,14 +152,15 @@ export function DashboardNav({
               );
             })}
           </nav>
-          <div className="mt-2 border-t pt-2">
+          <div className="mt-2 border-t pt-2 space-y-2">
+            <LanguageSwitcher className="w-full justify-center" />
             <form action={signOutAction}>
               <button
                 type="submit"
                 className="flex w-full items-center gap-2 rounded-md px-3 py-2.5 text-sm font-medium text-destructive hover:bg-destructive/10"
               >
                 <LogOut className="size-4" />
-                Cerrar Sesión
+                {d.common.signOut}
               </button>
             </form>
           </div>

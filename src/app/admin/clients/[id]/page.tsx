@@ -4,6 +4,8 @@ import { clients, clientMeasurements, mealPlans } from "@/lib/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { Badge } from "@/components/ui/badge";
 import { ClientDetailTabs } from "./_components/client-detail-tabs";
+import { getLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n";
 
 export default async function ClientDetailPage({
   params,
@@ -11,6 +13,9 @@ export default async function ClientDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+
+  const locale = await getLocale();
+  const d = await getDictionary(locale);
 
   const [client] = await db
     .select()
@@ -32,20 +37,14 @@ export default async function ClientDetailPage({
     .where(eq(mealPlans.clientId, id))
     .orderBy(desc(mealPlans.createdAt));
 
-  const goalLabels: Record<string, string> = {
-    fat_loss: "Fat Loss",
-    muscle_gain: "Muscle Gain",
-    weight_cut: "Weight Cut",
-    maintenance: "Maintenance",
-    pre_competition: "Pre-Competition",
-  };
+  const goalLabels = d.admin.clients.goalLabels;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{client.name}</h1>
-          <p className="text-muted-foreground">{client.email ?? "No email"}</p>
+          <p className="text-muted-foreground">{client.email ?? d.admin.clients.detail.noEmail}</p>
         </div>
         <Badge
           variant={client.status === "active" ? "default" : "secondary"}

@@ -1,6 +1,8 @@
 import { auth, signOut } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { AdminSidebar } from "./_components/admin-sidebar";
+import { getLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n";
 
 export default async function AdminLayout({
   children,
@@ -10,10 +12,13 @@ export default async function AdminLayout({
   const session = await auth();
   if (!session?.user) redirect("/login");
 
+  const locale = await getLocale();
+  const d = await getDictionary(locale);
+
   return (
     <div className="flex h-screen overflow-hidden bg-muted/30">
       <AdminSidebar
-        userName={session.user.name ?? "User"}
+        userName={session.user.name ?? d.common.user}
         userEmail={session.user.email ?? ""}
         signOutAction={async () => {
           "use server";

@@ -2,6 +2,8 @@ import { db } from "@/lib/db";
 import { appointments } from "@/lib/db/schema";
 import { desc, eq } from "drizzle-orm";
 import { AppointmentsTable } from "./_components/appointments-table";
+import { getLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n";
 
 export default async function AppointmentsPage({
   searchParams,
@@ -26,12 +28,15 @@ export default async function AppointmentsPage({
         .from(appointments)
         .orderBy(desc(appointments.createdAt));
 
+  const locale = await getLocale();
+  const d = await getDictionary(locale);
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Appointments</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{d.admin.appointments.title}</h1>
         <p className="text-muted-foreground">
-          Manage client appointment requests.
+          {d.admin.appointments.subtitle}
         </p>
       </div>
 

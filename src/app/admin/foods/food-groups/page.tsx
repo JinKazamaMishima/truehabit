@@ -3,9 +3,14 @@ import { foodGroups } from "@/lib/db/schema";
 import { asc } from "drizzle-orm";
 import { ensureDefaultFoodGroups } from "@/actions/foods";
 import { FoodGroupsManager } from "./_components/food-groups-manager";
+import { getLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n";
 
 export default async function FoodGroupsPage() {
   await ensureDefaultFoodGroups();
+
+  const locale = await getLocale();
+  const d = await getDictionary(locale);
 
   const groups = await db
     .select()
@@ -15,10 +20,9 @@ export default async function FoodGroupsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Food groups</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{d.admin.foods.foodGroupsPage.title}</h1>
         <p className="text-muted-foreground">
-          Categories used to organize foods. Default groups are created automatically
-          when this page is first opened.
+          {d.admin.foods.foodGroupsPage.subtitle}
         </p>
       </div>
 

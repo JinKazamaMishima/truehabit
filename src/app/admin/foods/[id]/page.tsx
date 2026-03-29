@@ -8,6 +8,8 @@ import { eq, asc } from "drizzle-orm";
 import { updateFood } from "@/actions/foods";
 import { FoodForm } from "../_components/food-form";
 import { EditFoodDeleteSection } from "./_components/edit-food-delete-section";
+import { getLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n";
 
 export default async function EditFoodPage({
   params,
@@ -15,6 +17,8 @@ export default async function EditFoodPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const locale = await getLocale();
+  const d = await getDictionary(locale);
 
   const [row] = await db
     .select({
@@ -44,18 +48,18 @@ export default async function EditFoodPage({
           render={<Link href="/admin/foods" />}
         >
           <ArrowLeft className="size-4" />
-          <span className="sr-only">Back to foods</span>
+          <span className="sr-only">{d.admin.foods.editFood.backToFoods}</span>
         </Button>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Edit food</h1>
-          <p className="text-muted-foreground">Update {food.name}.</p>
+          <h1 className="text-2xl font-bold tracking-tight">{d.admin.foods.editFood.title}</h1>
+          <p className="text-muted-foreground">{d.admin.foods.editFood.subtitle} {food.name}.</p>
         </div>
       </div>
 
       <FoodForm
         groups={groups}
         action={update}
-        submitLabel="Save changes"
+        submitLabel={d.admin.foods.editFood.saveChanges}
         defaults={{
           name: food.name,
           foodGroupId: food.foodGroupId,

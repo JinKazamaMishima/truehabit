@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useRef, useState, useTransition } from "react";
+import { Suspense, useRef, useState, useTransition, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,6 +26,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createAppointment } from "@/actions/appointments";
+import { useDictionary } from "@/lib/i18n/context";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -36,67 +37,36 @@ const stagger = {
   visible: { transition: { staggerChildren: 0.12 } },
 };
 
-const serviceOptions = [
-  { value: "personalized_nutrition", label: "Nutrición Personalizada" },
-  { value: "weight_loss", label: "Pérdida de Peso" },
-  { value: "sports_nutrition", label: "Nutrición Deportiva" },
-  { value: "body_composition", label: "Composición Corporal" },
-  { value: "pre_competition", label: "Plan Pre-Competencia" },
-  { value: "individual_coaching", label: "Coaching Individual" },
+const serviceValues = [
+  "personalized_nutrition",
+  "weight_loss",
+  "sports_nutrition",
+  "body_composition",
+  "pre_competition",
+  "individual_coaching",
 ] as const;
 
-const formSchema = z.object({
-  clientName: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
-  email: z.email("Ingresa un email válido"),
-  phone: z.string().optional(),
-  serviceType: z.enum([
-    "personalized_nutrition",
-    "weight_loss",
-    "sports_nutrition",
-    "body_composition",
-    "pre_competition",
-    "individual_coaching",
-  ]),
-  preferredDate: z.string().optional(),
-  message: z.string().optional(),
-});
-
-type FormValues = z.infer<typeof formSchema>;
-
-const contactInfo = [
-  {
-    icon: Phone,
-    label: "Teléfono",
-    value: "+52 (664) 123-4567",
-    href: "tel:+526641234567",
-  },
-  {
-    icon: Mail,
-    label: "Email",
-    value: "contacto@truehabit.mx",
-    href: "mailto:contacto@truehabit.mx",
-  },
-  {
-    icon: MapPin,
-    label: "Ubicación",
-    value: "Tijuana, B.C., México",
-  },
-  {
-    icon: Clock,
-    label: "Horario",
-    value: "Lun - Vie: 8:00 AM - 7:00 PM",
-  },
-];
+type FormValues = {
+  clientName: string;
+  email: string;
+  phone?: string;
+  serviceType: (typeof serviceValues)[number];
+  preferredDate?: string;
+  message?: string;
+};
 
 export default function ContactPage() {
+  const d = useDictionary();
+
   return (
-    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="text-lg text-muted-foreground">Cargando...</div></div>}>
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center"><div className="text-lg text-muted-foreground">{d.common.loading}</div></div>}>
       <ContactPageContent />
     </Suspense>
   );
 }
 
 function ContactPageContent() {
+  const d = useDictionary();
   const formRef = useRef(null);
   const formInView = useInView(formRef, { once: true, margin: "-80px" });
   const searchParams = useSearchParams();
@@ -105,6 +75,27 @@ function ContactPageContent() {
   const [submitted, setSubmitted] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  const serviceOptions = useMemo(() => serviceValues.map((value) => ({
+    value,
+    label: d.public.contact.serviceOptions[value],
+  })), [d]);
+
+  const contactInfo = useMemo(() => [
+    { icon: Phone, label: d.public.contact.phone, value: d.public.contact.defaultPhone, href: "tel:+526641234567" },
+    { icon: Mail, label: d.public.contact.email, value: d.public.contact.defaultEmail, href: "mailto:contacto@truehabit.mx" },
+    { icon: MapPin, label: d.public.contact.location, value: d.public.contact.defaultLocation },
+    { icon: Clock, label: d.public.contact.schedule, value: d.public.contact.defaultSchedule },
+  ], [d]);
+
+  const formSchema = useMemo(() => z.object({
+    clientName: z.string().min(2, d.public.contact.nameMinLength),
+    email: z.email(d.public.contact.invalidEmail),
+    phone: z.string().optional(),
+    serviceType: z.enum(serviceValues),
+    preferredDate: z.string().optional(),
+    message: z.string().optional(),
+  }), [d]);
 
   const {
     register,
@@ -118,7 +109,7 @@ function ContactPageContent() {
       clientName: "",
       email: "",
       phone: "",
-      serviceType: (serviceOptions.find((o) => o.value === preselectedService)
+      serviceType: (serviceValues.includes(preselectedService as FormValues["serviceType"])
         ? preselectedService
         : "personalized_nutrition") as FormValues["serviceType"],
       preferredDate: "",
@@ -135,7 +126,7 @@ function ContactPageContent() {
       if (result.success) {
         setSubmitted(true);
       } else {
-        setServerError(result.error ?? "Error desconocido");
+        setServerError(result.error ?? d.public.contact.unknownError);
       }
     });
   }
@@ -154,7 +145,7 @@ function ContactPageContent() {
             <motion.div variants={fadeUp} className="mb-4 flex items-center justify-center gap-3">
               <span className="h-px w-8 bg-brand" />
               <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
-                Contáctanos
+                {d.public.contact.title}
               </span>
               <span className="h-px w-8 bg-brand" />
             </motion.div>
@@ -162,14 +153,13 @@ function ContactPageContent() {
               variants={fadeUp}
               className="font-heading text-4xl font-bold text-white sm:text-5xl"
             >
-              Agenda Tu Cita
+              {d.public.contact.subtitle}
             </motion.h1>
             <motion.p
               variants={fadeUp}
               className="mx-auto mt-5 max-w-xl text-base text-white/70"
             >
-              Estamos listos para ayudarte a alcanzar tus metas de nutrición.
-              Completa el formulario y te contactaremos pronto.
+              {d.public.contact.introText}
             </motion.p>
           </motion.div>
         </div>
@@ -185,11 +175,10 @@ function ContactPageContent() {
           >
             <motion.div variants={fadeUp} className="lg:col-span-2">
               <h2 className="font-heading text-2xl font-bold text-charcoal">
-                Información de Contacto
+                {d.public.contact.contactInfoTitle}
               </h2>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                No dudes en contactarnos por cualquiera de estos medios. Nos
-                encantará ayudarte en tu camino hacia una mejor nutrición.
+                {d.public.contact.contactInfoSubtitle}
               </p>
 
               <div className="mt-8 space-y-6">
@@ -230,11 +219,10 @@ function ContactPageContent() {
                     <CheckCircle className="size-8 text-brand" />
                   </div>
                   <h3 className="font-heading text-xl font-bold text-charcoal">
-                    ¡Cita Agendada!
+                    {d.public.contact.successTitle}
                   </h3>
                   <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-                    Hemos recibido tu solicitud. Te contactaremos pronto para
-                    confirmar los detalles de tu cita.
+                    {d.public.contact.successMessage}
                   </p>
                 </div>
               ) : (
@@ -243,7 +231,7 @@ function ContactPageContent() {
                   className="space-y-5"
                 >
                   <h3 className="font-heading text-lg font-bold text-charcoal">
-                    Formulario de Cita
+                    {d.public.contact.formTitle}
                   </h3>
 
                   {serverError && (
@@ -254,10 +242,10 @@ function ContactPageContent() {
 
                   <div className="grid gap-5 sm:grid-cols-2">
                     <div className="space-y-1.5">
-                      <Label htmlFor="clientName">Nombre completo *</Label>
+                      <Label htmlFor="clientName">{d.public.contact.fullName} *</Label>
                       <Input
                         id="clientName"
-                        placeholder="Tu nombre"
+                        placeholder={d.public.contact.fullNamePlaceholder}
                         {...register("clientName")}
                         aria-invalid={!!errors.clientName}
                       />
@@ -269,11 +257,11 @@ function ContactPageContent() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label htmlFor="email">Email *</Label>
+                      <Label htmlFor="email">{d.public.contact.emailLabel} *</Label>
                       <Input
                         id="email"
                         type="email"
-                        placeholder="tu@email.com"
+                        placeholder={d.public.contact.emailPlaceholder}
                         {...register("email")}
                         aria-invalid={!!errors.email}
                       />
@@ -287,16 +275,16 @@ function ContactPageContent() {
 
                   <div className="grid gap-5 sm:grid-cols-2">
                     <div className="space-y-1.5">
-                      <Label htmlFor="phone">Teléfono</Label>
+                      <Label htmlFor="phone">{d.public.contact.phone}</Label>
                       <Input
                         id="phone"
-                        placeholder="+52 (664) 000-0000"
+                        placeholder={d.public.contact.phonePlaceholder}
                         {...register("phone")}
                       />
                     </div>
 
                     <div className="space-y-1.5">
-                      <Label>Servicio *</Label>
+                      <Label>{d.public.contact.serviceLabel} *</Label>
                       <Select
                         value={selectedService}
                         onValueChange={(val) =>
@@ -304,7 +292,7 @@ function ContactPageContent() {
                         }
                       >
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Selecciona un servicio" />
+                          <SelectValue placeholder={d.public.contact.servicePlaceholder} />
                         </SelectTrigger>
                         <SelectContent>
                           {serviceOptions.map((opt) => (
@@ -323,7 +311,7 @@ function ContactPageContent() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="preferredDate">Fecha preferida</Label>
+                    <Label htmlFor="preferredDate">{d.public.contact.preferredDate}</Label>
                     <Input
                       id="preferredDate"
                       type="date"
@@ -332,10 +320,10 @@ function ContactPageContent() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="message">Mensaje</Label>
+                    <Label htmlFor="message">{d.public.contact.message}</Label>
                     <Textarea
                       id="message"
-                      placeholder="Cuéntanos sobre tus metas y necesidades..."
+                      placeholder={d.public.contact.messagePlaceholder}
                       rows={4}
                       {...register("message")}
                     />
@@ -347,10 +335,10 @@ function ContactPageContent() {
                     disabled={isPending}
                   >
                     {isPending ? (
-                      "Enviando..."
+                      d.common.sending
                     ) : (
                       <>
-                        Enviar Solicitud
+                        {d.public.contact.submitButton}
                         <Send className="ml-1.5 size-4" />
                       </>
                     )}

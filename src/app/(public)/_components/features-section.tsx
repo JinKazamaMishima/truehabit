@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { ClipboardList, FlaskConical, TrendingUp, Utensils, Heart, Sparkles } from "lucide-react";
 import { motion, useInView } from "framer-motion";
+import { useDictionary } from "@/lib/i18n/context";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -13,18 +14,18 @@ const stagger = {
   visible: { transition: { staggerChildren: 0.1 } },
 };
 
-const features = [
-  { icon: ClipboardList, title: "Evaluación Completa", desc: "Análisis antropométrico detallado y evaluación de hábitos alimenticios para un diagnóstico preciso." },
-  { icon: FlaskConical, title: "Plan Científico", desc: "Estrategias basadas en la evidencia más actualizada en nutrición y metabolismo." },
-  { icon: Utensils, title: "Menús Prácticos", desc: "Recetas fáciles y deliciosas adaptadas a tus gustos y disponibilidad de ingredientes." },
-  { icon: Heart, title: "Hábitos Duraderos", desc: "Educación nutricional para que tomes decisiones informadas de por vida." },
-  { icon: TrendingUp, title: "Seguimiento Continuo", desc: "Monitoreo semanal con ajustes progresivos para garantizar tus resultados." },
-  { icon: Sparkles, title: "Bienestar Integral", desc: "Un enfoque holístico que considera tu salud física, mental y emocional." },
-];
+const featureIcons = [ClipboardList, FlaskConical, Utensils, Heart, TrendingUp, Sparkles];
 
 export function FeaturesSection() {
+  const d = useDictionary();
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
+
+  const features = d.public.features.items.map((item, i) => ({
+    icon: featureIcons[i],
+    title: item.title,
+    desc: item.description,
+  }));
 
   return (
     <section ref={ref} className="bg-white py-20 sm:py-28 lg:pt-20">
@@ -38,7 +39,7 @@ export function FeaturesSection() {
           <motion.div variants={fadeUp} className="mb-4 flex items-center justify-center gap-3">
             <span className="h-px w-8 bg-brand" />
             <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
-              Nuestro Proceso
+              {d.public.features.eyebrow}
             </span>
             <span className="h-px w-8 bg-brand" />
           </motion.div>
@@ -46,10 +47,10 @@ export function FeaturesSection() {
             variants={fadeUp}
             className="font-heading text-3xl font-bold text-charcoal sm:text-4xl lg:text-[2.75rem]"
           >
-            ¿Cómo Funciona?
+            {d.public.features.heading}
           </motion.h2>
           <motion.p variants={fadeUp} className="mt-4 text-base text-muted-foreground">
-            Un proceso integral diseñado para transformar tu relación con la alimentación.
+            {d.public.features.subheading}
           </motion.p>
         </motion.div>
 

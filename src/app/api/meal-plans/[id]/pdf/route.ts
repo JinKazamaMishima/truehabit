@@ -17,6 +17,8 @@ import { asc, desc, eq } from "drizzle-orm";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { createElement } from "react";
 import { NextResponse } from "next/server";
+import { getLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -252,8 +254,11 @@ export async function GET(
       : null,
   };
 
+  const locale = await getLocale();
+  const dict = await getDictionary(locale);
+
   const buffer = await renderToBuffer(
-    createElement(MealPlanPdfDocument, { data }) as Parameters<
+    createElement(MealPlanPdfDocument, { data, labels: dict.pdf }) as Parameters<
       typeof renderToBuffer
     >[0]
   );

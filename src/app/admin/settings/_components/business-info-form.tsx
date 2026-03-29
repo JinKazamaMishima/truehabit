@@ -15,17 +15,7 @@ import {
 import { upsertSettings } from "@/actions/settings";
 import { Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
-
-const FIELDS = [
-  { key: "business_name", label: "Business Name", placeholder: "TrueHabit" },
-  { key: "business_tagline", label: "Tagline", placeholder: "Nutrición basada en ciencia" },
-  { key: "business_phone", label: "Phone", placeholder: "+52 (664) 123-4567" },
-  { key: "business_email", label: "Email", placeholder: "contacto@truehabit.mx" },
-  { key: "business_address", label: "Address", placeholder: "Tijuana, B.C., México" },
-  { key: "business_instagram", label: "Instagram URL", placeholder: "https://instagram.com/truehabit" },
-  { key: "business_facebook", label: "Facebook URL", placeholder: "https://facebook.com/truehabit" },
-  { key: "business_whatsapp", label: "WhatsApp Number", placeholder: "5210000000000" },
-] as const;
+import { useDictionary } from "@/lib/i18n/context";
 
 export function BusinessInfoForm({
   initialValues,
@@ -34,6 +24,18 @@ export function BusinessInfoForm({
 }) {
   const [values, setValues] = useState<Record<string, string>>(initialValues);
   const [isPending, startTransition] = useTransition();
+  const d = useDictionary();
+
+  const FIELDS = [
+    { key: "business_name", label: d.admin.settings.businessInfo.businessName, placeholder: d.admin.settings.businessInfo.placeholders.name },
+    { key: "business_tagline", label: d.admin.settings.businessInfo.tagline, placeholder: d.admin.settings.businessInfo.placeholders.tagline },
+    { key: "business_phone", label: d.admin.settings.businessInfo.phone, placeholder: d.admin.settings.businessInfo.placeholders.phone },
+    { key: "business_email", label: d.admin.settings.businessInfo.email, placeholder: d.admin.settings.businessInfo.placeholders.email },
+    { key: "business_address", label: d.admin.settings.businessInfo.address, placeholder: d.admin.settings.businessInfo.placeholders.address },
+    { key: "business_instagram", label: d.admin.settings.businessInfo.instagramUrl, placeholder: d.admin.settings.businessInfo.placeholders.instagram },
+    { key: "business_facebook", label: d.admin.settings.businessInfo.facebookUrl, placeholder: d.admin.settings.businessInfo.placeholders.facebook },
+    { key: "business_whatsapp", label: d.admin.settings.businessInfo.whatsappNumber, placeholder: d.admin.settings.businessInfo.placeholders.whatsapp },
+  ];
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -45,16 +47,16 @@ export function BusinessInfoForm({
           section: "business",
         }))
       );
-      toast.success("Business info updated");
+      toast.success(d.admin.settings.businessInfo.toast);
     });
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Business Information</CardTitle>
+        <CardTitle>{d.admin.settings.businessInfo.cardTitle}</CardTitle>
         <CardDescription>
-          Contact details and social media links shown on the public site.
+          {d.admin.settings.businessInfo.cardDescription}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -93,7 +95,7 @@ export function BusinessInfoForm({
             ) : (
               <Save className="size-4" />
             )}
-            Save Changes
+            {d.common.saveChanges}
           </Button>
         </form>
       </CardContent>

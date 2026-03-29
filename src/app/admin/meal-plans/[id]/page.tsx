@@ -27,6 +27,8 @@ import { db } from "@/lib/db";
 import { mealPlans, recipes } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { updateMealPlanStatus, deleteMealPlan } from "@/actions/meal-plans";
+import { getLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n";
 
 const statusStyles: Record<string, string> = {
   draft: "bg-amber-100 text-amber-700",
@@ -40,6 +42,9 @@ export default async function MealPlanDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const locale = await getLocale();
+  const d = await getDictionary(locale);
+  const dt = d.admin.mealPlans.detail;
 
   const plan = await db.query.mealPlans.findFirst({
     where: eq(mealPlans.id, id),
@@ -89,7 +94,7 @@ export default async function MealPlanDetailPage({
         <div className="flex-1">
           <h1 className="text-2xl font-bold tracking-tight">{plan.name}</h1>
           <p className="text-muted-foreground">
-            {plan.client?.name ?? "Unknown client"}
+            {plan.client?.name ?? dt.unknownClient}
           </p>
         </div>
         <div className="flex gap-2">
@@ -99,7 +104,7 @@ export default async function MealPlanDetailPage({
             render={<Link href={`/admin/meal-plans/${id}/export`} />}
           >
             <FileDown className="size-4" />
-            Export
+            {dt.export}
           </Button>
           <form
             action={async () => {
@@ -109,7 +114,7 @@ export default async function MealPlanDetailPage({
           >
             <Button variant="destructive" size="sm" type="submit">
               <Trash2 className="size-4" />
-              Delete
+              {dt.delete}
             </Button>
           </form>
         </div>
@@ -123,8 +128,8 @@ export default async function MealPlanDetailPage({
               <User className="size-4" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Client</p>
-              <p className="font-medium">{plan.client?.name ?? "—"}</p>
+              <p className="text-xs text-muted-foreground">{dt.client}</p>
+              <p className="font-medium">{plan.client?.name ?? d.common.emDash}</p>
             </div>
           </CardContent>
         </Card>
@@ -134,18 +139,18 @@ export default async function MealPlanDetailPage({
               <Calendar className="size-4" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Date Range</p>
+              <p className="text-xs text-muted-foreground">{dt.dateRange}</p>
               <p className="font-medium">
                 {plan.startDate && plan.endDate
                   ? `${plan.startDate} → ${plan.endDate}`
-                  : "Not set"}
+                  : dt.notSet}
               </p>
             </div>
           </CardContent>
         </Card>
         <Card size="sm">
           <CardContent>
-            <p className="text-xs text-muted-foreground">Status</p>
+            <p className="text-xs text-muted-foreground">{d.common.status}</p>
             <div className="mt-1 flex items-center gap-2">
               <Badge
                 variant="secondary"
@@ -153,15 +158,23 @@ export default async function MealPlanDetailPage({
               >
                 {plan.status}
               </Badge>
-              <StatusToggle planId={id} currentStatus={plan.status} />
+              <StatusToggle
+                planId={id}
+                currentStatus={plan.status}
+                labels={{
+                  activate: dt.activate,
+                  complete: dt.complete,
+                  reopen: dt.reopen,
+                }}
+              />
             </div>
           </CardContent>
         </Card>
         <Card size="sm">
           <CardContent>
-            <p className="text-xs text-muted-foreground">Calorie Target</p>
+            <p className="text-xs text-muted-foreground">{dt.calorieTarget}</p>
             <p className="text-2xl font-bold text-brand">
-              {plan.calorieTarget ?? "—"}{" "}
+              {plan.calorieTarget ?? d.common.emDash}{" "}
               <span className="text-sm font-normal text-muted-foreground">
                 kcal
               </span>
@@ -174,23 +187,23 @@ export default async function MealPlanDetailPage({
       {(plan.proteinGPerKg || plan.carbsGPerKg || plan.fatGPerKg) && (
         <Card>
           <CardHeader>
-            <CardTitle>Macro Targets</CardTitle>
+            <CardTitle>{dt.macroTargets}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
-                <p className="text-lg font-bold">{plan.proteinGPerKg ?? "—"}</p>
+                <p className="text-lg font-bold">{plan.proteinGPerKg ?? d.common.emDash}</p>
                 <p className="text-xs text-muted-foreground">
-                  Protein (g/kg)
+                  {dt.proteinGPerKg}
                 </p>
               </div>
               <div>
-                <p className="text-lg font-bold">{plan.carbsGPerKg ?? "—"}</p>
-                <p className="text-xs text-muted-foreground">Carbs (g/kg)</p>
+                <p className="text-lg font-bold">{plan.carbsGPerKg ?? d.common.emDash}</p>
+                <p className="text-xs text-muted-foreground">{dt.carbsGPerKg}</p>
               </div>
               <div>
-                <p className="text-lg font-bold">{plan.fatGPerKg ?? "—"}</p>
-                <p className="text-xs text-muted-foreground">Fat (g/kg)</p>
+                <p className="text-lg font-bold">{plan.fatGPerKg ?? d.common.emDash}</p>
+                <p className="text-xs text-muted-foreground">{dt.fatGPerKg}</p>
               </div>
             </div>
           </CardContent>
@@ -216,19 +229,19 @@ export default async function MealPlanDetailPage({
             </CardHeader>
             <CardContent>
               {sortedMeals.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No meals.</p>
+                <p className="text-sm text-muted-foreground">{dt.noMeals}</p>
               ) : (
                 <div className="rounded-lg border">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>Meal</TableHead>
-                        <TableHead className="text-center">Cereals</TableHead>
-                        <TableHead className="text-center">Proteins</TableHead>
-                        <TableHead className="text-center">Fats</TableHead>
-                        <TableHead className="text-center">Veggies</TableHead>
-                        <TableHead>Recipes</TableHead>
-                        <TableHead>Notes</TableHead>
+                        <TableHead>{dt.mealHeaders.meal}</TableHead>
+                        <TableHead className="text-center">{dt.mealHeaders.cereals}</TableHead>
+                        <TableHead className="text-center">{dt.mealHeaders.proteins}</TableHead>
+                        <TableHead className="text-center">{dt.mealHeaders.fats}</TableHead>
+                        <TableHead className="text-center">{dt.mealHeaders.veggies}</TableHead>
+                        <TableHead>{dt.mealHeaders.recipes}</TableHead>
+                        <TableHead>{dt.mealHeaders.notes}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -238,16 +251,16 @@ export default async function MealPlanDetailPage({
                             {meal.slotName}
                           </TableCell>
                           <TableCell className="text-center">
-                            {meal.cerealPortions ?? "—"}
+                            {meal.cerealPortions ?? d.common.emDash}
                           </TableCell>
                           <TableCell className="text-center">
-                            {meal.proteinPortions ?? "—"}
+                            {meal.proteinPortions ?? d.common.emDash}
                           </TableCell>
                           <TableCell className="text-center">
-                            {meal.fatPortions ?? "—"}
+                            {meal.fatPortions ?? d.common.emDash}
                           </TableCell>
                           <TableCell className="text-center">
-                            {meal.veggiePortions ?? "—"}
+                            {meal.veggiePortions ?? d.common.emDash}
                           </TableCell>
                           <TableCell>
                             {meal.options.length > 0 ? (
@@ -258,16 +271,16 @@ export default async function MealPlanDetailPage({
                                     variant="secondary"
                                     className="text-xs"
                                   >
-                                    {recipeMap[opt.recipeId] ?? "Unknown"}
+                                    {recipeMap[opt.recipeId] ?? dt.unknown}
                                   </Badge>
                                 ))}
                               </div>
                             ) : (
-                              <span className="text-muted-foreground">—</span>
+                              <span className="text-muted-foreground">{d.common.emDash}</span>
                             )}
                           </TableCell>
                           <TableCell className="max-w-[200px] truncate text-muted-foreground">
-                            {meal.notes ?? "—"}
+                            {meal.notes ?? d.common.emDash}
                           </TableCell>
                         </TableRow>
                       ))}
@@ -284,18 +297,18 @@ export default async function MealPlanDetailPage({
       {plan.supplementProtocols.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Supplements</CardTitle>
+            <CardTitle>{dt.supplements}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="rounded-lg border">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Supplement</TableHead>
-                    <TableHead>Dose</TableHead>
-                    <TableHead>Frequency</TableHead>
-                    <TableHead>Timing</TableHead>
-                    <TableHead>Notes</TableHead>
+                    <TableHead>{dt.supplementHeaders.supplement}</TableHead>
+                    <TableHead>{dt.supplementHeaders.dose}</TableHead>
+                    <TableHead>{dt.supplementHeaders.frequency}</TableHead>
+                    <TableHead>{dt.supplementHeaders.timing}</TableHead>
+                    <TableHead>{dt.supplementHeaders.notes}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -304,11 +317,11 @@ export default async function MealPlanDetailPage({
                       <TableCell className="font-medium">
                         {s.supplementName}
                       </TableCell>
-                      <TableCell>{s.dose ?? "—"}</TableCell>
-                      <TableCell>{s.frequency ?? "—"}</TableCell>
-                      <TableCell>{s.timing ?? "—"}</TableCell>
+                      <TableCell>{s.dose ?? d.common.emDash}</TableCell>
+                      <TableCell>{s.frequency ?? d.common.emDash}</TableCell>
+                      <TableCell>{s.timing ?? d.common.emDash}</TableCell>
                       <TableCell className="text-muted-foreground">
-                        {s.notes ?? "—"}
+                        {s.notes ?? d.common.emDash}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -323,34 +336,34 @@ export default async function MealPlanDetailPage({
       {plan.hydrationProtocols.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Hydration</CardTitle>
+            <CardTitle>{dt.hydration}</CardTitle>
           </CardHeader>
           <CardContent>
             {plan.hydrationProtocols.map((h) => (
               <div key={h.id} className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <p className="text-xs text-muted-foreground">Daily Water</p>
+                  <p className="text-xs text-muted-foreground">{dt.dailyWater}</p>
                   <p className="font-medium">
-                    {h.dailyWaterMl ? `${h.dailyWaterMl} mL` : "—"}
+                    {h.dailyWaterMl ? `${h.dailyWaterMl} mL` : d.common.emDash}
                   </p>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">
-                    Electrolyte Brand
+                    {dt.electrolyteBrand}
                   </p>
-                  <p className="font-medium">{h.electrolyteBrand ?? "—"}</p>
+                  <p className="font-medium">{h.electrolyteBrand ?? d.common.emDash}</p>
                 </div>
                 {h.duringTraining && (
                   <div className="sm:col-span-2">
                     <p className="text-xs text-muted-foreground">
-                      During Training
+                      {dt.duringTraining}
                     </p>
                     <p className="text-sm">{h.duringTraining}</p>
                   </div>
                 )}
                 {h.notes && (
                   <div className="sm:col-span-2">
-                    <p className="text-xs text-muted-foreground">Notes</p>
+                    <p className="text-xs text-muted-foreground">{d.common.notes}</p>
                     <p className="text-sm">{h.notes}</p>
                   </div>
                 )}
@@ -364,7 +377,7 @@ export default async function MealPlanDetailPage({
       {plan.generalRecommendations && (
         <Card>
           <CardHeader>
-            <CardTitle>General Recommendations</CardTitle>
+            <CardTitle>{dt.generalRecommendations}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="whitespace-pre-wrap text-sm">
@@ -380,14 +393,16 @@ export default async function MealPlanDetailPage({
 function StatusToggle({
   planId,
   currentStatus,
+  labels,
 }: {
   planId: string;
   currentStatus: string;
+  labels: { activate: string; complete: string; reopen: string };
 }) {
   const nextStatusMap: Record<string, { label: string; value: string }> = {
-    draft: { label: "Activate", value: "active" },
-    active: { label: "Complete", value: "completed" },
-    completed: { label: "Reopen", value: "draft" },
+    draft: { label: labels.activate, value: "active" },
+    active: { label: labels.complete, value: "completed" },
+    completed: { label: labels.reopen, value: "draft" },
   };
 
   const next = nextStatusMap[currentStatus];

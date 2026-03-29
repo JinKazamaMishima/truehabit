@@ -16,14 +16,7 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import { upsertSettings } from "@/actions/settings";
 import { Loader2, Save } from "lucide-react";
 import { toast } from "sonner";
-
-const TEXT_FIELDS = [
-  { key: "hero_badge", label: "Badge Text", placeholder: "Nutrición basada en ciencia", type: "input" as const },
-  { key: "hero_heading", label: "Heading", placeholder: "Transforma Tu Nutrición", type: "input" as const },
-  { key: "hero_subheading", label: "Subheading", placeholder: "Planes de alimentación personalizados...", type: "textarea" as const },
-  { key: "hero_cta_primary", label: "Primary CTA Text", placeholder: "Agenda Tu Cita", type: "input" as const },
-  { key: "hero_cta_secondary", label: "Secondary CTA Text", placeholder: "Conoce Más", type: "input" as const },
-];
+import { useDictionary } from "@/lib/i18n/context";
 
 export function HeroForm({
   initialValues,
@@ -32,6 +25,15 @@ export function HeroForm({
 }) {
   const [values, setValues] = useState<Record<string, string>>(initialValues);
   const [isPending, startTransition] = useTransition();
+  const d = useDictionary();
+
+  const TEXT_FIELDS = [
+    { key: "hero_badge", label: d.admin.settings.hero.badgeText, placeholder: d.admin.settings.hero.placeholders.badge, type: "input" as const },
+    { key: "hero_heading", label: d.admin.settings.hero.heading, placeholder: d.admin.settings.hero.placeholders.heading, type: "input" as const },
+    { key: "hero_subheading", label: d.admin.settings.hero.subheading, placeholder: d.admin.settings.hero.placeholders.subheading, type: "textarea" as const },
+    { key: "hero_cta_primary", label: d.admin.settings.hero.primaryCta, placeholder: d.admin.settings.hero.placeholders.primaryCta, type: "input" as const },
+    { key: "hero_cta_secondary", label: d.admin.settings.hero.secondaryCta, placeholder: d.admin.settings.hero.placeholders.secondaryCta, type: "input" as const },
+  ];
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -49,22 +51,22 @@ export function HeroForm({
         },
       ];
       await upsertSettings(settings);
-      toast.success("Hero section updated");
+      toast.success(d.admin.settings.hero.toast);
     });
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Hero Banner</CardTitle>
+        <CardTitle>{d.admin.settings.hero.cardTitle}</CardTitle>
         <CardDescription>
-          Main banner content on the home page.
+          {d.admin.settings.hero.cardDescription}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-1.5">
-            <Label>Hero Image</Label>
+            <Label>{d.admin.settings.hero.heroImage}</Label>
             <ImageUpload
               folder="heroes"
               currentUrl={values.hero_image_url || undefined}
@@ -76,7 +78,7 @@ export function HeroForm({
               }
             />
             <p className="text-xs text-muted-foreground">
-              Or enter a URL directly:
+              {d.admin.settings.hero.orEnterUrl}
             </p>
             <Input
               placeholder="https://..."
@@ -122,7 +124,7 @@ export function HeroForm({
             ) : (
               <Save className="size-4" />
             )}
-            Save Changes
+            {d.common.saveChanges}
           </Button>
         </form>
       </CardContent>

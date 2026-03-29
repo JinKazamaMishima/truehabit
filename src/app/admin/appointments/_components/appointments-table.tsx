@@ -15,6 +15,7 @@ import {
 import { CalendarClock } from "lucide-react";
 import { updateAppointmentStatus } from "@/actions/appointments-admin";
 import { cn } from "@/lib/utils";
+import { useDictionary } from "@/lib/i18n/context";
 
 type Appointment = {
   id: string;
@@ -35,23 +36,6 @@ const statusColors: Record<string, string> = {
   cancelled: "bg-red-100 text-red-700",
 };
 
-const serviceLabels: Record<string, string> = {
-  personalized_nutrition: "Personalized Nutrition",
-  weight_loss: "Weight Loss",
-  sports_nutrition: "Sports Nutrition",
-  body_composition: "Body Composition",
-  pre_competition: "Pre-Competition",
-  individual_coaching: "Individual Coaching",
-};
-
-const filterTabs = [
-  { value: "all", label: "All" },
-  { value: "pending", label: "Pending" },
-  { value: "confirmed", label: "Confirmed" },
-  { value: "completed", label: "Completed" },
-  { value: "cancelled", label: "Cancelled" },
-];
-
 export function AppointmentsTable({
   appointments,
   currentFilter,
@@ -60,6 +44,17 @@ export function AppointmentsTable({
   currentFilter: string;
 }) {
   const router = useRouter();
+  const d = useDictionary();
+
+  const serviceLabels = d.admin.appointments.serviceLabels as Record<string, string>;
+
+  const filterTabs = [
+    { value: "all", label: d.admin.appointments.filterTabs.all },
+    { value: "pending", label: d.admin.appointments.filterTabs.pending },
+    { value: "confirmed", label: d.admin.appointments.filterTabs.confirmed },
+    { value: "completed", label: d.admin.appointments.filterTabs.completed },
+    { value: "cancelled", label: d.admin.appointments.filterTabs.cancelled },
+  ];
 
   async function handleStatusChange(
     id: string,
@@ -96,7 +91,7 @@ export function AppointmentsTable({
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16">
           <CalendarClock className="mb-3 size-10 text-muted-foreground/50" />
           <p className="text-sm font-medium text-muted-foreground">
-            No appointments found.
+            {d.admin.appointments.noAppointments}
           </p>
         </div>
       ) : (
@@ -104,12 +99,12 @@ export function AppointmentsTable({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Service</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{d.admin.appointments.tableHeaders.name}</TableHead>
+                <TableHead>{d.admin.appointments.tableHeaders.email}</TableHead>
+                <TableHead>{d.admin.appointments.tableHeaders.service}</TableHead>
+                <TableHead>{d.admin.appointments.tableHeaders.date}</TableHead>
+                <TableHead>{d.admin.appointments.tableHeaders.status}</TableHead>
+                <TableHead className="text-right">{d.admin.appointments.tableHeaders.actions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -125,8 +120,8 @@ export function AppointmentsTable({
                     {serviceLabels[apt.serviceType] ?? apt.serviceType}
                   </TableCell>
                   <TableCell>
-                    {apt.preferredDate ?? "—"}
-                    {apt.preferredTime && ` at ${apt.preferredTime}`}
+                    {apt.preferredDate ?? d.common.emDash}
+                    {apt.preferredTime && `${d.admin.appointments.atTime}${apt.preferredTime}`}
                   </TableCell>
                   <TableCell>
                     <Badge
@@ -146,7 +141,7 @@ export function AppointmentsTable({
                             handleStatusChange(apt.id, "confirmed")
                           }
                         >
-                          Confirm
+                          {d.admin.appointments.confirmButton}
                         </Button>
                       )}
                       {(apt.status === "pending" ||
@@ -158,7 +153,7 @@ export function AppointmentsTable({
                             handleStatusChange(apt.id, "completed")
                           }
                         >
-                          Complete
+                          {d.admin.appointments.completeButton}
                         </Button>
                       )}
                       {apt.status !== "cancelled" &&
@@ -170,7 +165,7 @@ export function AppointmentsTable({
                               handleStatusChange(apt.id, "cancelled")
                             }
                           >
-                            Cancel
+                            {d.admin.appointments.cancelButton}
                           </Button>
                         )}
                     </div>

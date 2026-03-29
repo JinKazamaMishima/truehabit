@@ -13,6 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useDictionary } from "@/lib/i18n/context";
 
 export function DeleteFoodButton({
   foodId,
@@ -21,6 +22,7 @@ export function DeleteFoodButton({
   foodId: string;
   foodName: string;
 }) {
+  const d = useDictionary();
   const [open, setOpen] = useState(false);
 
   return (
@@ -32,7 +34,7 @@ export function DeleteFoodButton({
             variant="ghost"
             size="sm"
             className="text-destructive hover:text-destructive"
-            aria-label={`Delete ${foodName}`}
+            aria-label={`${d.common.delete} ${foodName}`}
           />
         }
       >
@@ -40,19 +42,19 @@ export function DeleteFoodButton({
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Delete food</DialogTitle>
+          <DialogTitle>{d.admin.foods.deleteFood.title}</DialogTitle>
           <DialogDescription>
-            Remove <span className="font-medium text-foreground">{foodName}</span>{" "}
-            from the database? This cannot be undone.
+            {d.admin.foods.foodGroupsPage.removePrefix}<span className="font-medium text-foreground">{foodName}</span>{" "}
+            {d.admin.foods.deleteFood.confirmMessage}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="gap-2 sm:gap-0">
           <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-            Cancel
+            {d.common.cancel}
           </Button>
           <form action={deleteFood.bind(null, foodId)}>
             <Button type="submit" variant="destructive">
-              Delete
+              {d.common.delete}
             </Button>
           </form>
         </DialogFooter>

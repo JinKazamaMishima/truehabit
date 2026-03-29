@@ -24,14 +24,8 @@ import {
   clients,
 } from "@/lib/db/schema";
 import { desc, eq } from "drizzle-orm";
-
-const goalLabels: Record<string, string> = {
-  fat_loss: "Fat Loss",
-  muscle_gain: "Muscle Gain",
-  weight_cut: "Weight Cut",
-  maintenance: "Maintenance",
-  pre_competition: "Pre-Competition",
-};
+import { getLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n";
 
 const statusStyles: Record<string, string> = {
   draft: "bg-amber-100 text-amber-700",
@@ -40,6 +34,10 @@ const statusStyles: Record<string, string> = {
 };
 
 export default async function MealPlansPage() {
+  const locale = await getLocale();
+  const d = await getDictionary(locale);
+  const goalLabels = d.admin.mealPlans.templates.form.goalLabels;
+
   const [templates, plans] = await Promise.all([
     db
       .select()
@@ -64,9 +62,9 @@ export default async function MealPlansPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Meal Plans</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{d.admin.mealPlans.title}</h1>
           <p className="text-muted-foreground">
-            Manage templates and client meal plans.
+            {d.admin.mealPlans.subtitle}
           </p>
         </div>
         <div className="flex gap-2">
@@ -75,19 +73,19 @@ export default async function MealPlansPage() {
             render={<Link href="/admin/meal-plans/templates/new" />}
           >
             <LayoutTemplate className="size-4" />
-            New Template
+            {d.admin.mealPlans.newTemplate}
           </Button>
           <Button render={<Link href="/admin/meal-plans/builder" />}>
             <Plus className="size-4" />
-            New Plan
+            {d.admin.mealPlans.newPlan}
           </Button>
         </div>
       </div>
 
       <Tabs defaultValue="templates">
         <TabsList>
-          <TabsTrigger value="templates">Templates</TabsTrigger>
-          <TabsTrigger value="plans">Client Plans</TabsTrigger>
+          <TabsTrigger value="templates">{d.admin.mealPlans.templatesTab}</TabsTrigger>
+          <TabsTrigger value="plans">{d.admin.mealPlans.clientPlansTab}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="templates">
@@ -95,7 +93,7 @@ export default async function MealPlansPage() {
             <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16">
               <LayoutTemplate className="mb-3 size-10 text-muted-foreground/50" />
               <p className="text-sm font-medium text-muted-foreground">
-                No templates yet.
+                {d.admin.mealPlans.noTemplatesYet}
               </p>
               <Button
                 variant="outline"
@@ -103,7 +101,7 @@ export default async function MealPlansPage() {
                 render={<Link href="/admin/meal-plans/templates/new" />}
               >
                 <Plus className="size-4" />
-                Create your first template
+                {d.admin.mealPlans.createFirstTemplate}
               </Button>
             </div>
           ) : (
@@ -119,7 +117,7 @@ export default async function MealPlansPage() {
                   <CardContent className="space-y-3">
                     {t.goalType && (
                       <Badge variant="secondary">
-                        {goalLabels[t.goalType] ?? t.goalType}
+                        {goalLabels[t.goalType as keyof typeof goalLabels] ?? t.goalType}
                       </Badge>
                     )}
                     {t.description && (
@@ -148,7 +146,7 @@ export default async function MealPlansPage() {
             <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16">
               <Calendar className="mb-3 size-10 text-muted-foreground/50" />
               <p className="text-sm font-medium text-muted-foreground">
-                No meal plans yet.
+                {d.admin.mealPlans.noPlansYet}
               </p>
               <Button
                 variant="outline"
@@ -156,7 +154,7 @@ export default async function MealPlansPage() {
                 render={<Link href="/admin/meal-plans/builder" />}
               >
                 <Plus className="size-4" />
-                Create your first meal plan
+                {d.admin.mealPlans.createFirstPlan}
               </Button>
             </div>
           ) : (
@@ -164,12 +162,12 @@ export default async function MealPlansPage() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Plan Name</TableHead>
-                    <TableHead>Client</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Start Date</TableHead>
-                    <TableHead>End Date</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>{d.admin.mealPlans.tableHeaders.planName}</TableHead>
+                    <TableHead>{d.admin.mealPlans.tableHeaders.client}</TableHead>
+                    <TableHead>{d.admin.mealPlans.tableHeaders.status}</TableHead>
+                    <TableHead>{d.admin.mealPlans.tableHeaders.startDate}</TableHead>
+                    <TableHead>{d.admin.mealPlans.tableHeaders.endDate}</TableHead>
+                    <TableHead className="text-right">{d.admin.mealPlans.tableHeaders.actions}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -184,7 +182,7 @@ export default async function MealPlansPage() {
                         </Link>
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {plan.clientName ?? "—"}
+                        {plan.clientName ?? d.common.emDash}
                       </TableCell>
                       <TableCell>
                         <Badge
@@ -195,10 +193,10 @@ export default async function MealPlansPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {plan.startDate ?? "—"}
+                        {plan.startDate ?? d.common.emDash}
                       </TableCell>
                       <TableCell className="text-muted-foreground">
-                        {plan.endDate ?? "—"}
+                        {plan.endDate ?? d.common.emDash}
                       </TableCell>
                       <TableCell className="text-right">
                         <Button
@@ -206,7 +204,7 @@ export default async function MealPlansPage() {
                           size="sm"
                           render={<Link href={`/admin/meal-plans/${plan.id}`} />}
                         >
-                          View
+                          {d.common.view}
                         </Button>
                       </TableCell>
                     </TableRow>

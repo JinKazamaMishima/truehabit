@@ -21,6 +21,8 @@ import {
 import { db } from "@/lib/db";
 import { mealPlans, recipes } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
+import { getLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n";
 
 export default async function ExportPage({
   params,
@@ -28,6 +30,10 @@ export default async function ExportPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const locale = await getLocale();
+  const d = await getDictionary(locale);
+  const ex = d.admin.mealPlans.export;
+  const dt = d.admin.mealPlans.detail;
 
   const plan = await db.query.mealPlans.findFirst({
     where: eq(mealPlans.id, id),
@@ -67,9 +73,9 @@ export default async function ExportPage({
           <ArrowLeft className="size-4" />
         </Button>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold tracking-tight">Export Plan</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{ex.title}</h1>
           <p className="text-muted-foreground">
-            Preview and export the meal plan.
+            {ex.subtitle}
           </p>
         </div>
         <Button
@@ -77,7 +83,7 @@ export default async function ExportPage({
           render={<a href={`/api/meal-plans/${id}/pdf`} />}
         >
           <Download className="size-4" />
-          Download PDF
+          {ex.downloadPdf}
         </Button>
         <PrintButton />
       </div>
@@ -90,7 +96,7 @@ export default async function ExportPage({
               {plan.name}
             </h2>
             <p className="mt-1 text-sm text-brand dark:text-brand">
-              Client: {plan.client?.name ?? "—"}
+              {ex.clientLabel} {plan.client?.name ?? d.common.emDash}
             </p>
             {plan.startDate && plan.endDate && (
               <p className="text-sm text-brand/70 dark:text-brand/70">
@@ -105,9 +111,9 @@ export default async function ExportPage({
               </p>
             )}
             <div className="mt-1 flex gap-3 text-sm text-brand dark:text-brand">
-              {plan.proteinGPerKg && <span>P: {plan.proteinGPerKg} g/kg</span>}
-              {plan.carbsGPerKg && <span>C: {plan.carbsGPerKg} g/kg</span>}
-              {plan.fatGPerKg && <span>F: {plan.fatGPerKg} g/kg</span>}
+              {plan.proteinGPerKg && <span>{ex.macroP} {plan.proteinGPerKg} g/kg</span>}
+              {plan.carbsGPerKg && <span>{ex.macroC} {plan.carbsGPerKg} g/kg</span>}
+              {plan.fatGPerKg && <span>{ex.macroF} {plan.fatGPerKg} g/kg</span>}
             </div>
           </div>
         </div>
@@ -135,12 +141,12 @@ export default async function ExportPage({
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Meal</TableHead>
-                      <TableHead className="text-center">Cereals</TableHead>
-                      <TableHead className="text-center">Proteins</TableHead>
-                      <TableHead className="text-center">Fats</TableHead>
-                      <TableHead className="text-center">Veggies</TableHead>
-                      <TableHead>Recipes</TableHead>
+                      <TableHead>{dt.mealHeaders.meal}</TableHead>
+                      <TableHead className="text-center">{dt.mealHeaders.cereals}</TableHead>
+                      <TableHead className="text-center">{dt.mealHeaders.proteins}</TableHead>
+                      <TableHead className="text-center">{dt.mealHeaders.fats}</TableHead>
+                      <TableHead className="text-center">{dt.mealHeaders.veggies}</TableHead>
+                      <TableHead>{dt.mealHeaders.recipes}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -150,25 +156,25 @@ export default async function ExportPage({
                           {meal.slotName}
                         </TableCell>
                         <TableCell className="text-center">
-                          {meal.cerealPortions ?? "—"}
+                          {meal.cerealPortions ?? d.common.emDash}
                         </TableCell>
                         <TableCell className="text-center">
-                          {meal.proteinPortions ?? "—"}
+                          {meal.proteinPortions ?? d.common.emDash}
                         </TableCell>
                         <TableCell className="text-center">
-                          {meal.fatPortions ?? "—"}
+                          {meal.fatPortions ?? d.common.emDash}
                         </TableCell>
                         <TableCell className="text-center">
-                          {meal.veggiePortions ?? "—"}
+                          {meal.veggiePortions ?? d.common.emDash}
                         </TableCell>
                         <TableCell>
                           {meal.options.length > 0
                             ? meal.options
                                 .map(
-                                  (o) => recipeMap[o.recipeId] ?? "Unknown"
+                                  (o) => recipeMap[o.recipeId] ?? dt.unknown
                                 )
                                 .join(", ")
-                            : "—"}
+                            : d.common.emDash}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -184,17 +190,17 @@ export default async function ExportPage({
       {plan.supplementProtocols.length > 0 && (
         <Card className="print:break-inside-avoid">
           <CardHeader>
-            <CardTitle>Supplements</CardTitle>
+            <CardTitle>{dt.supplements}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="rounded-lg border">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Supplement</TableHead>
-                    <TableHead>Dose</TableHead>
-                    <TableHead>Frequency</TableHead>
-                    <TableHead>Timing</TableHead>
+                    <TableHead>{dt.supplementHeaders.supplement}</TableHead>
+                    <TableHead>{dt.supplementHeaders.dose}</TableHead>
+                    <TableHead>{dt.supplementHeaders.frequency}</TableHead>
+                    <TableHead>{dt.supplementHeaders.timing}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -203,9 +209,9 @@ export default async function ExportPage({
                       <TableCell className="font-medium">
                         {s.supplementName}
                       </TableCell>
-                      <TableCell>{s.dose ?? "—"}</TableCell>
-                      <TableCell>{s.frequency ?? "—"}</TableCell>
-                      <TableCell>{s.timing ?? "—"}</TableCell>
+                      <TableCell>{s.dose ?? d.common.emDash}</TableCell>
+                      <TableCell>{s.frequency ?? d.common.emDash}</TableCell>
+                      <TableCell>{s.timing ?? d.common.emDash}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -219,27 +225,27 @@ export default async function ExportPage({
       {plan.hydrationProtocols.length > 0 && (
         <Card className="print:break-inside-avoid">
           <CardHeader>
-            <CardTitle>Hydration</CardTitle>
+            <CardTitle>{dt.hydration}</CardTitle>
           </CardHeader>
           <CardContent>
             {plan.hydrationProtocols.map((h) => (
               <div key={h.id} className="grid gap-3 sm:grid-cols-2">
                 <div>
-                  <p className="text-xs text-muted-foreground">Daily Water</p>
+                  <p className="text-xs text-muted-foreground">{dt.dailyWater}</p>
                   <p className="font-medium">
-                    {h.dailyWaterMl ? `${h.dailyWaterMl} mL` : "—"}
+                    {h.dailyWaterMl ? `${h.dailyWaterMl} mL` : d.common.emDash}
                   </p>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">
-                    Electrolyte Brand
+                    {dt.electrolyteBrand}
                   </p>
-                  <p className="font-medium">{h.electrolyteBrand ?? "—"}</p>
+                  <p className="font-medium">{h.electrolyteBrand ?? d.common.emDash}</p>
                 </div>
                 {h.duringTraining && (
                   <div className="sm:col-span-2">
                     <p className="text-xs text-muted-foreground">
-                      During Training
+                      {dt.duringTraining}
                     </p>
                     <p className="text-sm">{h.duringTraining}</p>
                   </div>
@@ -254,7 +260,7 @@ export default async function ExportPage({
       {plan.generalRecommendations && (
         <Card className="print:break-inside-avoid">
           <CardHeader>
-            <CardTitle>General Recommendations</CardTitle>
+            <CardTitle>{dt.generalRecommendations}</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="whitespace-pre-wrap text-sm">

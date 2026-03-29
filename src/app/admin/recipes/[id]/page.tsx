@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { foods, recipeIngredients, recipeTags, recipes } from "@/lib/db/schema";
 import { RecipeForm } from "../_components/recipe-form";
+import { getLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n";
 
 export default async function EditRecipePage({
   params,
@@ -10,6 +12,8 @@ export default async function EditRecipePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const locale = await getLocale();
+  const d = await getDictionary(locale);
 
   const [recipe] = await db
     .select()
@@ -45,7 +49,7 @@ export default async function EditRecipePage({
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Edit Recipe</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{d.admin.recipes.editRecipePage.title}</h1>
         <p className="text-muted-foreground">{recipe.name}</p>
       </div>
       <RecipeForm

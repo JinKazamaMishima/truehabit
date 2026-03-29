@@ -13,19 +13,22 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
-
-const navLinks = [
-  { href: "/", label: "Inicio" },
-  { href: "/about", label: "Nosotros" },
-  { href: "/services", label: "Servicios" },
-  { href: "/contact", label: "Contacto" },
-];
+import { useDictionary } from "@/lib/i18n/context";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 export function Navbar({ businessName }: { businessName?: string }) {
+  const d = useDictionary();
   const name = businessName || "TrueHabit";
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+
+  const navLinks = [
+    { href: "/", label: d.nav.public.home },
+    { href: "/about", label: d.nav.public.about },
+    { href: "/services", label: d.nav.public.services },
+    { href: "/contact", label: d.nav.public.contact },
+  ];
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -60,8 +63,10 @@ export function Navbar({ businessName }: { businessName?: string }) {
               </a>
             </div>
             <div className="ml-2 h-4 w-px bg-white/20" />
+            <LanguageSwitcher className="border-white/20 text-white [&_button]:text-white/60 [&_button:hover]:text-white [&_.text-muted-foreground]:text-white/50" />
+            <div className="h-4 w-px bg-white/20" />
             <Link href="/contact" className="text-xs font-medium text-brand transition-colors hover:text-brand-dark">
-              Agenda Tu Cita
+              {d.public.navbar.scheduleAppointment}
             </Link>
           </div>
         </div>
@@ -108,13 +113,13 @@ export function Navbar({ businessName }: { businessName?: string }) {
               render={<Link href="/login" />}
             >
               <LogIn className="size-4" />
-              Iniciar Sesión
+              {d.common.signIn}
             </Button>
             <Button
               className="h-11 rounded-md bg-brand px-6 text-sm font-semibold text-white shadow-md transition-all hover:bg-brand-dark hover:shadow-lg"
               render={<Link href="/contact" />}
             >
-              Agenda Tu Cita
+              {d.public.navbar.scheduleAppointment}
             </Button>
           </div>
 
@@ -124,7 +129,7 @@ export function Navbar({ businessName }: { businessName?: string }) {
               render={<Button variant="ghost" size="icon" />}
             >
               <Menu className="size-5" />
-              <span className="sr-only">Toggle menu</span>
+              <span className="sr-only">{d.public.navbar.toggleMenu}</span>
             </SheetTrigger>
 
             <SheetContent side="right" className="w-72">
@@ -162,6 +167,7 @@ export function Navbar({ businessName }: { businessName?: string }) {
               </nav>
 
               <div className="mt-4 space-y-2 px-4">
+                <LanguageSwitcher className="w-full justify-center" />
                 <Button
                   variant="outline"
                   className="w-full gap-2 border-brand/30 text-brand hover:bg-brand-light hover:text-brand-dark"
@@ -169,14 +175,14 @@ export function Navbar({ businessName }: { businessName?: string }) {
                   render={<Link href="/login" onClick={() => setOpen(false)} />}
                 >
                   <LogIn className="size-4" />
-                  Iniciar Sesión
+                  {d.common.signIn}
                 </Button>
                 <Button
                   className="w-full bg-brand text-white hover:bg-brand-dark"
                   size="lg"
                   render={<Link href="/contact" onClick={() => setOpen(false)} />}
                 >
-                  Agenda Tu Cita
+                  {d.public.navbar.scheduleAppointment}
                 </Button>
               </div>
             </SheetContent>

@@ -45,6 +45,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { cn } from "@/lib/utils";
+import { useDictionary } from "@/lib/i18n/context";
 
 export type FoodOption = {
   id: string;
@@ -58,24 +59,27 @@ export type FoodOption = {
   fiberG: string | null;
 };
 
-const MEAL_TYPE_OPTIONS = [
-  { value: "breakfast", label: "Breakfast" },
-  { value: "lunch", label: "Lunch" },
-  { value: "dinner", label: "Dinner" },
-  { value: "snack", label: "Snack" },
-  { value: "pre_workout", label: "Pre-workout" },
-  { value: "recovery", label: "Recovery" },
-  { value: "pre_competition", label: "Pre-competition" },
+const MEAL_TYPE_VALUES = [
+  "breakfast",
+  "lunch",
+  "dinner",
+  "snack",
+  "pre_workout",
+  "recovery",
+  "pre_competition",
 ] as const;
 
-const RATIO_OPTIONS = [
-  { value: "none", label: "None" },
-  { value: "cereales", label: "Cereales" },
-  { value: "proteinas", label: "Proteínas" },
-  { value: "grasas", label: "Grasas" },
-  { value: "vegetales", label: "Vegetales" },
-  { value: "frutas", label: "Frutas" },
-] as const;
+const MEAL_LABEL_KEYS: Record<string, string> = {
+  breakfast: "Breakfast",
+  lunch: "Lunch",
+  dinner: "Dinner",
+  snack: "Snack",
+  pre_workout: "Pre-workout",
+  recovery: "Recovery",
+  pre_competition: "Pre-competition",
+};
+
+const RATIO_VALUES = ["none", "cereales", "proteinas", "grasas", "vegetales", "frutas"] as const;
 
 type IngredientRow = {
   key: string;
@@ -140,6 +144,10 @@ type RecipeFormProps =
 
 export function RecipeForm(props: RecipeFormProps) {
   const { mode, foods } = props;
+  const d = useDictionary();
+  const f = d.admin.recipes.form;
+  const mealLabels = d.admin.recipes.mealLabels as Record<string, string>;
+  const ratioGroups = f.ratioGroups as Record<string, string>;
 
   const foodById = useMemo(() => new Map(foods.map((f) => [f.id, f])), [foods]);
 
@@ -252,7 +260,7 @@ export function RecipeForm(props: RecipeFormProps) {
       } catch (err) {
         if (isRedirectError(err)) throw err;
         setFormError(
-          err instanceof Error ? err.message : "Something went wrong."
+          err instanceof Error ? err.message : f.somethingWrong
         );
       }
     });
@@ -260,11 +268,7 @@ export function RecipeForm(props: RecipeFormProps) {
 
   const handleDelete = () => {
     if (mode !== "edit") return;
-    if (
-      !confirm(
-        "Delete this recipe? This cannot be undone. Meal plans referencing it may be affected."
-      )
-    ) {
+    if (!confirm(f.deleteConfirm)) {
       return;
     }
     setFormError(null);
@@ -274,7 +278,7 @@ export function RecipeForm(props: RecipeFormProps) {
       } catch (err) {
         if (isRedirectError(err)) throw err;
         setFormError(
-          err instanceof Error ? err.message : "Could not delete recipe."
+          err instanceof Error ? err.message : f.couldNotDelete
         );
       }
     });
@@ -291,7 +295,7 @@ export function RecipeForm(props: RecipeFormProps) {
           render={<Link href="/admin/recipes" />}
         >
           <ArrowLeft className="size-4" />
-          Recipes
+          {f.recipesButton}
         </Button>
       </div>
 
@@ -306,31 +310,31 @@ export function RecipeForm(props: RecipeFormProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Basics</CardTitle>
+          <CardTitle>{f.basicsCard}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="recipe-name">Name</Label>
+            <Label htmlFor="recipe-name">{f.name}</Label>
             <Input
               id="recipe-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Avena con fruta"
+              placeholder={f.namePlaceholder}
               required
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="recipe-desc">Description</Label>
+            <Label htmlFor="recipe-desc">{f.description}</Label>
             <Textarea
               id="recipe-desc"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              placeholder="Short summary for cards and lists"
+              placeholder={f.descriptionPlaceholder}
             />
           </div>
           <div className="space-y-2">
-            <Label>Recipe Image</Label>
+            <Label>{f.recipeImage}</Label>
             <ImageUpload
               folder="recipes"
               currentUrl={imageUrl || undefined}
@@ -339,18 +343,18 @@ export function RecipeForm(props: RecipeFormProps) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="recipe-prep">Prep instructions</Label>
+            <Label htmlFor="recipe-prep">{f.prepInstructions}</Label>
             <Textarea
               id="recipe-prep"
               value={prepInstructions}
               onChange={(e) => setPrepInstructions(e.target.value)}
               rows={4}
-              placeholder="Steps, tips, substitutions…"
+              placeholder={f.prepInstructionsPlaceholder}
             />
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="prep-time">Prep time (minutes)</Label>
+              <Label htmlFor="prep-time">{f.prepTime}</Label>
               <Input
                 id="prep-time"
                 type="number"
@@ -358,24 +362,24 @@ export function RecipeForm(props: RecipeFormProps) {
                 step={1}
                 value={prepTimeMin}
                 onChange={(e) => setPrepTimeMin(e.target.value)}
-                placeholder="Optional"
+                placeholder={d.common.optional}
               />
             </div>
           </div>
           <div className="space-y-3">
-            <Label>Meal types</Label>
+            <Label>{f.mealTypes}</Label>
             <div className="grid gap-3 sm:grid-cols-2">
-              {MEAL_TYPE_OPTIONS.map((opt) => (
+              {MEAL_TYPE_VALUES.map((value) => (
                 <label
-                  key={opt.value}
+                  key={value}
                   className="flex cursor-pointer items-center gap-2 text-sm"
                 >
                   <Checkbox
-                    checked={mealTypes.includes(opt.value)}
-                    onCheckedChange={() => toggleMealType(opt.value)}
+                    checked={mealTypes.includes(value)}
+                    onCheckedChange={() => toggleMealType(value)}
                     className="data-checked:border-brand data-checked:bg-brand data-checked:text-white"
                   />
-                  <span>{opt.label}</span>
+                  <span>{mealLabels[MEAL_LABEL_KEYS[value]] ?? value}</span>
                 </label>
               ))}
             </div>
@@ -385,7 +389,7 @@ export function RecipeForm(props: RecipeFormProps) {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between gap-2">
-          <CardTitle>Ingredients</CardTitle>
+          <CardTitle>{f.ingredientsCard}</CardTitle>
           <Button
             type="button"
             variant="outline"
@@ -393,7 +397,7 @@ export function RecipeForm(props: RecipeFormProps) {
             onClick={() => setIngredients((prev) => [...prev, newRow()])}
           >
             <Plus className="size-4" />
-            Add ingredient
+            {f.addIngredient}
           </Button>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -404,7 +408,7 @@ export function RecipeForm(props: RecipeFormProps) {
             >
               <div className="mb-3 flex items-center justify-between gap-2">
                 <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                  Ingredient {index + 1}
+                  {f.ingredientN} {index + 1}
                 </span>
                 <Button
                   type="button"
@@ -417,14 +421,14 @@ export function RecipeForm(props: RecipeFormProps) {
                       prev.filter((r) => r.key !== row.key)
                     )
                   }
-                  aria-label="Remove ingredient"
+                  aria-label={f.removeIngredient}
                 >
                   <Trash2 className="size-4" />
                 </Button>
               </div>
               <div className="grid gap-3 lg:grid-cols-12 lg:items-end">
                 <div className="space-y-2 lg:col-span-4">
-                  <Label>Name</Label>
+                  <Label>{f.name}</Label>
                   <Input
                     value={row.name}
                     onChange={(e) =>
@@ -436,11 +440,11 @@ export function RecipeForm(props: RecipeFormProps) {
                         )
                       )
                     }
-                    placeholder="Ingredient name"
+                    placeholder={f.ingredientName}
                   />
                 </div>
                 <div className="space-y-2 lg:col-span-4">
-                  <Label>From database</Label>
+                  <Label>{f.fromDatabase}</Label>
                   <FoodCombobox
                     foods={foods}
                     value={row.foodId}
@@ -479,7 +483,7 @@ export function RecipeForm(props: RecipeFormProps) {
                   />
                 </div>
                 <div className="space-y-2 lg:col-span-2">
-                  <Label>Base qty</Label>
+                  <Label>{f.baseQty}</Label>
                   <Input
                     type="number"
                     min={0}
@@ -498,7 +502,7 @@ export function RecipeForm(props: RecipeFormProps) {
                   />
                 </div>
                 <div className="space-y-2 lg:col-span-2">
-                  <Label>Unit</Label>
+                  <Label>{f.unit}</Label>
                   <Input
                     value={row.servingUnit}
                     onChange={(e) =>
@@ -510,11 +514,11 @@ export function RecipeForm(props: RecipeFormProps) {
                         )
                       )
                     }
-                    placeholder="taza, gr, cda…"
+                    placeholder={f.unitPlaceholder}
                   />
                 </div>
                 <div className="space-y-2 lg:col-span-3">
-                  <Label>Ratio group</Label>
+                  <Label>{f.ratioGroup}</Label>
                   <Select
                     value={row.ratioGroup}
                     onValueChange={(v) =>
@@ -528,12 +532,12 @@ export function RecipeForm(props: RecipeFormProps) {
                     }
                   >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Group" />
+                      <SelectValue placeholder={f.groupPlaceholder} />
                     </SelectTrigger>
                     <SelectContent>
-                      {RATIO_OPTIONS.map((opt) => (
-                        <SelectItem key={opt.value} value={opt.value}>
-                          {opt.label}
+                      {RATIO_VALUES.map((value) => (
+                        <SelectItem key={value} value={value}>
+                          {ratioGroups[value] ?? value}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -553,7 +557,7 @@ export function RecipeForm(props: RecipeFormProps) {
                     }
                     className="data-checked:border-brand data-checked:bg-brand data-checked:text-white"
                   />
-                  Optional
+                  {f.optionalIngredient}
                 </label>
               </div>
             </div>
@@ -563,7 +567,7 @@ export function RecipeForm(props: RecipeFormProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle>Tags</CardTitle>
+          <CardTitle>{f.tagsCard}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="flex flex-wrap gap-1.5">
@@ -580,7 +584,7 @@ export function RecipeForm(props: RecipeFormProps) {
                   onClick={() =>
                     setTags((prev) => prev.filter((x) => x !== t))
                   }
-                  aria-label={`Remove ${t}`}
+                  aria-label={`${f.removeTag} ${t}`}
                 >
                   <X className="size-3" />
                 </button>
@@ -597,10 +601,10 @@ export function RecipeForm(props: RecipeFormProps) {
               }
             }}
             onBlur={addTagFromInput}
-            placeholder="Type tags, comma-separated, then Enter or blur"
+            placeholder={f.tagsPlaceholder}
           />
           <p className="text-xs text-muted-foreground">
-            Separate with commas or press Enter to add.
+            {f.tagsHelp}
           </p>
         </CardContent>
       </Card>
@@ -608,36 +612,36 @@ export function RecipeForm(props: RecipeFormProps) {
       <Card className="border-brand/20 bg-brand/10 dark:bg-brand/10">
         <CardHeader>
           <CardTitle className="text-foreground dark:text-foreground">
-            Macro preview (base portions)
+            {f.macroPreview}
           </CardTitle>
         </CardHeader>
         <CardContent>
           {macroPreview ? (
             <dl className="grid grid-cols-2 gap-3 sm:grid-cols-5">
               <div>
-                <dt className="text-xs text-muted-foreground">Calories</dt>
+                <dt className="text-xs text-muted-foreground">{f.macroCalories}</dt>
                 <dd className="font-medium tabular-nums">
                   {Math.round(macroPreview.calories)}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-muted-foreground">Protein (g)</dt>
+                <dt className="text-xs text-muted-foreground">{f.macroProtein}</dt>
                 <dd className="font-medium tabular-nums">
                   {macroPreview.proteinG}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-muted-foreground">Carbs (g)</dt>
+                <dt className="text-xs text-muted-foreground">{f.macroCarbs}</dt>
                 <dd className="font-medium tabular-nums">
                   {macroPreview.carbsG}
                 </dd>
               </div>
               <div>
-                <dt className="text-xs text-muted-foreground">Fat (g)</dt>
+                <dt className="text-xs text-muted-foreground">{f.macroFat}</dt>
                 <dd className="font-medium tabular-nums">{macroPreview.fatG}</dd>
               </div>
               <div>
-                <dt className="text-xs text-muted-foreground">Fiber (g)</dt>
+                <dt className="text-xs text-muted-foreground">{f.macroFiber}</dt>
                 <dd className="font-medium tabular-nums">
                   {macroPreview.fiberG}
                 </dd>
@@ -645,9 +649,7 @@ export function RecipeForm(props: RecipeFormProps) {
             </dl>
           ) : (
             <p className="text-sm text-muted-foreground">
-              Link ingredients to foods from the database and enter base
-              quantities matching each food&apos;s reference serving to preview
-              totals. Manual lines without a food stay out of this estimate.
+              {f.macroHelp}
             </p>
           )}
         </CardContent>
@@ -662,7 +664,7 @@ export function RecipeForm(props: RecipeFormProps) {
             disabled={pending}
             onClick={handleDelete}
           >
-            Delete recipe
+            {f.deleteRecipe}
           </Button>
         )}
         <Button
@@ -671,14 +673,14 @@ export function RecipeForm(props: RecipeFormProps) {
           disabled={pending}
           render={<Link href="/admin/recipes" />}
         >
-          Cancel
+          {d.common.cancel}
         </Button>
         <Button
           type="submit"
           className="bg-brand text-white hover:bg-brand-dark"
           disabled={pending}
         >
-          {pending ? "Saving…" : mode === "create" ? "Create recipe" : "Save changes"}
+          {pending ? d.common.saving : mode === "create" ? f.createRecipe : d.common.saveChanges}
         </Button>
       </div>
     </form>
@@ -699,6 +701,8 @@ function FoodCombobox({
   onClear: () => void;
 }) {
   const [open, setOpen] = useState(false);
+  const d = useDictionary();
+  const f = d.admin.recipes.form;
 
   return (
     <div className="flex gap-2">
@@ -712,15 +716,15 @@ function FoodCombobox({
           )}
         >
           <span className="truncate text-left">
-            {value && selectedLabel ? selectedLabel : "Search foods…"}
+            {value && selectedLabel ? selectedLabel : f.searchFoods}
           </span>
           <ChevronDown className="size-4 shrink-0 opacity-50" />
         </PopoverTrigger>
         <PopoverContent className="w-[min(100vw-2rem,22rem)] p-0" align="start">
           <Command>
-            <CommandInput placeholder="Search foods…" />
+            <CommandInput placeholder={f.searchFoods} />
             <CommandList>
-              <CommandEmpty>No foods found.</CommandEmpty>
+              <CommandEmpty>{f.noFoodsFound}</CommandEmpty>
               <CommandGroup>
                 {foods.map((food) => (
                   <CommandItem
@@ -747,7 +751,7 @@ function FoodCombobox({
           className="shrink-0"
           onClick={onClear}
         >
-          Clear
+          {f.clear}
         </Button>
       ) : null}
     </div>

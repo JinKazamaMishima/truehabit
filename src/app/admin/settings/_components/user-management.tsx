@@ -45,6 +45,7 @@ import {
   Utensils,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useDictionary } from "@/lib/i18n/context";
 
 type UserRow = {
   id: string;
@@ -61,9 +62,9 @@ type UnlinkedClient = {
 };
 
 const roleConfig = {
-  admin: { label: "Admin", icon: Shield, variant: "default" as const },
-  nutritionist: { label: "Nutritionist", icon: Utensils, variant: "secondary" as const },
-  customer: { label: "Customer", icon: User, variant: "outline" as const },
+  admin: { icon: Shield, variant: "default" as const },
+  nutritionist: { icon: Utensils, variant: "secondary" as const },
+  customer: { icon: User, variant: "outline" as const },
 };
 
 function AddUserDialog({
@@ -77,6 +78,7 @@ function AddUserDialog({
   const [open, setOpen] = useState(false);
   const [role, setRole] = useState<"admin" | "nutritionist" | "customer">("customer");
   const [linkedClientId, setLinkedClientId] = useState<string>("");
+  const d = useDictionary();
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -92,14 +94,14 @@ function AddUserDialog({
           role,
           linkedClientId: role === "customer" && linkedClientId ? linkedClientId : undefined,
         });
-        toast.success("User created successfully");
+        toast.success(d.admin.settings.users.toastCreated);
         setOpen(false);
         setRole("customer");
         setLinkedClientId("");
         form.reset();
         onDone();
       } catch {
-        toast.error("Failed to create user. Email may already be in use.");
+        toast.error(d.admin.settings.users.toastCreateFailed);
       }
     });
   }
@@ -110,24 +112,24 @@ function AddUserDialog({
         render={
           <Button size="sm" className="gap-2 bg-brand text-white hover:bg-brand-dark">
             <UserPlus className="size-4" />
-            Add User
+            {d.admin.settings.users.addUser}
           </Button>
         }
       />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add New User</DialogTitle>
+          <DialogTitle>{d.admin.settings.users.addUserTitle}</DialogTitle>
           <DialogDescription>
-            Create a new user account. Customers can be linked to an existing client record.
+            {d.admin.settings.users.addUserDescription}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="add-name">Name</Label>
+            <Label htmlFor="add-name">{d.admin.settings.users.nameLabel}</Label>
             <Input id="add-name" name="name" required disabled={isPending} />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="add-email">Email</Label>
+            <Label htmlFor="add-email">{d.admin.settings.users.emailLabel}</Label>
             <Input
               id="add-email"
               name="email"
@@ -137,7 +139,7 @@ function AddUserDialog({
             />
           </div>
           <div className="flex flex-col gap-2">
-            <Label htmlFor="add-password">Password</Label>
+            <Label htmlFor="add-password">{d.admin.settings.users.passwordLabel}</Label>
             <Input
               id="add-password"
               name="password"
@@ -148,24 +150,24 @@ function AddUserDialog({
             />
           </div>
           <div className="flex flex-col gap-2">
-            <Label>Role</Label>
+            <Label>{d.admin.settings.users.roleLabel}</Label>
             <Select value={role} onValueChange={(v) => { if (v) setRole(v as typeof role); }}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="customer">Customer</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="nutritionist">Nutritionist</SelectItem>
+                <SelectItem value="customer">{d.admin.settings.users.roleCustomer}</SelectItem>
+                <SelectItem value="admin">{d.admin.settings.users.roleAdmin}</SelectItem>
+                <SelectItem value="nutritionist">{d.admin.settings.users.roleNutritionist}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           {role === "customer" && unlinkedClients.length > 0 && (
             <div className="flex flex-col gap-2">
-              <Label>Link to Client Record (optional)</Label>
+              <Label>{d.admin.settings.users.linkToClient}</Label>
               <Select value={linkedClientId} onValueChange={(v) => setLinkedClientId(v ?? "")}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select a client..." />
+                  <SelectValue placeholder={d.admin.settings.users.selectClient} />
                 </SelectTrigger>
                 <SelectContent>
                   {unlinkedClients.map((c) => (
@@ -178,14 +180,14 @@ function AddUserDialog({
             </div>
           )}
           <DialogFooter>
-            <DialogClose render={<Button variant="outline">Cancel</Button>} />
+            <DialogClose render={<Button variant="outline">{d.common.cancel}</Button>} />
             <Button
               type="submit"
               disabled={isPending}
               className="gap-2 bg-brand text-white hover:bg-brand-dark"
             >
               {isPending && <Loader2 className="size-4 animate-spin" />}
-              Create User
+              {d.admin.settings.users.createUser}
             </Button>
           </DialogFooter>
         </form>
@@ -203,6 +205,7 @@ function ResetPasswordDialog({
 }) {
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
+  const d = useDictionary();
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -212,11 +215,11 @@ function ResetPasswordDialog({
     startTransition(async () => {
       try {
         await resetUserPassword(user.id, newPassword);
-        toast.success(`Password reset for ${user.name}`);
+        toast.success(`${d.admin.settings.users.toastPasswordReset} ${user.name}`);
         setOpen(false);
         onDone();
       } catch {
-        toast.error("Failed to reset password");
+        toast.error(d.admin.settings.users.toastPasswordFailed);
       }
     });
   }
@@ -232,14 +235,14 @@ function ResetPasswordDialog({
       />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Reset Password</DialogTitle>
+          <DialogTitle>{d.admin.settings.users.resetPassword}</DialogTitle>
           <DialogDescription>
-            Set a new password for <strong>{user.name}</strong> ({user.email}).
+            {d.admin.settings.users.resetPasswordFor} <strong>{user.name}</strong> ({user.email}).
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <Label htmlFor={`pw-${user.id}`}>New Password</Label>
+            <Label htmlFor={`pw-${user.id}`}>{d.admin.settings.users.newPassword}</Label>
             <Input
               id={`pw-${user.id}`}
               name="newPassword"
@@ -250,14 +253,14 @@ function ResetPasswordDialog({
             />
           </div>
           <DialogFooter>
-            <DialogClose render={<Button variant="outline">Cancel</Button>} />
+            <DialogClose render={<Button variant="outline">{d.common.cancel}</Button>} />
             <Button
               type="submit"
               disabled={isPending}
               className="gap-2 bg-brand text-white hover:bg-brand-dark"
             >
               {isPending && <Loader2 className="size-4 animate-spin" />}
-              Reset Password
+              {d.admin.settings.users.resetPassword}
             </Button>
           </DialogFooter>
         </form>
@@ -275,16 +278,17 @@ function DeleteUserDialog({
 }) {
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
+  const d = useDictionary();
 
   function handleDelete() {
     startTransition(async () => {
       try {
         await deleteUser(user.id);
-        toast.success(`User ${user.name} deleted`);
+        toast.success(`${user.name} ${d.admin.settings.users.toastDeleted}`);
         setOpen(false);
         onDone();
       } catch {
-        toast.error("Failed to delete user");
+        toast.error(d.admin.settings.users.toastDeleteFailed);
       }
     });
   }
@@ -300,14 +304,14 @@ function DeleteUserDialog({
       />
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete User</DialogTitle>
+          <DialogTitle>{d.admin.settings.users.deleteUser}</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete <strong>{user.name}</strong> ({user.email})?
-            This action cannot be undone.
+            {d.admin.settings.users.deleteUserConfirm} <strong>{user.name}</strong> ({user.email})?
+            {" "}{d.admin.settings.users.deleteUserWarning}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <DialogClose render={<Button variant="outline">Cancel</Button>} />
+          <DialogClose render={<Button variant="outline">{d.common.cancel}</Button>} />
           <Button
             variant="destructive"
             onClick={handleDelete}
@@ -315,7 +319,7 @@ function DeleteUserDialog({
             className="gap-2"
           >
             {isPending && <Loader2 className="size-4 animate-spin" />}
-            Delete User
+            {d.admin.settings.users.deleteUser}
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -332,6 +336,13 @@ export function UserManagement({
 }) {
   const [userList, setUserList] = useState(initialUsers);
   const [unlinkedClients, setUnlinkedClients] = useState(initialUnlinkedClients);
+  const d = useDictionary();
+
+  const roleLabels: Record<string, string> = {
+    admin: d.admin.settings.users.roleAdmin,
+    nutritionist: d.admin.settings.users.roleNutritionist,
+    customer: d.admin.settings.users.roleCustomer,
+  };
 
   async function refresh() {
     const { getUsers, getUnlinkedClients } = await import("@/actions/users");
@@ -347,16 +358,16 @@ export function UserManagement({
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
-          <CardTitle>User Management</CardTitle>
+          <CardTitle>{d.admin.settings.users.cardTitle}</CardTitle>
           <CardDescription>
-            Manage user accounts, roles, and passwords.
+            {d.admin.settings.users.cardDescription}
           </CardDescription>
         </div>
         <AddUserDialog unlinkedClients={unlinkedClients} onDone={refresh} />
       </CardHeader>
       <CardContent>
         {userList.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No users found.</p>
+          <p className="text-sm text-muted-foreground">{d.admin.settings.users.noUsers}</p>
         ) : (
           <div className="divide-y">
             {userList.map((user) => {
@@ -380,7 +391,7 @@ export function UserManagement({
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <Badge variant={config.variant} className="text-xs">
-                      {config.label}
+                      {roleLabels[user.role]}
                     </Badge>
                     <ResetPasswordDialog user={user} onDone={refresh} />
                     <DeleteUserDialog user={user} onDone={refresh} />

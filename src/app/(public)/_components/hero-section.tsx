@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ArrowRight, ClipboardList, FlaskConical, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { useDictionary } from "@/lib/i18n/context";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -13,12 +14,6 @@ const fadeUp = {
 const stagger = {
   visible: { transition: { staggerChildren: 0.12 } },
 };
-
-const features = [
-  { icon: ClipboardList, title: "Planes Personalizados", desc: "Diseñados según tus metas y estilo de vida." },
-  { icon: FlaskConical, title: "Basado en Ciencia", desc: "Respaldado por evidencia científica actualizada." },
-  { icon: TrendingUp, title: "Resultados Reales", desc: "Seguimiento con métricas claras de progreso." },
-];
 
 export type HeroData = {
   badge: string;
@@ -30,6 +25,14 @@ export type HeroData = {
 };
 
 export function HeroSection({ data }: { data: HeroData }) {
+  const d = useDictionary();
+
+  const features = [
+    { icon: ClipboardList, title: d.public.hero.feature1Title, desc: d.public.hero.feature1Desc },
+    { icon: FlaskConical, title: d.public.hero.feature2Title, desc: d.public.hero.feature2Desc },
+    { icon: TrendingUp, title: d.public.hero.feature3Title, desc: d.public.hero.feature3Desc },
+  ];
+
   const words = data.heading.split(" ");
   const highlightWord = words.length > 2 ? words[2] : words[words.length - 1];
   const beforeHighlight = words.slice(0, words.indexOf(highlightWord)).join(" ");
@@ -93,7 +96,7 @@ export function HeroSection({ data }: { data: HeroData }) {
             {data.imageUrl ? (
               <img
                 src={data.imageUrl}
-                alt="Nutrición saludable"
+                alt={d.public.hero.heroImageAlt}
                 className="absolute inset-0 size-full object-cover"
               />
             ) : (
@@ -103,7 +106,7 @@ export function HeroSection({ data }: { data: HeroData }) {
                     <svg className="mx-auto size-32" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M17.8 5C17.4 4 16.3 3 15.2 3c-1.1 0-2 .4-2.6 1.1-.5-.3-1.1-.5-1.8-.5-2 0-3.6 1.6-3.6 3.6 0 .4.1.8.2 1.2C5.8 8.8 4.8 10 4.8 11.4c0 1.8 1.5 3.2 3.2 3.2.1 0 .3 0 .4 0-.1.3-.2.7-.2 1.1 0 2 1.6 3.6 3.6 3.6 1.6 0 3-1.1 3.4-2.5.3.1.6.1.9.1 2 0 3.6-1.6 3.6-3.6 0-1.4-.8-2.6-2-3.2.1-.3.2-.7.2-1.1C17.9 7.4 18 6.1 17.8 5z" />
                     </svg>
-                    <p className="mt-2 text-sm font-medium">Imagen del hero</p>
+                    <p className="mt-2 text-sm font-medium">{d.public.hero.heroPlaceholder}</p>
                   </div>
                 </div>
               </div>

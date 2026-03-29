@@ -4,6 +4,7 @@ import { useState, useRef, useCallback } from "react";
 import { Upload, X, ImageIcon, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useDictionary } from "@/lib/i18n/context";
 
 type ImageUploadProps = {
   folder: string;
@@ -22,6 +23,8 @@ export function ImageUpload({
   className,
   aspectRatio = "landscape",
 }: ImageUploadProps) {
+  const d = useDictionary();
+  const t = d.imageUpload;
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -43,12 +46,12 @@ export function ImageUpload({
   const handleFile = useCallback(
     async (file: File) => {
       if (!file.type.startsWith("image/")) {
-        setError("Solo se permiten archivos de imagen");
+        setError(t.onlyImages);
         return;
       }
 
       if (file.size > 5 * 1024 * 1024) {
-        setError("El archivo no puede exceder 5MB");
+        setError(t.maxSize);
         return;
       }
 
@@ -69,7 +72,7 @@ export function ImageUpload({
 
         if (!res.ok) {
           const data = await res.json();
-          throw new Error(data.error || "Error al preparar la subida");
+          throw new Error(data.error || t.uploadError);
         }
 
         const { url, fields, key } = await res.json();
@@ -90,20 +93,20 @@ export function ImageUpload({
         });
 
         if (!uploadRes.ok && uploadRes.status !== 204) {
-          throw new Error("Error al subir el archivo");
+          throw new Error(t.fileUploadError);
         }
 
         setProgress(100);
         const proxyUrl = `/api/images/${encodeURIComponent(key)}`;
         onUpload(key, proxyUrl);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Error desconocido");
+        setError(err instanceof Error ? err.message : t.unknownError);
       } finally {
         setUploading(false);
         setProgress(0);
       }
     },
-    [folder, onUpload]
+    [folder, onUpload, t]
   );
 
   const handleDrop = useCallback(
@@ -129,7 +132,7 @@ export function ImageUpload({
       <div className={cn("relative overflow-hidden rounded-xl border border-gray-200", aspectClass, maxWidthClass, className)}>
         <img
           src={currentUrl}
-          alt="Imagen actual"
+          alt={t.currentImage}
           className="size-full object-cover"
         />
         <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/0 opacity-0 transition-all hover:bg-black/40 hover:opacity-100">
@@ -141,7 +144,7 @@ export function ImageUpload({
             disabled={uploading}
           >
             <Upload className="size-3.5" />
-            Cambiar
+            {t.change}
           </Button>
           <Button
             type="button"
@@ -151,7 +154,7 @@ export function ImageUpload({
             disabled={uploading}
           >
             <X className="size-3.5" />
-            Quitar
+            {t.remove}
           </Button>
         </div>
         <input
@@ -186,7 +189,7 @@ export function ImageUpload({
         {uploading ? (
           <div className="flex flex-col items-center gap-2">
             <Loader2 className="size-8 animate-spin text-brand" />
-            <p className="text-sm text-muted-foreground">Subiendo... {progress}%</p>
+            <p className="text-sm text-muted-foreground">{t.uploading} {progress}%</p>
             <div className="h-1.5 w-32 overflow-hidden rounded-full bg-gray-200">
               <div
                 className="h-full rounded-full bg-brand transition-all duration-300"
@@ -200,10 +203,10 @@ export function ImageUpload({
               <ImageIcon className="size-5 text-brand" />
             </div>
             <p className="text-sm font-medium text-foreground">
-              Arrastra una imagen o haz clic
+              {t.dragOrClick}
             </p>
             <p className="text-xs text-muted-foreground">
-              PNG, JPG, WebP hasta 5MB
+              {t.formats}
             </p>
           </div>
         )}

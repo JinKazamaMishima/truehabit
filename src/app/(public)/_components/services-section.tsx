@@ -12,6 +12,7 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { motion, useInView } from "framer-motion";
+import { useDictionary } from "@/lib/i18n/context";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -22,18 +23,20 @@ const stagger = {
   visible: { transition: { staggerChildren: 0.1 } },
 };
 
-const services = [
-  { icon: Apple, title: "Nutrición Personalizada", desc: "Planes alimenticios adaptados a tus requerimientos calóricos y preferencias.", slug: "personalized_nutrition" },
-  { icon: Scale, title: "Pérdida de Peso", desc: "Estrategias sostenibles para alcanzar y mantener tu peso ideal.", slug: "weight_loss" },
-  { icon: Dumbbell, title: "Nutrición Deportiva", desc: "Optimiza tu rendimiento con nutrición específica para tu disciplina.", slug: "sports_nutrition" },
-  { icon: Activity, title: "Composición Corporal", desc: "Análisis detallado y estrategias para mejorar tu composición corporal.", slug: "body_composition" },
-  { icon: Trophy, title: "Plan Pre-Competencia", desc: "Protocolos de nutrición y carga de carbohidratos para competidores.", slug: "pre_competition" },
-  { icon: Users, title: "Coaching Individual", desc: "Acompañamiento personalizado para crear hábitos alimenticios duraderos.", slug: "individual_coaching" },
-];
+const serviceIcons = [Apple, Scale, Dumbbell, Activity, Trophy, Users];
+const serviceSlugs = ["personalized_nutrition", "weight_loss", "sports_nutrition", "body_composition", "pre_competition", "individual_coaching"];
 
 export function ServicesSection() {
+  const d = useDictionary();
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
+
+  const services = d.public.services.items.map((item, i) => ({
+    icon: serviceIcons[i],
+    title: item.title,
+    desc: item.short,
+    slug: serviceSlugs[i],
+  }));
 
   return (
     <section ref={ref} className="bg-white py-20 sm:py-28">
@@ -47,7 +50,7 @@ export function ServicesSection() {
           <motion.div variants={fadeUp} className="mb-4 flex items-center justify-center gap-3">
             <span className="h-px w-8 bg-brand" />
             <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
-              Lo que ofrecemos
+              {d.public.services.eyebrow}
             </span>
             <span className="h-px w-8 bg-brand" />
           </motion.div>
@@ -55,10 +58,10 @@ export function ServicesSection() {
             variants={fadeUp}
             className="font-heading text-3xl font-bold text-charcoal sm:text-4xl lg:text-[2.75rem]"
           >
-            Nuestros Servicios
+            {d.public.services.heading}
           </motion.h2>
           <motion.p variants={fadeUp} className="mt-4 text-base text-muted-foreground">
-            Soluciones integrales de nutrición adaptadas a tus necesidades específicas.
+            {d.public.services.subheading}
           </motion.p>
         </motion.div>
 
@@ -90,7 +93,7 @@ export function ServicesSection() {
                   href={`/contact?service=${s.slug}`}
                   className="inline-flex items-center text-sm font-semibold text-brand transition-colors hover:text-brand-dark"
                 >
-                  Saber Más
+                  {d.public.services.learnMore}
                   <ArrowRight className="ml-1 size-3.5 transition-transform group-hover:translate-x-1" />
                 </Link>
               </div>

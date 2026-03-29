@@ -5,6 +5,7 @@ import {
   View,
   StyleSheet,
 } from "@react-pdf/renderer";
+import type { Dictionary } from "@/lib/i18n/messages/es";
 
 const BRAND = "#059669";
 const TEXT = "#1f2937";
@@ -310,28 +311,18 @@ export type MealPlanPdfData = {
   measurement: MealPlanPdfMeasurement | null;
 };
 
-const GOAL_ES: Record<string, string> = {
-  fat_loss: "PÉRDIDA DE GRASA",
-  muscle_gain: "GANANCIA MUSCULAR",
-  weight_cut: "CORTE DE PESO",
-  maintenance: "MANTENIMIENTO",
-  pre_competition: "PRE-COMPETICIÓN",
-};
+type PdfLabels = Dictionary["pdf"];
 
-const DAY_TYPE_ES: Record<string, string> = {
-  training: "Entrenamiento",
-  rest: "Descanso",
-  competition: "Competición",
-};
-
-function goalLabel(goal: string | null): string {
-  if (!goal) return "PLAN NUTRICIONAL";
-  return GOAL_ES[goal] ?? goal.replace(/_/g, " ").toUpperCase();
+function goalLabel(goal: string | null, labels: PdfLabels): string {
+  if (!goal) return labels.nutritionalPlan;
+  const key = goal as keyof typeof labels.goalLabels;
+  return labels.goalLabels[key] ?? goal.replace(/_/g, " ").toUpperCase();
 }
 
-function dayTypeLabel(t: string | null): string {
+function dayTypeLabel(t: string | null, labels: PdfLabels): string {
   if (!t) return "";
-  return DAY_TYPE_ES[t] ?? t;
+  const key = t as keyof typeof labels.dayTypeLabels;
+  return labels.dayTypeLabels[key] ?? t;
 }
 
 function fmt(s: string | null | undefined, fallback = "—"): string {
@@ -339,12 +330,12 @@ function fmt(s: string | null | undefined, fallback = "—"): string {
   return String(s);
 }
 
-function formatIngredient(ing: MealPlanPdfIngredient): string {
+function formatIngredient(ing: MealPlanPdfIngredient, labels: PdfLabels): string {
   const qty = ing.baseQty?.trim();
   const unit = ing.servingUnit?.trim();
-  const name = ing.name?.trim() || "Ingrediente";
+  const name = ing.name?.trim() || labels.ingredient;
   const ratio = ing.ratioGroup?.trim();
-  const opt = ing.isOptional ? " (opcional)" : "";
+  const opt = ing.isOptional ? labels.optionalSuffix : "";
   const ratioPart = ratio ? ` · ${ratio}` : "";
   if (qty && unit) return `• ${qty} ${unit} — ${name}${ratioPart}${opt}`;
   if (qty) return `• ${qty} — ${name}${ratioPart}${opt}`;
@@ -356,46 +347,49 @@ function PortionsRow({
   protein,
   fat,
   veggie,
+  labels,
 }: {
   cereal: string | null;
   protein: string | null;
   fat: string | null;
   veggie: string | null;
+  labels: PdfLabels;
 }) {
   return (
     <View style={styles.portionRow}>
-      <Text style={styles.portionPill}>Cereales: {fmt(cereal)}</Text>
-      <Text style={styles.portionPill}>Proteínas: {fmt(protein)}</Text>
-      <Text style={styles.portionPill}>Grasas: {fmt(fat)}</Text>
-      <Text style={styles.portionPill}>Verduras: {fmt(veggie)}</Text>
+      <Text style={styles.portionPill}>{labels.cereals}: {fmt(cereal)}</Text>
+      <Text style={styles.portionPill}>{labels.proteins}: {fmt(protein)}</Text>
+      <Text style={styles.portionPill}>{labels.fats}: {fmt(fat)}</Text>
+      <Text style={styles.portionPill}>{labels.vegetables}: {fmt(veggie)}</Text>
     </View>
   );
 }
 
-export function MealPlanPdfDocument({ data }: { data: MealPlanPdfData }) {
+export function MealPlanPdfDocument({ data, labels }: { data: MealPlanPdfData; labels: PdfLabels }) {
   const totalPages = 2 + data.days.length;
+  const ml = labels.measurementLabels;
 
   const measurementRows: { label: string; value: string }[] = [
-    { label: "Fecha", value: data.measurement ? fmt(data.measurement.date) : "—" },
-    { label: "Peso (kg)", value: fmt(data.measurement?.weightKg ?? null) },
-    { label: "Altura (cm)", value: fmt(data.measurement?.heightCm ?? null) },
-    { label: "IMC", value: fmt(data.measurement?.bmi ?? null) },
-    { label: "Grasa corporal (%)", value: fmt(data.measurement?.bodyFatPct ?? null) },
-    { label: "Grasa (kg)", value: fmt(data.measurement?.fatKg ?? null) },
-    { label: "Masa muscular (%)", value: fmt(data.measurement?.muscleMassPct ?? null) },
-    { label: "Músculo (kg)", value: fmt(data.measurement?.muscleKg ?? null) },
-    { label: "Grasa visceral", value: fmt(data.measurement?.visceralFat ?? null) },
+    { label: ml.date, value: data.measurement ? fmt(data.measurement.date) : "—" },
+    { label: ml.weightKg, value: fmt(data.measurement?.weightKg ?? null) },
+    { label: ml.heightCm, value: fmt(data.measurement?.heightCm ?? null) },
+    { label: ml.bmi, value: fmt(data.measurement?.bmi ?? null) },
+    { label: ml.bodyFatPct, value: fmt(data.measurement?.bodyFatPct ?? null) },
+    { label: ml.fatKg, value: fmt(data.measurement?.fatKg ?? null) },
+    { label: ml.muscleMassPct, value: fmt(data.measurement?.muscleMassPct ?? null) },
+    { label: ml.muscleKg, value: fmt(data.measurement?.muscleKg ?? null) },
+    { label: ml.visceralFat, value: fmt(data.measurement?.visceralFat ?? null) },
   ];
 
   return (
     <Document>
       <Page size="A4" style={styles.coverPage}>
         <Text style={styles.logo}>TrueHabit</Text>
-        <Text style={styles.coverTitle}>ESQUEMA DE ALIMENTACIÓN</Text>
-        <Text style={styles.coverGoal}>{goalLabel(data.clientGoal)}</Text>
+        <Text style={styles.coverTitle}>{labels.feedingPlan}</Text>
+        <Text style={styles.coverGoal}>{goalLabel(data.clientGoal, labels)}</Text>
         <Text style={styles.coverClient}>{data.clientName}</Text>
         <Text style={styles.coverFooter}>
-          LN. Enya Marrero | Nutrición Deportiva
+          LN. Enya Marrero | {labels.sportsNutrition}
         </Text>
         <Text
           style={styles.pageNumber}
@@ -405,9 +399,9 @@ export function MealPlanPdfDocument({ data }: { data: MealPlanPdfData }) {
       </Page>
 
       <Page size="A4" style={styles.page}>
-        <Text style={styles.sectionHeader}>Información primordial</Text>
+        <Text style={styles.sectionHeader}>{labels.essentialInfo}</Text>
 
-        <Text style={styles.subHeader}>Antropometría (último registro)</Text>
+        <Text style={styles.subHeader}>{labels.anthropometry}</Text>
         <View style={styles.box}>
           {measurementRows.map((row, i) => (
             <View
@@ -424,26 +418,26 @@ export function MealPlanPdfDocument({ data }: { data: MealPlanPdfData }) {
           ))}
         </View>
 
-        <Text style={styles.subHeader}>Hidratación</Text>
+        <Text style={styles.subHeader}>{labels.hydration}</Text>
         {data.hydration.length === 0 ? (
           <Text style={styles.bodyText}>—</Text>
         ) : (
           data.hydration.map((h, idx) => (
             <View key={idx} style={[styles.box, { marginBottom: 8 }]}>
               <View style={styles.tableRowLast}>
-                <Text style={styles.tableCellLabel}>Agua diaria</Text>
+                <Text style={styles.tableCellLabel}>{labels.dailyWater}</Text>
                 <Text style={styles.tableCellValue}>
                   {h.dailyWaterMl != null ? `${h.dailyWaterMl} mL` : "—"}
                 </Text>
               </View>
               <View style={styles.tableRowLast}>
-                <Text style={styles.tableCellLabel}>Durante entreno</Text>
+                <Text style={styles.tableCellLabel}>{labels.duringTraining}</Text>
                 <Text style={styles.tableCellValue}>
                   {fmt(h.duringTraining)}
                 </Text>
               </View>
               <View style={styles.tableRowLast}>
-                <Text style={styles.tableCellLabel}>Electrolitos</Text>
+                <Text style={styles.tableCellLabel}>{labels.electrolytes}</Text>
                 <Text style={styles.tableCellValue}>
                   {fmt(h.electrolyteBrand)}
                 </Text>
@@ -455,23 +449,23 @@ export function MealPlanPdfDocument({ data }: { data: MealPlanPdfData }) {
           ))
         )}
 
-        <Text style={styles.subHeader}>Suplementación</Text>
+        <Text style={styles.subHeader}>{labels.supplementation}</Text>
         {data.supplements.length === 0 ? (
           <Text style={styles.bodyText}>—</Text>
         ) : (
           <View style={{ borderWidth: 1, borderColor: BORDER, borderRadius: 4 }}>
             <View style={styles.tableHeaderRow}>
               <Text style={[styles.tableHeaderCell, styles.suppCol1]}>
-                Suplemento
+                {labels.supplement}
               </Text>
               <Text style={[styles.tableHeaderCell, styles.suppCol2]}>
-                Dosis
+                {labels.dose}
               </Text>
               <Text style={[styles.tableHeaderCell, styles.suppCol3]}>
-                Frecuencia
+                {labels.frequency}
               </Text>
               <Text style={[styles.tableHeaderCell, styles.suppCol4]}>
-                Momento
+                {labels.timing}
               </Text>
             </View>
             {data.supplements.map((s, i) => (
@@ -501,10 +495,10 @@ export function MealPlanPdfDocument({ data }: { data: MealPlanPdfData }) {
           </View>
         )}
 
-        <Text style={styles.subHeader}>Objetivos energéticos y macros</Text>
+        <Text style={styles.subHeader}>{labels.energyAndMacros}</Text>
         <View style={styles.box}>
           <View style={styles.tableRow}>
-            <Text style={styles.tableCellLabel}>Calorías objetivo</Text>
+            <Text style={styles.tableCellLabel}>{labels.calorieTarget}</Text>
             <Text style={styles.tableCellValue}>
               {data.calorieTarget != null
                 ? `${data.calorieTarget} kcal`
@@ -512,22 +506,22 @@ export function MealPlanPdfDocument({ data }: { data: MealPlanPdfData }) {
             </Text>
           </View>
           <View style={styles.tableRow}>
-            <Text style={styles.tableCellLabel}>Proteína (g/kg)</Text>
+            <Text style={styles.tableCellLabel}>{labels.proteinGPerKg}</Text>
             <Text style={styles.tableCellValue}>
               {fmt(data.proteinGPerKg)}
             </Text>
           </View>
           <View style={styles.tableRow}>
-            <Text style={styles.tableCellLabel}>Carbohidratos (g/kg)</Text>
+            <Text style={styles.tableCellLabel}>{labels.carbsGPerKg}</Text>
             <Text style={styles.tableCellValue}>{fmt(data.carbsGPerKg)}</Text>
           </View>
           <View style={styles.tableRowLast}>
-            <Text style={styles.tableCellLabel}>Grasa (g/kg)</Text>
+            <Text style={styles.tableCellLabel}>{labels.fatGPerKg}</Text>
             <Text style={styles.tableCellValue}>{fmt(data.fatGPerKg)}</Text>
           </View>
         </View>
 
-        <Text style={styles.subHeader}>Recomendaciones generales</Text>
+        <Text style={styles.subHeader}>{labels.generalRecommendations}</Text>
         <Text style={styles.bodyText}>
           {data.generalRecommendations?.trim()
             ? data.generalRecommendations
@@ -544,10 +538,10 @@ export function MealPlanPdfDocument({ data }: { data: MealPlanPdfData }) {
       {data.days.map((day) => (
         <Page key={day.dayNumber} size="A4" style={styles.page}>
           <Text style={styles.dayPageHeader}>
-            {day.dayLabel?.trim() || `Día ${day.dayNumber}`}
+            {day.dayLabel?.trim() || `${labels.dayPrefix} ${day.dayNumber}`}
           </Text>
           {day.dayType ? (
-            <Text style={styles.dayTypeBadge}>{dayTypeLabel(day.dayType)}</Text>
+            <Text style={styles.dayTypeBadge}>{dayTypeLabel(day.dayType, labels)}</Text>
           ) : null}
 
           {day.meals.map((meal, mi) => (
@@ -558,15 +552,16 @@ export function MealPlanPdfDocument({ data }: { data: MealPlanPdfData }) {
                 protein={meal.proteinPortions}
                 fat={meal.fatPortions}
                 veggie={meal.veggiePortions}
+                labels={labels}
               />
 
               {meal.options.length === 0 ? (
-                <Text style={styles.bodyText}>Sin recetas asignadas.</Text>
+                <Text style={styles.bodyText}>{labels.noRecipes}</Text>
               ) : (
                 meal.options.map((opt, oi) => (
                   <View key={oi}>
                     {opt.isPrimary ? (
-                      <Text style={styles.recipePrimary}>Opción principal</Text>
+                      <Text style={styles.recipePrimary}>{labels.primaryOption}</Text>
                     ) : null}
                     <Text style={styles.recipeName}>{opt.recipe.name}</Text>
                     {opt.recipe.description ? (
@@ -574,19 +569,19 @@ export function MealPlanPdfDocument({ data }: { data: MealPlanPdfData }) {
                     ) : null}
                     {opt.recipe.ingredients.length === 0 ? (
                       <Text style={styles.ingredientLine}>
-                        Sin lista de ingredientes.
+                        {labels.noIngredients}
                       </Text>
                     ) : (
                       opt.recipe.ingredients.map((ing, ii) => (
                         <Text key={ii} style={styles.ingredientLine}>
-                          {formatIngredient(ing)}
+                          {formatIngredient(ing, labels)}
                           {ing.notes?.trim() ? ` — ${ing.notes}` : ""}
                         </Text>
                       ))
                     )}
                     {opt.recipe.prepInstructions?.trim() ? (
                       <Text style={styles.prepText}>
-                        Prep.: {opt.recipe.prepInstructions}
+                        {labels.prep} {opt.recipe.prepInstructions}
                       </Text>
                     ) : null}
                   </View>
@@ -595,7 +590,7 @@ export function MealPlanPdfDocument({ data }: { data: MealPlanPdfData }) {
 
               {meal.notes?.trim() ? (
                 <View>
-                  <Text style={styles.notesLabel}>Notas</Text>
+                  <Text style={styles.notesLabel}>{labels.notes}</Text>
                   <Text style={styles.notesText}>{meal.notes}</Text>
                 </View>
               ) : null}

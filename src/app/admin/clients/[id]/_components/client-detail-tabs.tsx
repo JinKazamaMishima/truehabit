@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import { updateClient, addMeasurement, deleteClient } from "@/actions/clients";
 import { Plus, Trash2 } from "lucide-react";
+import { useDictionary } from "@/lib/i18n/context";
 
 type Client = {
   id: string;
@@ -61,19 +62,6 @@ type MealPlan = {
   calorieTarget: number | null;
 };
 
-const goalOptions = [
-  { value: "fat_loss", label: "Fat Loss" },
-  { value: "muscle_gain", label: "Muscle Gain" },
-  { value: "weight_cut", label: "Weight Cut" },
-  { value: "maintenance", label: "Maintenance" },
-  { value: "pre_competition", label: "Pre-Competition" },
-];
-
-const sexOptions = [
-  { value: "male", label: "Male" },
-  { value: "female", label: "Female" },
-];
-
 const planStatusColors: Record<string, string> = {
   draft: "bg-gray-100 text-gray-700",
   active: "bg-brand/15 text-brand-dark",
@@ -91,7 +79,21 @@ export function ClientDetailTabs({
   mealPlans: MealPlan[];
   goalLabels: Record<string, string>;
 }) {
+  const d = useDictionary();
+  const nc = d.admin.clients.newClient;
+  const dt = d.admin.clients.detail;
+  const mh = dt.measurementHeaders;
+
   const [showMeasurementForm, setShowMeasurementForm] = useState(false);
+
+  const goalOptions = Object.entries(d.admin.clients.goalLabels).map(
+    ([value, label]) => ({ value, label }),
+  );
+
+  const sexOptions = [
+    { value: "male", label: nc.male },
+    { value: "female", label: nc.female },
+  ];
 
   const updateClientWithId = updateClient.bind(null, client.id);
   const addMeasurementWithId = addMeasurement.bind(null, client.id);
@@ -100,21 +102,21 @@ export function ClientDetailTabs({
   return (
     <Tabs defaultValue="profile">
       <TabsList>
-        <TabsTrigger value="profile">Profile</TabsTrigger>
-        <TabsTrigger value="measurements">Measurements</TabsTrigger>
-        <TabsTrigger value="meal-plans">Meal Plans</TabsTrigger>
+        <TabsTrigger value="profile">{dt.tabs.profile}</TabsTrigger>
+        <TabsTrigger value="measurements">{dt.tabs.measurements}</TabsTrigger>
+        <TabsTrigger value="meal-plans">{dt.tabs.mealPlans}</TabsTrigger>
       </TabsList>
 
       <TabsContent value="profile">
         <Card>
           <CardHeader>
-            <CardTitle>Client Information</CardTitle>
+            <CardTitle>{dt.profileCard}</CardTitle>
           </CardHeader>
           <CardContent>
             <form action={updateClientWithId} className="space-y-6">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
+                  <Label htmlFor="name">{nc.fullName}</Label>
                   <Input
                     id="name"
                     name="name"
@@ -123,7 +125,7 @@ export function ClientDetailTabs({
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email">{nc.email}</Label>
                   <Input
                     id="email"
                     name="email"
@@ -132,7 +134,7 @@ export function ClientDetailTabs({
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
+                  <Label htmlFor="phone">{nc.phone}</Label>
                   <Input
                     id="phone"
                     name="phone"
@@ -140,7 +142,7 @@ export function ClientDetailTabs({
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                  <Label htmlFor="dateOfBirth">{nc.dateOfBirth}</Label>
                   <Input
                     id="dateOfBirth"
                     name="dateOfBirth"
@@ -149,10 +151,10 @@ export function ClientDetailTabs({
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Sex</Label>
+                  <Label>{nc.sex}</Label>
                   <Select name="sex" defaultValue={client.sex ?? ""}>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select sex" />
+                      <SelectValue placeholder={nc.selectSex} />
                     </SelectTrigger>
                     <SelectContent>
                       {sexOptions.map((opt) => (
@@ -164,10 +166,10 @@ export function ClientDetailTabs({
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Goal</Label>
+                  <Label>{nc.goal}</Label>
                   <Select name="goal" defaultValue={client.goal ?? ""}>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select goal" />
+                      <SelectValue placeholder={nc.selectGoal} />
                     </SelectTrigger>
                     <SelectContent>
                       {goalOptions.map((opt) => (
@@ -179,26 +181,26 @@ export function ClientDetailTabs({
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="activityLevel">Activity Level</Label>
+                  <Label htmlFor="activityLevel">{nc.activityLevel}</Label>
                   <Input
                     id="activityLevel"
                     name="activityLevel"
                     defaultValue={client.activityLevel ?? ""}
-                    placeholder="e.g. Moderate, High"
+                    placeholder={nc.activityLevelPlaceholder}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="sport">Sport</Label>
+                  <Label htmlFor="sport">{nc.sport}</Label>
                   <Input
                     id="sport"
                     name="sport"
                     defaultValue={client.sport ?? ""}
-                    placeholder="e.g. Swimming, Running"
+                    placeholder={nc.sportPlaceholder}
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="notes">Notes</Label>
+                <Label htmlFor="notes">{nc.notes}</Label>
                 <Textarea
                   id="notes"
                   name="notes"
@@ -210,10 +212,10 @@ export function ClientDetailTabs({
                 <form action={deleteClientWithId}>
                   <Button type="submit" variant="destructive" size="sm">
                     <Trash2 className="size-4" />
-                    Delete Client
+                    {dt.deleteClient}
                   </Button>
                 </form>
-                <Button type="submit">Save Changes</Button>
+                <Button type="submit">{d.common.saveChanges}</Button>
               </div>
             </form>
           </CardContent>
@@ -223,13 +225,13 @@ export function ClientDetailTabs({
       <TabsContent value="measurements">
         <Card>
           <CardHeader className="flex-row items-center justify-between">
-            <CardTitle>Body Measurements</CardTitle>
+            <CardTitle>{dt.measurementsTitle}</CardTitle>
             <Button
               size="sm"
               onClick={() => setShowMeasurementForm(!showMeasurementForm)}
             >
               <Plus className="size-4" />
-              Add Measurement
+              {dt.addMeasurement}
             </Button>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -243,11 +245,11 @@ export function ClientDetailTabs({
               >
                 <div className="grid gap-4 sm:grid-cols-3">
                   <div className="space-y-2">
-                    <Label htmlFor="m-date">Date</Label>
+                    <Label htmlFor="m-date">{mh.date}</Label>
                     <Input id="m-date" name="date" type="date" required />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="m-weight">Weight (kg)</Label>
+                    <Label htmlFor="m-weight">{mh.weightKg}</Label>
                     <Input
                       id="m-weight"
                       name="weightKg"
@@ -256,7 +258,7 @@ export function ClientDetailTabs({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="m-height">Height (cm)</Label>
+                    <Label htmlFor="m-height">{mh.heightCm}</Label>
                     <Input
                       id="m-height"
                       name="heightCm"
@@ -265,7 +267,7 @@ export function ClientDetailTabs({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="m-bfp">Body Fat %</Label>
+                    <Label htmlFor="m-bfp">{mh.bodyFatPct}</Label>
                     <Input
                       id="m-bfp"
                       name="bodyFatPct"
@@ -274,7 +276,7 @@ export function ClientDetailTabs({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="m-mm">Muscle Mass %</Label>
+                    <Label htmlFor="m-mm">{mh.muscleMassPct}</Label>
                     <Input
                       id="m-mm"
                       name="muscleMassPct"
@@ -283,7 +285,7 @@ export function ClientDetailTabs({
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="m-bmi">BMI</Label>
+                    <Label htmlFor="m-bmi">{mh.bmi}</Label>
                     <Input
                       id="m-bmi"
                       name="bmi"
@@ -293,12 +295,12 @@ export function ClientDetailTabs({
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="m-notes">Notes</Label>
+                  <Label htmlFor="m-notes">{mh.notes}</Label>
                   <Textarea id="m-notes" name="notes" rows={2} />
                 </div>
                 <div className="flex gap-2">
                   <Button type="submit" size="sm">
-                    Save
+                    {d.common.save}
                   </Button>
                   <Button
                     type="button"
@@ -306,7 +308,7 @@ export function ClientDetailTabs({
                     size="sm"
                     onClick={() => setShowMeasurementForm(false)}
                   >
-                    Cancel
+                    {d.common.cancel}
                   </Button>
                 </div>
               </form>
@@ -314,28 +316,28 @@ export function ClientDetailTabs({
 
             {measurements.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">
-                No measurements recorded yet.
+                {dt.noMeasurements}
               </p>
             ) : (
               <div className="rounded-lg border">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Weight (kg)</TableHead>
-                      <TableHead>Body Fat %</TableHead>
-                      <TableHead>Muscle Mass %</TableHead>
-                      <TableHead>BMI</TableHead>
+                      <TableHead>{mh.date}</TableHead>
+                      <TableHead>{mh.weightKg}</TableHead>
+                      <TableHead>{mh.bodyFatPct}</TableHead>
+                      <TableHead>{mh.muscleMassPct}</TableHead>
+                      <TableHead>{mh.bmi}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {measurements.map((m) => (
                       <TableRow key={m.id}>
                         <TableCell className="font-medium">{m.date}</TableCell>
-                        <TableCell>{m.weightKg ?? "—"}</TableCell>
-                        <TableCell>{m.bodyFatPct ?? "—"}</TableCell>
-                        <TableCell>{m.muscleMassPct ?? "—"}</TableCell>
-                        <TableCell>{m.bmi ?? "—"}</TableCell>
+                        <TableCell>{m.weightKg ?? d.common.emDash}</TableCell>
+                        <TableCell>{m.bodyFatPct ?? d.common.emDash}</TableCell>
+                        <TableCell>{m.muscleMassPct ?? d.common.emDash}</TableCell>
+                        <TableCell>{m.bmi ?? d.common.emDash}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -349,12 +351,12 @@ export function ClientDetailTabs({
       <TabsContent value="meal-plans">
         <Card>
           <CardHeader>
-            <CardTitle>Assigned Meal Plans</CardTitle>
+            <CardTitle>{dt.assignedMealPlans}</CardTitle>
           </CardHeader>
           <CardContent>
             {mealPlans.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">
-                No meal plans assigned yet.
+                {dt.noMealPlans}
               </p>
             ) : (
               <div className="space-y-3">
@@ -369,7 +371,7 @@ export function ClientDetailTabs({
                       <p className="text-sm text-muted-foreground">
                         {plan.startDate && plan.endDate
                           ? `${plan.startDate} — ${plan.endDate}`
-                          : "No dates set"}
+                          : dt.noDatesSet}
                         {plan.calorieTarget &&
                           ` · ${plan.calorieTarget} kcal`}
                       </p>

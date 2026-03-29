@@ -16,6 +16,8 @@ import {
   Heart,
 } from "lucide-react";
 import { MiniChart } from "./_components/progress-chart";
+import { getLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n";
 
 function TrendBadge({ current, previous }: { current?: string | null; previous?: string | null }) {
   if (!current || !previous) return null;
@@ -40,6 +42,9 @@ function TrendBadge({ current, previous }: { current?: string | null; previous?:
 export default async function ProgressPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
+
+  const locale = await getLocale();
+  const d = await getDictionary(locale);
 
   const client = await getClientByLinkedUser(session.user.id!);
   if (!client) redirect("/dashboard");
@@ -66,11 +71,10 @@ export default async function ProgressPage() {
     <div className="space-y-6">
       <div>
         <h1 className="font-heading text-2xl font-bold text-charcoal">
-          Progreso
+          {d.dashboard.progress.title}
         </h1>
         <p className="text-sm text-muted-foreground">
-          Seguimiento de tus mediciones y composición corporal a lo largo del
-          tiempo.
+          {d.dashboard.progress.subtitle}
         </p>
       </div>
 
@@ -79,10 +83,9 @@ export default async function ProgressPage() {
           <div className="mb-4 rounded-full bg-blue-50 p-4">
             <Activity className="size-8 text-blue-600" />
           </div>
-          <p className="text-lg font-semibold text-charcoal">Sin mediciones aún</p>
+          <p className="text-lg font-semibold text-charcoal">{d.dashboard.progress.noMeasurements}</p>
           <p className="mt-1 max-w-md text-sm text-muted-foreground">
-            Cuando tu nutriólogo registre tus mediciones, aparecerán aquí con
-            gráficas de progreso.
+            {d.dashboard.progress.noMeasurementsMessage}
           </p>
         </div>
       ) : (
@@ -98,9 +101,9 @@ export default async function ProgressPage() {
                   <TrendBadge current={latest?.weightKg} previous={previous?.weightKg} />
                 </div>
                 <p className="mt-3 text-2xl font-bold text-charcoal">
-                  {latest?.weightKg ? `${Number(latest.weightKg).toFixed(1)} kg` : "—"}
+                  {latest?.weightKg ? `${Number(latest.weightKg).toFixed(1)}${d.dashboard.kgSuffix}` : d.common.emDash}
                 </p>
-                <p className="text-xs text-muted-foreground">Peso</p>
+                <p className="text-xs text-muted-foreground">{d.dashboard.profile.weight}</p>
               </CardContent>
             </Card>
 
@@ -113,9 +116,9 @@ export default async function ProgressPage() {
                   <TrendBadge current={latest?.bodyFatPct} previous={previous?.bodyFatPct} />
                 </div>
                 <p className="mt-3 text-2xl font-bold text-charcoal">
-                  {latest?.bodyFatPct ? `${Number(latest.bodyFatPct).toFixed(1)}%` : "—"}
+                  {latest?.bodyFatPct ? `${Number(latest.bodyFatPct).toFixed(1)}%` : d.common.emDash}
                 </p>
-                <p className="text-xs text-muted-foreground">Grasa Corporal</p>
+                <p className="text-xs text-muted-foreground">{d.dashboard.bodyFat}</p>
               </CardContent>
             </Card>
 
@@ -130,9 +133,9 @@ export default async function ProgressPage() {
                 <p className="mt-3 text-2xl font-bold text-charcoal">
                   {latest?.muscleMassPct
                     ? `${Number(latest.muscleMassPct).toFixed(1)}%`
-                    : "—"}
+                    : d.common.emDash}
                 </p>
-                <p className="text-xs text-muted-foreground">Masa Muscular</p>
+                <p className="text-xs text-muted-foreground">{d.dashboard.muscleMass}</p>
               </CardContent>
             </Card>
 
@@ -145,9 +148,9 @@ export default async function ProgressPage() {
                   <TrendBadge current={latest?.bmi} previous={previous?.bmi} />
                 </div>
                 <p className="mt-3 text-2xl font-bold text-charcoal">
-                  {latest?.bmi ? Number(latest.bmi).toFixed(1) : "—"}
+                  {latest?.bmi ? Number(latest.bmi).toFixed(1) : d.common.emDash}
                 </p>
-                <p className="text-xs text-muted-foreground">IMC</p>
+                <p className="text-xs text-muted-foreground">{d.dashboard.bmi}</p>
               </CardContent>
             </Card>
           </div>
@@ -156,7 +159,7 @@ export default async function ProgressPage() {
           <div className="grid gap-6 lg:grid-cols-2">
             <Card className="border-0 shadow-sm">
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">Peso (kg)</CardTitle>
+                <CardTitle className="text-base">{d.dashboard.progress.weightKg}</CardTitle>
               </CardHeader>
               <CardContent>
                 <MiniChart data={weightData} color="#3b82f6" height={120} />
@@ -165,7 +168,7 @@ export default async function ProgressPage() {
 
             <Card className="border-0 shadow-sm">
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">Grasa Corporal (%)</CardTitle>
+                <CardTitle className="text-base">{d.dashboard.progress.bodyFatPct}</CardTitle>
               </CardHeader>
               <CardContent>
                 <MiniChart data={bodyFatData} color="#f97316" height={120} />
@@ -174,7 +177,7 @@ export default async function ProgressPage() {
 
             <Card className="border-0 shadow-sm">
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">Masa Muscular (%)</CardTitle>
+                <CardTitle className="text-base">{d.dashboard.progress.muscleMassPct}</CardTitle>
               </CardHeader>
               <CardContent>
                 <MiniChart data={muscleData} color="#22c55e" height={120} />
@@ -185,19 +188,19 @@ export default async function ProgressPage() {
           {/* Measurement History Table */}
           <Card className="border-0 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-base">Historial de Mediciones</CardTitle>
+              <CardTitle className="text-base">{d.dashboard.progress.measurementHistory}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b text-left text-xs text-muted-foreground">
-                      <th className="pb-2 pr-4 font-medium">Fecha</th>
-                      <th className="pb-2 pr-4 font-medium">Peso (kg)</th>
-                      <th className="pb-2 pr-4 font-medium">Grasa (%)</th>
-                      <th className="pb-2 pr-4 font-medium">Músculo (%)</th>
-                      <th className="pb-2 pr-4 font-medium">IMC</th>
-                      <th className="pb-2 font-medium">Notas</th>
+                      <th className="pb-2 pr-4 font-medium">{d.dashboard.progress.dateHeader}</th>
+                      <th className="pb-2 pr-4 font-medium">{d.dashboard.progress.weightHeader}</th>
+                      <th className="pb-2 pr-4 font-medium">{d.dashboard.progress.fatHeader}</th>
+                      <th className="pb-2 pr-4 font-medium">{d.dashboard.progress.muscleHeader}</th>
+                      <th className="pb-2 pr-4 font-medium">{d.dashboard.progress.bmiHeader}</th>
+                      <th className="pb-2 font-medium">{d.dashboard.progress.notesHeader}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -205,19 +208,19 @@ export default async function ProgressPage() {
                       <tr key={m.id} className="border-b border-border/40 last:border-0">
                         <td className="py-2.5 pr-4 font-medium">{m.date}</td>
                         <td className="py-2.5 pr-4">
-                          {m.weightKg ? Number(m.weightKg).toFixed(1) : "—"}
+                          {m.weightKg ? Number(m.weightKg).toFixed(1) : d.common.emDash}
                         </td>
                         <td className="py-2.5 pr-4">
-                          {m.bodyFatPct ? Number(m.bodyFatPct).toFixed(1) : "—"}
+                          {m.bodyFatPct ? Number(m.bodyFatPct).toFixed(1) : d.common.emDash}
                         </td>
                         <td className="py-2.5 pr-4">
-                          {m.muscleMassPct ? Number(m.muscleMassPct).toFixed(1) : "—"}
+                          {m.muscleMassPct ? Number(m.muscleMassPct).toFixed(1) : d.common.emDash}
                         </td>
                         <td className="py-2.5 pr-4">
-                          {m.bmi ? Number(m.bmi).toFixed(1) : "—"}
+                          {m.bmi ? Number(m.bmi).toFixed(1) : d.common.emDash}
                         </td>
                         <td className="py-2.5 max-w-[200px] truncate text-muted-foreground">
-                          {m.notes ?? "—"}
+                          {m.notes ?? d.common.emDash}
                         </td>
                       </tr>
                     ))}

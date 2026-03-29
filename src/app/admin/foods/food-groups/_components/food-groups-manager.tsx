@@ -28,6 +28,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useDictionary } from "@/lib/i18n/context";
 
 export type FoodGroupRow = {
   id: string;
@@ -36,6 +37,7 @@ export type FoodGroupRow = {
 };
 
 export function FoodGroupsManager({ groups }: { groups: FoodGroupRow[] }) {
+  const d = useDictionary();
   const [addOpen, setAddOpen] = useState(false);
   const [editing, setEditing] = useState<FoodGroupRow | null>(null);
   const [deleting, setDeleting] = useState<FoodGroupRow | null>(null);
@@ -50,7 +52,7 @@ export function FoodGroupsManager({ groups }: { groups: FoodGroupRow[] }) {
           render={<Link href="/admin/foods" />}
         >
           <ArrowLeft className="size-4" />
-          Back to foods
+          {d.admin.foods.foodGroupsPage.backToFoods}
         </Button>
         <Dialog open={addOpen} onOpenChange={setAddOpen}>
           <DialogTrigger
@@ -59,13 +61,13 @@ export function FoodGroupsManager({ groups }: { groups: FoodGroupRow[] }) {
             }
           >
             <Plus className="size-4" />
-            Add group
+            {d.admin.foods.foodGroupsPage.addGroup}
           </DialogTrigger>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>New food group</DialogTitle>
+              <DialogTitle>{d.admin.foods.foodGroupsPage.newFoodGroup}</DialogTitle>
               <DialogDescription>
-                Groups organize foods in the database and meal templates.
+                {d.admin.foods.foodGroupsPage.groupsDescription}
               </DialogDescription>
             </DialogHeader>
             <form
@@ -76,11 +78,11 @@ export function FoodGroupsManager({ groups }: { groups: FoodGroupRow[] }) {
               }}
             >
               <div className="space-y-2">
-                <Label htmlFor="add-name">Name</Label>
-                <Input id="add-name" name="name" required placeholder="e.g. Cereales" />
+                <Label htmlFor="add-name">{d.common.name}</Label>
+                <Input id="add-name" name="name" required placeholder={d.admin.foods.foodGroupsPage.namePlaceholder} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="add-order">Display order</Label>
+                <Label htmlFor="add-order">{d.admin.foods.foodGroupsPage.displayOrder}</Label>
                 <Input
                   id="add-order"
                   name="display_order"
@@ -91,13 +93,13 @@ export function FoodGroupsManager({ groups }: { groups: FoodGroupRow[] }) {
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setAddOpen(false)}>
-                  Cancel
+                  {d.common.cancel}
                 </Button>
                 <Button
                   type="submit"
                   className="bg-brand hover:bg-brand-dark dark:bg-brand dark:hover:bg-brand"
                 >
-                  Create
+                  {d.common.create}
                 </Button>
               </DialogFooter>
             </form>
@@ -107,17 +109,17 @@ export function FoodGroupsManager({ groups }: { groups: FoodGroupRow[] }) {
 
       {groups.length === 0 ? (
         <div className="rounded-xl border border-dashed border-brand/25 bg-brand/[0.03] py-12 text-center text-sm text-muted-foreground">
-          No food groups yet. Use <span className="font-medium text-foreground">Add group</span>{" "}
-          to create one.
+          {d.admin.foods.foodGroupsPage.noGroupsYet} <span className="font-medium text-foreground">{d.admin.foods.foodGroupsPage.noGroupsAction}</span>{" "}
+          {d.admin.foods.foodGroupsPage.noGroupsEnd}
         </div>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-brand/10">
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead className="w-16">Order</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="w-16">{d.admin.foods.foodGroupsPage.tableHeaders.order}</TableHead>
+                <TableHead>{d.admin.foods.foodGroupsPage.tableHeaders.name}</TableHead>
+                <TableHead className="text-right">{d.admin.foods.foodGroupsPage.tableHeaders.actions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -134,7 +136,7 @@ export function FoodGroupsManager({ groups }: { groups: FoodGroupRow[] }) {
                         onClick={() => setEditing(g)}
                       >
                         <Pencil className="size-4" />
-                        Edit
+                        {d.common.edit}
                       </Button>
                       <Button
                         type="button"
@@ -144,7 +146,7 @@ export function FoodGroupsManager({ groups }: { groups: FoodGroupRow[] }) {
                         onClick={() => setDeleting(g)}
                       >
                         <Trash2 className="size-4" />
-                        Delete
+                        {d.common.delete}
                       </Button>
                     </div>
                   </TableCell>
@@ -160,8 +162,8 @@ export function FoodGroupsManager({ groups }: { groups: FoodGroupRow[] }) {
           {editing && (
             <>
               <DialogHeader>
-                <DialogTitle>Edit food group</DialogTitle>
-                <DialogDescription>Update name or sort order.</DialogDescription>
+                <DialogTitle>{d.admin.foods.foodGroupsPage.editGroup}</DialogTitle>
+                <DialogDescription>{d.admin.foods.foodGroupsPage.editDescription}</DialogDescription>
               </DialogHeader>
               <form
                 className="space-y-4"
@@ -171,7 +173,7 @@ export function FoodGroupsManager({ groups }: { groups: FoodGroupRow[] }) {
                 }}
               >
                 <div className="space-y-2">
-                  <Label htmlFor="edit-name">Name</Label>
+                  <Label htmlFor="edit-name">{d.common.name}</Label>
                   <Input
                     id="edit-name"
                     name="name"
@@ -180,7 +182,7 @@ export function FoodGroupsManager({ groups }: { groups: FoodGroupRow[] }) {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="edit-order">Display order</Label>
+                  <Label htmlFor="edit-order">{d.admin.foods.foodGroupsPage.displayOrder}</Label>
                   <Input
                     id="edit-order"
                     name="display_order"
@@ -191,13 +193,13 @@ export function FoodGroupsManager({ groups }: { groups: FoodGroupRow[] }) {
                 </div>
                 <DialogFooter>
                   <Button type="button" variant="outline" onClick={() => setEditing(null)}>
-                    Cancel
+                    {d.common.cancel}
                   </Button>
                   <Button
                     type="submit"
                     className="bg-brand hover:bg-brand-dark dark:bg-brand dark:hover:bg-brand"
                   >
-                    Save
+                    {d.common.save}
                   </Button>
                 </DialogFooter>
               </form>
@@ -209,19 +211,19 @@ export function FoodGroupsManager({ groups }: { groups: FoodGroupRow[] }) {
       <Dialog open={deleting != null} onOpenChange={(o) => !o && setDeleting(null)}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Delete food group</DialogTitle>
+            <DialogTitle>{d.admin.foods.foodGroupsPage.deleteGroup}</DialogTitle>
             <DialogDescription>
               {deleting && (
                 <>
-                  Remove <span className="font-medium text-foreground">{deleting.name}</span>
-                  ? Foods in this group will have their group cleared.
+                  {d.admin.foods.foodGroupsPage.removePrefix}<span className="font-medium text-foreground">{deleting.name}</span>
+                  {d.admin.foods.foodGroupsPage.deleteConfirm}
                 </>
               )}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button type="button" variant="outline" onClick={() => setDeleting(null)}>
-              Cancel
+              {d.common.cancel}
             </Button>
             {deleting && (
               <form
@@ -231,7 +233,7 @@ export function FoodGroupsManager({ groups }: { groups: FoodGroupRow[] }) {
                 }}
               >
                 <Button type="submit" variant="destructive">
-                  Delete
+                  {d.common.delete}
                 </Button>
               </form>
             )}

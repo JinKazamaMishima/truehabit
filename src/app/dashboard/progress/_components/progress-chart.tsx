@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { useDictionary } from "@/lib/i18n/context";
 
 type Measurement = {
   date: string;
@@ -16,6 +17,7 @@ export function MiniChart({
   color?: string;
   height?: number;
 }) {
+  const d = useDictionary();
   const points = useMemo(() => {
     const valid = data
       .filter((d) => d.value !== null)
@@ -51,7 +53,7 @@ export function MiniChart({
         className="flex items-center justify-center text-xs text-muted-foreground"
         style={{ height }}
       >
-        Datos insuficientes para gráfica
+        {d.dashboard.progress.insufficientData}
       </div>
     );
   }

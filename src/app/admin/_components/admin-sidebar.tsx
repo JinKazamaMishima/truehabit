@@ -23,16 +23,8 @@ import {
   SheetTrigger,
   SheetTitle,
 } from "@/components/ui/sheet";
-
-const navItems = [
-  { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
-  { label: "Clients", href: "/admin/clients", icon: Users },
-  { label: "Foods", href: "/admin/foods", icon: Apple },
-  { label: "Recipes", href: "/admin/recipes", icon: ChefHat },
-  { label: "Meal Plans", href: "/admin/meal-plans", icon: Calendar },
-  { label: "Appointments", href: "/admin/appointments", icon: CalendarClock },
-  { label: "Settings", href: "/admin/settings", icon: Settings },
-];
+import { useDictionary } from "@/lib/i18n/context";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 function getInitials(name: string) {
   return name
@@ -48,7 +40,25 @@ function isActive(pathname: string, href: string) {
   return pathname.startsWith(href);
 }
 
-function NavLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
+function NavLinks({
+  pathname,
+  onNavigate,
+  labels,
+}: {
+  pathname: string;
+  onNavigate?: () => void;
+  labels: { dashboard: string; clients: string; foods: string; recipes: string; mealPlans: string; appointments: string; settings: string };
+}) {
+  const navItems = [
+    { label: labels.dashboard, href: "/admin", icon: LayoutDashboard },
+    { label: labels.clients, href: "/admin/clients", icon: Users },
+    { label: labels.foods, href: "/admin/foods", icon: Apple },
+    { label: labels.recipes, href: "/admin/recipes", icon: ChefHat },
+    { label: labels.mealPlans, href: "/admin/meal-plans", icon: Calendar },
+    { label: labels.appointments, href: "/admin/appointments", icon: CalendarClock },
+    { label: labels.settings, href: "/admin/settings", icon: Settings },
+  ];
+
   return (
     <nav className="flex flex-col gap-1 px-3">
       {navItems.map((item) => {
@@ -83,6 +93,7 @@ export function AdminSidebar({
   userEmail: string;
   signOutAction: () => Promise<void>;
 }) {
+  const d = useDictionary();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -96,10 +107,15 @@ export function AdminSidebar({
       </div>
 
       <div className="flex-1 overflow-y-auto py-4">
-        <NavLinks pathname={pathname} onNavigate={() => setMobileOpen(false)} />
+        <NavLinks
+          pathname={pathname}
+          onNavigate={() => setMobileOpen(false)}
+          labels={d.nav.admin}
+        />
       </div>
 
       <div className="border-t p-3">
+        <LanguageSwitcher className="mb-2 w-full justify-center" />
         <div className="flex items-center gap-3 rounded-lg px-2 py-2">
           <Avatar size="sm">
             <AvatarFallback>{getInitials(userName)}</AvatarFallback>
@@ -117,7 +133,7 @@ export function AdminSidebar({
             size="sm"
           >
             <LogOut className="size-4" />
-            Sign out
+            {d.admin.sidebar.signOut}
           </Button>
         </form>
       </div>
@@ -126,7 +142,6 @@ export function AdminSidebar({
 
   return (
     <>
-      {/* Mobile top bar */}
       <div className="fixed top-0 left-0 right-0 z-40 flex h-14 items-center gap-3 border-b bg-background px-4 md:hidden">
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
           <SheetTrigger
@@ -137,17 +152,15 @@ export function AdminSidebar({
             }
           />
           <SheetContent side="left" className="w-64 p-0" showCloseButton={false}>
-            <SheetTitle className="sr-only">Navigation</SheetTitle>
+            <SheetTitle className="sr-only">{d.nav.admin.navigation}</SheetTitle>
             <div className="flex h-full flex-col">{sidebarContent}</div>
           </SheetContent>
         </Sheet>
         <span className="text-base font-semibold">TrueHabit</span>
       </div>
 
-      {/* Mobile spacer */}
       <div className="h-14 shrink-0 md:hidden" />
 
-      {/* Desktop sidebar */}
       <aside className="hidden w-64 shrink-0 flex-col border-r bg-background md:flex">
         {sidebarContent}
       </aside>

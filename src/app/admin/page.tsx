@@ -13,8 +13,13 @@ import { Button } from "@/components/ui/button";
 import { db } from "@/lib/db";
 import { clients, mealPlans, appointments, recipes } from "@/lib/db/schema";
 import { eq, count, desc } from "drizzle-orm";
+import { getLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n";
 
 export default async function AdminDashboardPage() {
+  const locale = await getLocale();
+  const d = await getDictionary(locale);
+
   const [
     [{ value: totalClients }],
     [{ value: activePlans }],
@@ -40,7 +45,7 @@ export default async function AdminDashboardPage() {
 
   const stats = [
     {
-      label: "Total Clientes",
+      label: d.admin.dashboard.totalClients,
       value: totalClients,
       icon: Users,
       color: "text-blue-600",
@@ -48,7 +53,7 @@ export default async function AdminDashboardPage() {
       border: "border-l-blue-500",
     },
     {
-      label: "Planes Activos",
+      label: d.admin.dashboard.activePlans,
       value: activePlans,
       icon: ClipboardList,
       color: "text-brand",
@@ -56,7 +61,7 @@ export default async function AdminDashboardPage() {
       border: "border-l-brand",
     },
     {
-      label: "Citas Pendientes",
+      label: d.admin.dashboard.pendingAppointments,
       value: pendingAppointments,
       icon: CalendarClock,
       color: "text-amber-600",
@@ -64,7 +69,7 @@ export default async function AdminDashboardPage() {
       border: "border-l-amber-500",
     },
     {
-      label: "Total Recetas",
+      label: d.admin.dashboard.totalRecipes,
       value: totalRecipes,
       icon: ChefHat,
       color: "text-purple-600",
@@ -73,21 +78,15 @@ export default async function AdminDashboardPage() {
     },
   ];
 
-  const goalLabels: Record<string, string> = {
-    fat_loss: "Pérdida de grasa",
-    muscle_gain: "Ganancia muscular",
-    weight_cut: "Corte de peso",
-    maintenance: "Mantenimiento",
-    pre_competition: "Pre-competencia",
-  };
+  const goalLabels = d.admin.clients.goalLabels;
 
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-heading text-2xl font-bold tracking-tight">Dashboard</h1>
+          <h1 className="font-heading text-2xl font-bold tracking-tight">{d.admin.dashboard.title}</h1>
           <p className="text-sm text-muted-foreground">
-            Resumen de tu práctica de nutrición.
+            {d.admin.dashboard.subtitle}
           </p>
         </div>
         <Button
@@ -95,7 +94,7 @@ export default async function AdminDashboardPage() {
           render={<Link href="/admin/clients/new" />}
         >
           <Plus className="size-4" />
-          Nuevo Cliente
+          {d.admin.dashboard.newClient}
         </Button>
       </div>
 
@@ -114,7 +113,7 @@ export default async function AdminDashboardPage() {
               <p className="text-3xl font-bold tracking-tight">{stat.value}</p>
               <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
                 <TrendingUp className="size-3 text-brand" />
-                <span>Actualizado</span>
+                <span>{d.admin.dashboard.updated}</span>
               </div>
             </CardContent>
           </Card>
@@ -124,9 +123,9 @@ export default async function AdminDashboardPage() {
       <div className="grid gap-6 lg:grid-cols-3">
         <Card className="lg:col-span-2">
           <CardHeader className="flex-row items-center justify-between">
-            <CardTitle className="text-base font-semibold">Clientes Recientes</CardTitle>
+            <CardTitle className="text-base font-semibold">{d.admin.dashboard.recentClients}</CardTitle>
             <Button variant="ghost" size="sm" className="text-brand" render={<Link href="/admin/clients" />}>
-              Ver todos
+              {d.admin.dashboard.viewAll}
               <ArrowRight className="ml-1 size-3" />
             </Button>
           </CardHeader>
@@ -135,7 +134,7 @@ export default async function AdminDashboardPage() {
               <div className="flex flex-col items-center justify-center py-8 text-center">
                 <Users className="mb-2 size-8 text-muted-foreground/30" />
                 <p className="text-sm text-muted-foreground">
-                  No hay clientes registrados aún.
+                  {d.admin.dashboard.noClientsYet}
                 </p>
               </div>
             ) : (
@@ -153,7 +152,7 @@ export default async function AdminDashboardPage() {
                       <div>
                         <p className="text-sm font-medium">{client.name}</p>
                         <p className="text-xs text-muted-foreground">
-                          {client.goal ? goalLabels[client.goal] ?? client.goal : "Sin objetivo"}
+                          {client.goal ? goalLabels[client.goal as keyof typeof goalLabels] ?? client.goal : d.admin.dashboard.noGoal}
                         </p>
                       </div>
                     </div>
@@ -167,24 +166,24 @@ export default async function AdminDashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base font-semibold">Acciones Rápidas</CardTitle>
+            <CardTitle className="text-base font-semibold">{d.admin.dashboard.quickActions}</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-2">
             <Button variant="outline" className="justify-start gap-2 border-brand/20 hover:bg-brand/5 hover:text-brand" render={<Link href="/admin/clients/new" />}>
               <Plus className="size-4" />
-              Nuevo Cliente
+              {d.admin.dashboard.newClient}
             </Button>
             <Button variant="outline" className="justify-start gap-2 border-brand/20 hover:bg-brand/5 hover:text-brand" render={<Link href="/admin/recipes/new" />}>
               <Plus className="size-4" />
-              Nueva Receta
+              {d.admin.dashboard.newRecipe}
             </Button>
             <Button variant="outline" className="justify-start gap-2 border-brand/20 hover:bg-brand/5 hover:text-brand" render={<Link href="/admin/meal-plans/builder" />}>
               <Plus className="size-4" />
-              Nuevo Plan Alimenticio
+              {d.admin.dashboard.newMealPlan}
             </Button>
             <Button variant="outline" className="justify-start gap-2 border-brand/20 hover:bg-brand/5 hover:text-brand" render={<Link href="/admin/appointments" />}>
               <CalendarClock className="size-4" />
-              Ver Citas
+              {d.admin.dashboard.viewAppointments}
             </Button>
           </CardContent>
         </Card>

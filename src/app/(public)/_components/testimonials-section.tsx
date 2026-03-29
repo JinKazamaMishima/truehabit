@@ -3,6 +3,7 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import { Quote, User, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, useInView, AnimatePresence } from "framer-motion";
+import { useDictionary } from "@/lib/i18n/context";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -21,6 +22,7 @@ export type TestimonialItem = {
 };
 
 export function TestimonialsSection({ items }: { items: TestimonialItem[] }) {
+  const d = useDictionary();
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const [current, setCurrent] = useState(0);
@@ -55,12 +57,12 @@ export function TestimonialsSection({ items }: { items: TestimonialItem[] }) {
             <div className="mb-4 flex items-center justify-center gap-3">
               <span className="h-px w-8 bg-brand" />
               <span className="text-xs font-semibold uppercase tracking-[0.2em] text-brand">
-                Testimonios
+                {d.public.testimonials.eyebrow}
               </span>
               <span className="h-px w-8 bg-brand" />
             </div>
             <h2 className="font-heading text-3xl font-bold text-charcoal sm:text-4xl lg:text-[2.75rem]">
-              Lo Que Dicen Nuestros Clientes
+              {d.public.testimonials.heading}
             </h2>
           </motion.div>
 
@@ -110,7 +112,7 @@ export function TestimonialsSection({ items }: { items: TestimonialItem[] }) {
                         <button
                           onClick={prev}
                           className="flex size-9 items-center justify-center rounded-full bg-white/20 text-white transition-colors hover:bg-white/30"
-                          aria-label="Anterior"
+                          aria-label={d.public.testimonials.prev}
                         >
                           <ChevronLeft className="size-4" />
                         </button>
@@ -122,14 +124,14 @@ export function TestimonialsSection({ items }: { items: TestimonialItem[] }) {
                               className={`size-2 rounded-full transition-all ${
                                 i === current ? "w-6 bg-white" : "bg-white/40"
                               }`}
-                              aria-label={`Testimonio ${i + 1}`}
+                              aria-label={`${d.public.testimonials.testimonialN} ${i + 1}`}
                             />
                           ))}
                         </div>
                         <button
                           onClick={next}
                           className="flex size-9 items-center justify-center rounded-full bg-white/20 text-white transition-colors hover:bg-white/30"
-                          aria-label="Siguiente"
+                          aria-label={d.public.testimonials.next}
                         >
                           <ChevronRight className="size-4" />
                         </button>

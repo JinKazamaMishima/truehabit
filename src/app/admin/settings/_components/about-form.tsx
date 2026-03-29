@@ -17,6 +17,7 @@ import { ImageUpload } from "@/components/ui/image-upload";
 import { upsertSettings } from "@/actions/settings";
 import { Loader2, Save, Plus, X } from "lucide-react";
 import { toast } from "sonner";
+import { useDictionary } from "@/lib/i18n/context";
 
 export function AboutForm({
   initialValues,
@@ -32,6 +33,7 @@ export function AboutForm({
     }
   });
   const [isPending, startTransition] = useTransition();
+  const d = useDictionary();
 
   function set(key: string, value: string) {
     setValues((prev) => ({ ...prev, [key]: value }));
@@ -53,35 +55,35 @@ export function AboutForm({
         { key: "about_image_url", value: values.about_image_url ?? "", section: "about" },
       ];
       await upsertSettings(entries);
-      toast.success("About section updated");
+      toast.success(d.admin.settings.about.toast);
     });
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>About / Bio</CardTitle>
+        <CardTitle>{d.admin.settings.about.cardTitle}</CardTitle>
         <CardDescription>
-          Nutritionist profile shown on the home and about pages.
+          {d.admin.settings.about.cardDescription}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <Label htmlFor="about_name">Full Name</Label>
+              <Label htmlFor="about_name">{d.admin.settings.about.fullName}</Label>
               <Input
                 id="about_name"
-                placeholder="LN. Enya Marrero"
+                placeholder={d.admin.settings.about.placeholders.name}
                 value={values.about_name ?? ""}
                 onChange={(e) => set("about_name", e.target.value)}
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="about_title">Title</Label>
+              <Label htmlFor="about_title">{d.admin.settings.about.title}</Label>
               <Input
                 id="about_title"
-                placeholder="Tu Nutrióloga"
+                placeholder={d.admin.settings.about.placeholders.title}
                 value={values.about_title ?? ""}
                 onChange={(e) => set("about_title", e.target.value)}
               />
@@ -89,7 +91,7 @@ export function AboutForm({
           </div>
 
           <div className="space-y-1.5">
-            <Label>Profile Image</Label>
+            <Label>{d.admin.settings.about.profileImage}</Label>
             <ImageUpload
               folder="about"
               currentUrl={values.about_image_url || undefined}
@@ -97,7 +99,7 @@ export function AboutForm({
               onRemove={() => set("about_image_url", "")}
               aspectRatio="portrait"
             />
-            <p className="text-xs text-muted-foreground">Or enter a URL directly:</p>
+            <p className="text-xs text-muted-foreground">{d.admin.settings.about.orEnterUrl}</p>
             <Input
               id="about_image_url"
               placeholder="https://..."
@@ -107,28 +109,28 @@ export function AboutForm({
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="about_bio_1">Bio Paragraph 1</Label>
+            <Label htmlFor="about_bio_1">{d.admin.settings.about.bio1}</Label>
             <Textarea
               id="about_bio_1"
-              placeholder="Main bio paragraph..."
+              placeholder={d.admin.settings.about.placeholders.bio1}
               value={values.about_bio_1 ?? ""}
               onChange={(e) => set("about_bio_1", e.target.value)}
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="about_bio_2">Bio Paragraph 2</Label>
+            <Label htmlFor="about_bio_2">{d.admin.settings.about.bio2}</Label>
             <Textarea
               id="about_bio_2"
-              placeholder="Second paragraph..."
+              placeholder={d.admin.settings.about.placeholders.bio2}
               value={values.about_bio_2 ?? ""}
               onChange={(e) => set("about_bio_2", e.target.value)}
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="about_bio_3">Bio Paragraph 3</Label>
+            <Label htmlFor="about_bio_3">{d.admin.settings.about.bio3}</Label>
             <Textarea
               id="about_bio_3"
-              placeholder="Third paragraph (optional)..."
+              placeholder={d.admin.settings.about.placeholders.bio3}
               value={values.about_bio_3 ?? ""}
               onChange={(e) => set("about_bio_3", e.target.value)}
             />
@@ -138,31 +140,31 @@ export function AboutForm({
 
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-1.5">
-              <Label htmlFor="about_stat_clients">Clients Count</Label>
+              <Label htmlFor="about_stat_clients">{d.admin.settings.about.clientsCount}</Label>
               <Input
                 id="about_stat_clients"
                 type="number"
-                placeholder="500"
+                placeholder={d.admin.settings.about.placeholders.clients}
                 value={values.about_stat_clients ?? ""}
                 onChange={(e) => set("about_stat_clients", e.target.value)}
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="about_stat_years">Years Experience</Label>
+              <Label htmlFor="about_stat_years">{d.admin.settings.about.yearsExperience}</Label>
               <Input
                 id="about_stat_years"
                 type="number"
-                placeholder="10"
+                placeholder={d.admin.settings.about.placeholders.years}
                 value={values.about_stat_years ?? ""}
                 onChange={(e) => set("about_stat_years", e.target.value)}
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="about_stat_satisfaction">Satisfaction %</Label>
+              <Label htmlFor="about_stat_satisfaction">{d.admin.settings.about.satisfactionPct}</Label>
               <Input
                 id="about_stat_satisfaction"
                 type="number"
-                placeholder="98"
+                placeholder={d.admin.settings.about.placeholders.satisfaction}
                 value={values.about_stat_satisfaction ?? ""}
                 onChange={(e) => set("about_stat_satisfaction", e.target.value)}
               />
@@ -173,7 +175,7 @@ export function AboutForm({
 
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label>Credentials / Certifications</Label>
+              <Label>{d.admin.settings.about.credentials}</Label>
               <Button
                 type="button"
                 variant="outline"
@@ -181,14 +183,14 @@ export function AboutForm({
                 onClick={() => setCredentials((prev) => [...prev, ""])}
               >
                 <Plus className="size-3.5" />
-                Add
+                {d.common.add}
               </Button>
             </div>
             {credentials.map((cred, i) => (
               <div key={i} className="flex items-center gap-2">
                 <Input
                   value={cred}
-                  placeholder="Credential or certification..."
+                  placeholder={d.admin.settings.about.credentialPlaceholder}
                   onChange={(e) =>
                     setCredentials((prev) =>
                       prev.map((c, j) => (j === i ? e.target.value : c))
@@ -209,7 +211,7 @@ export function AboutForm({
             ))}
             {credentials.length === 0 && (
               <p className="text-sm text-muted-foreground">
-                No credentials added yet.
+                {d.admin.settings.about.noCredentials}
               </p>
             )}
           </div>
@@ -224,7 +226,7 @@ export function AboutForm({
             ) : (
               <Save className="size-4" />
             )}
-            Save Changes
+            {d.common.saveChanges}
           </Button>
         </form>
       </CardContent>

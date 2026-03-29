@@ -15,6 +15,8 @@ import { db } from "@/lib/db";
 import { foods, foodGroups } from "@/lib/db/schema";
 import { and, asc, eq, like } from "drizzle-orm";
 import { DeleteFoodButton } from "./_components/delete-food-button";
+import { getLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n";
 
 function formatG(val: string | null | undefined) {
   if (val == null || val === "") return "—";
@@ -46,6 +48,8 @@ export default async function FoodsPage({
   searchParams: Promise<{ q?: string; group?: string }>;
 }) {
   const { q, group: groupId } = await searchParams;
+  const locale = await getLocale();
+  const d = await getDictionary(locale);
 
   const allGroups = await db
     .select()
@@ -77,9 +81,9 @@ export default async function FoodsPage({
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Food Database</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{d.admin.foods.title}</h1>
           <p className="text-muted-foreground">
-            Manage foods, macros, and portions for meal planning.
+            {d.admin.foods.subtitle}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -89,14 +93,14 @@ export default async function FoodsPage({
             render={<Link href="/admin/foods/food-groups" />}
           >
             <Tags className="size-4" />
-            Food groups
+            {d.admin.foods.foodGroups}
           </Button>
           <Button
             className="bg-brand hover:bg-brand-dark dark:bg-brand dark:hover:bg-brand"
             render={<Link href="/admin/foods/new" />}
           >
             <Plus className="size-4" />
-            Add Food
+            {d.admin.foods.addFood}
           </Button>
         </div>
       </div>
@@ -106,14 +110,14 @@ export default async function FoodsPage({
           <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             name="q"
-            placeholder="Search by name…"
+            placeholder={d.admin.foods.searchPlaceholder}
             defaultValue={q ?? ""}
             className="pl-9"
           />
         </div>
         <div className="flex w-full flex-col gap-1 sm:w-56">
           <label htmlFor="group" className="text-xs font-medium text-muted-foreground">
-            Food group
+            {d.admin.foods.foodGroupLabel}
           </label>
           <select
             id="group"
@@ -121,7 +125,7 @@ export default async function FoodsPage({
             defaultValue={groupId ?? ""}
             className="flex h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30"
           >
-            <option value="">All groups</option>
+            <option value="">{d.admin.foods.allGroups}</option>
             {allGroups.map((g) => (
               <option key={g.id} value={g.id}>
                 {g.name}
@@ -130,7 +134,7 @@ export default async function FoodsPage({
           </select>
         </div>
         <Button type="submit" variant="secondary" size="sm" className="w-full sm:w-auto">
-          Apply filters
+          {d.admin.foods.applyFilters}
         </Button>
       </form>
 
@@ -139,8 +143,8 @@ export default async function FoodsPage({
           <Apple className="mb-3 size-10 text-brand/40" />
           <p className="text-sm font-medium text-muted-foreground">
             {q || groupId
-              ? "No foods match your filters."
-              : "No foods in the database yet."}
+              ? d.admin.foods.noMatch
+              : d.admin.foods.noFoodsYet}
           </p>
           {!q && !groupId && (
             <Button
@@ -149,7 +153,7 @@ export default async function FoodsPage({
               render={<Link href="/admin/foods/new" />}
             >
               <Plus className="size-4" />
-              Add your first food
+              {d.admin.foods.addFirstFood}
             </Button>
           )}
         </div>
@@ -158,15 +162,15 @@ export default async function FoodsPage({
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">
-                <TableHead>Name</TableHead>
-                <TableHead>Food Group</TableHead>
-                <TableHead>Serving</TableHead>
-                <TableHead>Calories</TableHead>
-                <TableHead>Protein</TableHead>
-                <TableHead>Carbs</TableHead>
-                <TableHead>Fat</TableHead>
-                <TableHead>Free?</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{d.admin.foods.tableHeaders.name}</TableHead>
+                <TableHead>{d.admin.foods.tableHeaders.foodGroup}</TableHead>
+                <TableHead>{d.admin.foods.tableHeaders.serving}</TableHead>
+                <TableHead>{d.admin.foods.tableHeaders.calories}</TableHead>
+                <TableHead>{d.admin.foods.tableHeaders.protein}</TableHead>
+                <TableHead>{d.admin.foods.tableHeaders.carbs}</TableHead>
+                <TableHead>{d.admin.foods.tableHeaders.fat}</TableHead>
+                <TableHead>{d.admin.foods.tableHeaders.free}</TableHead>
+                <TableHead className="text-right">{d.admin.foods.tableHeaders.actions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -193,10 +197,10 @@ export default async function FoodsPage({
                   <TableCell>
                     {food.isFree ? (
                       <Badge className="bg-brand/15 text-brand-dark dark:text-brand">
-                        Yes
+                        {d.common.yes}
                       </Badge>
                     ) : (
-                      <Badge variant="secondary">No</Badge>
+                      <Badge variant="secondary">{d.common.no}</Badge>
                     )}
                   </TableCell>
                   <TableCell className="text-right">
@@ -207,7 +211,7 @@ export default async function FoodsPage({
                         render={<Link href={`/admin/foods/${food.id}`} />}
                       >
                         <Pencil className="size-4" />
-                        Edit
+                        {d.common.edit}
                       </Button>
                       <DeleteFoodButton foodId={food.id} foodName={food.name} />
                     </div>

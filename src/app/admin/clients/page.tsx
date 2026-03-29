@@ -14,6 +14,8 @@ import {
 import { db } from "@/lib/db";
 import { clients } from "@/lib/db/schema";
 import { desc, like } from "drizzle-orm";
+import { getLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n";
 
 export default async function ClientsPage({
   searchParams,
@@ -21,6 +23,9 @@ export default async function ClientsPage({
   searchParams: Promise<{ q?: string }>;
 }) {
   const { q } = await searchParams;
+
+  const locale = await getLocale();
+  const d = await getDictionary(locale);
 
   const allClients = q
     ? await db
@@ -30,26 +35,20 @@ export default async function ClientsPage({
         .orderBy(desc(clients.createdAt))
     : await db.select().from(clients).orderBy(desc(clients.createdAt));
 
-  const goalLabels: Record<string, string> = {
-    fat_loss: "Fat Loss",
-    muscle_gain: "Muscle Gain",
-    weight_cut: "Weight Cut",
-    maintenance: "Maintenance",
-    pre_competition: "Pre-Competition",
-  };
+  const goalLabels = d.admin.clients.goalLabels;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Clients</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{d.admin.clients.title}</h1>
           <p className="text-muted-foreground">
-            Manage your nutrition clients.
+            {d.admin.clients.subtitle}
           </p>
         </div>
         <Button render={<Link href="/admin/clients/new" />}>
           <Plus className="size-4" />
-          Add Client
+          {d.admin.clients.addClient}
         </Button>
       </div>
 
@@ -58,13 +57,13 @@ export default async function ClientsPage({
           <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             name="q"
-            placeholder="Search clients..."
+            placeholder={d.admin.clients.searchPlaceholder}
             defaultValue={q ?? ""}
             className="pl-9"
           />
         </div>
         <Button type="submit" variant="secondary" size="sm">
-          Search
+          {d.common.search}
         </Button>
       </form>
 
@@ -72,7 +71,7 @@ export default async function ClientsPage({
         <div className="flex flex-col items-center justify-center rounded-lg border border-dashed py-16">
           <Users className="mb-3 size-10 text-muted-foreground/50" />
           <p className="text-sm font-medium text-muted-foreground">
-            {q ? "No clients match your search." : "No clients yet."}
+            {q ? d.admin.clients.noMatch : d.admin.clients.noClientsYet}
           </p>
           {!q && (
             <Button
@@ -81,7 +80,7 @@ export default async function ClientsPage({
               render={<Link href="/admin/clients/new" />}
             >
               <Plus className="size-4" />
-              Add your first client
+              {d.admin.clients.addFirstClient}
             </Button>
           )}
         </div>
@@ -90,11 +89,11 @@ export default async function ClientsPage({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Goal</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead>{d.admin.clients.tableHeaders.name}</TableHead>
+                <TableHead>{d.admin.clients.tableHeaders.email}</TableHead>
+                <TableHead>{d.admin.clients.tableHeaders.goal}</TableHead>
+                <TableHead>{d.admin.clients.tableHeaders.status}</TableHead>
+                <TableHead className="text-right">{d.admin.clients.tableHeaders.actions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -109,15 +108,15 @@ export default async function ClientsPage({
                     </Link>
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {client.email ?? "—"}
+                    {client.email ?? d.common.emDash}
                   </TableCell>
                   <TableCell>
                     {client.goal ? (
                       <Badge variant="secondary">
-                        {goalLabels[client.goal] ?? client.goal}
+                        {goalLabels[client.goal as keyof typeof goalLabels] ?? client.goal}
                       </Badge>
                     ) : (
-                      "—"
+                      d.common.emDash
                     )}
                   </TableCell>
                   <TableCell>
@@ -140,7 +139,7 @@ export default async function ClientsPage({
                       size="sm"
                       render={<Link href={`/admin/clients/${client.id}`} />}
                     >
-                      View
+                      {d.common.view}
                     </Button>
                   </TableCell>
                 </TableRow>

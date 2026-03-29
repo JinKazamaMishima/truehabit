@@ -18,16 +18,15 @@ import {
   Wheat,
   Droplet,
 } from "lucide-react";
-
-const statusLabels: Record<string, { label: string; variant: "default" | "secondary" | "outline" }> = {
-  active: { label: "Activo", variant: "default" },
-  draft: { label: "Borrador", variant: "secondary" },
-  completed: { label: "Completado", variant: "outline" },
-};
+import { getLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n";
 
 export default async function MealPlansPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
+
+  const locale = await getLocale();
+  const d = await getDictionary(locale);
 
   const client = await getClientByLinkedUser(session.user.id!);
   if (!client) redirect("/dashboard");
@@ -39,19 +38,19 @@ export default async function MealPlansPage() {
       <div className="space-y-6">
         <div>
           <h1 className="font-heading text-2xl font-bold text-charcoal">
-            Plan Alimenticio
+            {d.dashboard.mealPlans.title}
           </h1>
           <p className="text-sm text-muted-foreground">
-            Aquí puedes ver tus planes asignados con el detalle de cada comida.
+            {d.dashboard.mealPlans.subtitle}
           </p>
         </div>
         <div className="flex flex-col items-center py-16 text-center">
           <div className="mb-4 rounded-full bg-brand-light p-4">
             <UtensilsCrossed className="size-8 text-brand" />
           </div>
-          <p className="text-lg font-semibold text-charcoal">Sin planes asignados</p>
+          <p className="text-lg font-semibold text-charcoal">{d.dashboard.mealPlans.noPlans}</p>
           <p className="mt-1 max-w-md text-sm text-muted-foreground">
-            Tu nutriólogo te asignará un plan alimenticio personalizado próximamente.
+            {d.dashboard.mealPlans.noPlansMessage}
           </p>
         </div>
       </div>
@@ -62,15 +61,16 @@ export default async function MealPlansPage() {
     <div className="space-y-6">
       <div>
         <h1 className="font-heading text-2xl font-bold text-charcoal">
-          Plan Alimenticio
+          {d.dashboard.mealPlans.title}
         </h1>
         <p className="text-sm text-muted-foreground">
-          Consulta tus planes alimenticios y el detalle de cada comida.
+          {d.dashboard.mealPlans.consultMessage}
         </p>
       </div>
 
       {mealPlans.map((plan) => {
-        const status = statusLabels[plan.status] ?? statusLabels.draft;
+        const statusLabel = d.dashboard.mealPlans.statusLabels[plan.status as keyof typeof d.dashboard.mealPlans.statusLabels];
+        const statusVariant = plan.status === "active" ? "default" as const : plan.status === "completed" ? "outline" as const : "secondary" as const;
         return (
           <Card key={plan.id} className="border-0 shadow-sm overflow-hidden">
             <CardHeader className="bg-gradient-to-r from-brand-light/40 to-transparent">
@@ -78,7 +78,7 @@ export default async function MealPlansPage() {
                 <div>
                   <div className="flex items-center gap-2">
                     <CardTitle className="text-xl">{plan.name}</CardTitle>
-                    <Badge variant={status.variant}>{status.label}</Badge>
+                    <Badge variant={statusVariant}>{statusLabel ?? plan.status}</Badge>
                   </div>
                   <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                     {plan.startDate && (
@@ -91,7 +91,7 @@ export default async function MealPlansPage() {
                     {plan.calorieTarget && (
                       <span className="flex items-center gap-1">
                         <Flame className="size-3" />
-                        {plan.calorieTarget} kcal
+                        {plan.calorieTarget}{d.dashboard.mealPlans.kcalSuffix}
                       </span>
                     )}
                   </div>
@@ -109,7 +109,7 @@ export default async function MealPlansPage() {
                   }
                 >
                   <FileDown className="size-4" />
-                  Descargar PDF
+                  {d.dashboard.mealPlans.downloadPdf}
                 </Button>
               </div>
 
@@ -119,19 +119,19 @@ export default async function MealPlansPage() {
                   {plan.proteinGPerKg && (
                     <Badge variant="secondary" className="gap-1 text-xs font-normal">
                       <Beef className="size-3" />
-                      Proteína: {plan.proteinGPerKg}g/kg
+                      {d.dashboard.mealPlans.proteinLabel}{plan.proteinGPerKg}g/kg
                     </Badge>
                   )}
                   {plan.carbsGPerKg && (
                     <Badge variant="secondary" className="gap-1 text-xs font-normal">
                       <Wheat className="size-3" />
-                      Carbos: {plan.carbsGPerKg}g/kg
+                      {d.dashboard.mealPlans.carbsLabel}{plan.carbsGPerKg}g/kg
                     </Badge>
                   )}
                   {plan.fatGPerKg && (
                     <Badge variant="secondary" className="gap-1 text-xs font-normal">
                       <Droplet className="size-3" />
-                      Grasa: {plan.fatGPerKg}g/kg
+                      {d.dashboard.mealPlans.fatLabel}{plan.fatGPerKg}g/kg
                     </Badge>
                   )}
                 </div>
@@ -142,7 +142,7 @@ export default async function MealPlansPage() {
               {plan.generalRecommendations && (
                 <div className="mb-4 rounded-lg bg-muted/50 p-3">
                   <p className="text-xs font-medium text-muted-foreground mb-1">
-                    Recomendaciones generales
+                    {d.dashboard.mealPlans.generalRecommendations}
                   </p>
                   <p className="text-sm text-charcoal">
                     {plan.generalRecommendations}
@@ -157,15 +157,15 @@ export default async function MealPlansPage() {
                       <summary className="flex cursor-pointer items-center gap-2 rounded-lg border border-border/60 bg-white px-4 py-3 text-sm font-semibold text-charcoal transition-colors hover:bg-muted/30">
                         <ChevronDown className="size-4 text-muted-foreground transition-transform group-open:rotate-180" />
                         <span>
-                          {day.dayLabel ?? `Día ${day.dayNumber}`}
+                          {day.dayLabel ?? `${d.dashboard.mealPlans.dayPrefix}${day.dayNumber}`}
                         </span>
                         {day.dayType && (
                           <Badge variant="outline" className="ml-auto text-xs capitalize">
                             {day.dayType === "training"
-                              ? "Entrenamiento"
+                              ? d.dashboard.mealPlans.training
                               : day.dayType === "rest"
-                                ? "Descanso"
-                                : "Competencia"}
+                                ? d.dashboard.mealPlans.rest
+                                : d.dashboard.mealPlans.competition}
                           </Badge>
                         )}
                       </summary>
@@ -185,24 +185,24 @@ export default async function MealPlansPage() {
                               {meal.cerealPortions && (
                                 <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-2 py-0.5 text-xs text-amber-700">
                                   <Wheat className="size-3" />
-                                  {meal.cerealPortions} cereal
+                                  {meal.cerealPortions}{d.dashboard.cereal}
                                 </span>
                               )}
                               {meal.proteinPortions && (
                                 <span className="inline-flex items-center gap-1 rounded-md bg-red-50 px-2 py-0.5 text-xs text-red-700">
                                   <Beef className="size-3" />
-                                  {meal.proteinPortions} proteína
+                                  {meal.proteinPortions}{d.dashboard.protein}
                                 </span>
                               )}
                               {meal.fatPortions && (
                                 <span className="inline-flex items-center gap-1 rounded-md bg-yellow-50 px-2 py-0.5 text-xs text-yellow-700">
                                   <Droplet className="size-3" />
-                                  {meal.fatPortions} grasa
+                                  {meal.fatPortions}{d.dashboard.fat}
                                 </span>
                               )}
                               {meal.veggiePortions && (
                                 <span className="inline-flex items-center gap-1 rounded-md bg-green-50 px-2 py-0.5 text-xs text-green-700">
-                                  🥬 {meal.veggiePortions} vegetal
+                                  🥬 {meal.veggiePortions}{d.dashboard.vegetable}
                                 </span>
                               )}
                             </div>
@@ -217,10 +217,10 @@ export default async function MealPlansPage() {
                                   >
                                     <UtensilsCrossed className="size-3 text-brand" />
                                     <span className="font-medium text-charcoal">
-                                      {opt.recipe?.name ?? "Receta"}
+                                      {opt.recipe?.name ?? d.dashboard.recipe}
                                     </span>
                                     {opt.isPrimary && (
-                                      <Badge className="h-4 text-[10px]">Principal</Badge>
+                                      <Badge className="h-4 text-[10px]">{d.dashboard.mealPlans.primary}</Badge>
                                     )}
                                   </div>
                                 ))}
@@ -236,7 +236,7 @@ export default async function MealPlansPage() {
                         ))}
                         {day.meals.length === 0 && (
                           <p className="py-3 text-sm text-muted-foreground">
-                            Sin comidas configuradas para este día.
+                            {d.dashboard.mealPlans.noMealsForDay}
                           </p>
                         )}
                       </div>
@@ -245,7 +245,7 @@ export default async function MealPlansPage() {
                 </div>
               ) : (
                 <p className="py-4 text-center text-sm text-muted-foreground">
-                  Este plan aún no tiene días configurados.
+                  {d.dashboard.mealPlans.noDaysConfigured}
                 </p>
               )}
             </CardContent>

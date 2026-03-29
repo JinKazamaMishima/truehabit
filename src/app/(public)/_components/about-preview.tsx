@@ -6,6 +6,7 @@ import { User, Clock, Star, Award, ArrowRight } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { AnimatedCounter } from "./animated-counter";
+import { useDictionary } from "@/lib/i18n/context";
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -26,12 +27,6 @@ const stagger = {
   visible: { transition: { staggerChildren: 0.12 } },
 };
 
-const highlights = [
-  { icon: Clock, label: "Atención Puntual" },
-  { icon: Star, label: "Servicio Premium" },
-  { icon: Award, label: "Profesionales Certificados" },
-];
-
 export type AboutPreviewData = {
   name: string;
   title: string;
@@ -42,8 +37,15 @@ export type AboutPreviewData = {
 };
 
 export function AboutPreview({ data }: { data: AboutPreviewData }) {
+  const d = useDictionary();
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
+
+  const highlights = [
+    { icon: Clock, label: d.public.aboutPreview.punctualService },
+    { icon: Star, label: d.public.aboutPreview.premiumService },
+    { icon: Award, label: d.public.aboutPreview.certifiedProfessionals },
+  ];
 
   return (
     <section ref={ref} className="bg-gray-50 py-20 sm:py-28">
@@ -64,7 +66,7 @@ export function AboutPreview({ data }: { data: AboutPreviewData }) {
             </div>
 
             <h2 className="font-heading text-3xl font-bold text-charcoal sm:text-4xl lg:text-[2.75rem] lg:leading-[1.15]">
-              Bienvenidos a{" "}
+              {d.public.aboutPreview.welcomeTo}
               <span className="text-brand">TrueHabit</span>
             </h2>
 
@@ -87,7 +89,7 @@ export function AboutPreview({ data }: { data: AboutPreviewData }) {
                 className="h-12 rounded-md bg-brand px-8 text-sm font-semibold text-white shadow-md transition-all hover:bg-brand-dark hover:shadow-lg"
                 render={<Link href="/about" />}
               >
-                Más Sobre Nosotros
+                {d.public.aboutPreview.moreAboutUs}
                 <ArrowRight className="ml-1.5 size-4" />
               </Button>
             </div>
@@ -114,7 +116,7 @@ export function AboutPreview({ data }: { data: AboutPreviewData }) {
                   <AnimatedCounter target={data.yearsExperience} suffix="+" />
                 </p>
                 <p className="text-xs font-medium tracking-wide text-white/80">
-                  Años de Experiencia
+                  {d.public.aboutPreview.yearsExperience}
                 </p>
               </div>
             </div>

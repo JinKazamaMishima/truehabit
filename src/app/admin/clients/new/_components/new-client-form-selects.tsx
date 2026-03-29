@@ -8,28 +8,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-const goalOptions = [
-  { value: "fat_loss", label: "Fat Loss" },
-  { value: "muscle_gain", label: "Muscle Gain" },
-  { value: "weight_cut", label: "Weight Cut" },
-  { value: "maintenance", label: "Maintenance" },
-  { value: "pre_competition", label: "Pre-Competition" },
-];
-
-const sexOptions = [
-  { value: "male", label: "Male" },
-  { value: "female", label: "Female" },
-];
+import { useDictionary } from "@/lib/i18n/context";
 
 export function NewClientFormSelects() {
+  const d = useDictionary();
+  const nc = d.admin.clients.newClient;
+
+  const goalOptions = Object.entries(d.admin.clients.goalLabels).map(
+    ([value, label]) => ({ value, label }),
+  );
+
+  const sexOptions = [
+    { value: "male", label: nc.male },
+    { value: "female", label: nc.female },
+  ];
+
   return (
     <>
       <div className="space-y-2">
-        <Label>Sex</Label>
+        <Label>{nc.sex}</Label>
         <Select name="sex">
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select sex" />
+            <SelectValue placeholder={nc.selectSex} />
           </SelectTrigger>
           <SelectContent>
             {sexOptions.map((opt) => (
@@ -41,10 +41,10 @@ export function NewClientFormSelects() {
         </Select>
       </div>
       <div className="space-y-2">
-        <Label>Goal</Label>
+        <Label>{nc.goal}</Label>
         <Select name="goal">
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select goal" />
+            <SelectValue placeholder={nc.selectGoal} />
           </SelectTrigger>
           <SelectContent>
             {goalOptions.map((opt) => (

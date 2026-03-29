@@ -30,6 +30,7 @@ import {
 } from "@/actions/testimonials";
 import { Loader2, Plus, Pencil, Trash2, Quote } from "lucide-react";
 import { toast } from "sonner";
+import { useDictionary } from "@/lib/i18n/context";
 
 type Testimonial = {
   id: string;
@@ -57,6 +58,7 @@ function TestimonialForm({
     testimonial?.displayOrder ?? 0
   );
   const [isPending, startTransition] = useTransition();
+  const d = useDictionary();
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -73,10 +75,10 @@ function TestimonialForm({
 
       if (testimonial) {
         await updateTestimonial(testimonial.id, data);
-        toast.success("Testimonial updated");
+        toast.success(d.admin.settings.testimonials.toastUpdated);
       } else {
         await createTestimonial(data);
-        toast.success("Testimonial created");
+        toast.success(d.admin.settings.testimonials.toastCreated);
       }
       onDone();
     });
@@ -85,37 +87,37 @@ function TestimonialForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-1.5">
-        <Label htmlFor="t-name">Client Name</Label>
+        <Label htmlFor="t-name">{d.admin.settings.testimonials.clientName}</Label>
         <Input
           id="t-name"
           required
           value={clientName}
           onChange={(e) => setClientName(e.target.value)}
-          placeholder="María García"
+          placeholder={d.admin.settings.testimonials.clientNamePlaceholder}
         />
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="t-title">Title / Service</Label>
+        <Label htmlFor="t-title">{d.admin.settings.testimonials.titleService}</Label>
         <Input
           id="t-title"
           value={clientTitle}
           onChange={(e) => setClientTitle(e.target.value)}
-          placeholder="Pérdida de peso"
+          placeholder={d.admin.settings.testimonials.titleServicePlaceholder}
         />
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="t-quote">Quote</Label>
+        <Label htmlFor="t-quote">{d.admin.settings.testimonials.quote}</Label>
         <Textarea
           id="t-quote"
           required
           value={quote}
           onChange={(e) => setQuote(e.target.value)}
-          placeholder="Their testimonial..."
+          placeholder={d.admin.settings.testimonials.quotePlaceholder}
         />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
-          <Label htmlFor="t-order">Display Order</Label>
+          <Label htmlFor="t-order">{d.admin.settings.testimonials.displayOrder}</Label>
           <Input
             id="t-order"
             type="number"
@@ -130,19 +132,19 @@ function TestimonialForm({
             onCheckedChange={(checked) => setIsFeatured(!!checked)}
           />
           <Label htmlFor="t-featured" className="font-normal">
-            Show on home page
+            {d.admin.settings.testimonials.showOnHome}
           </Label>
         </div>
       </div>
       <DialogFooter>
-        <DialogClose render={<Button variant="outline" />}>Cancel</DialogClose>
+        <DialogClose render={<Button variant="outline" />}>{d.common.cancel}</DialogClose>
         <Button
           type="submit"
           disabled={isPending}
           className="bg-brand text-white hover:bg-brand-dark"
         >
           {isPending && <Loader2 className="size-4 animate-spin" />}
-          {testimonial ? "Update" : "Create"}
+          {testimonial ? d.common.update : d.common.create}
         </Button>
       </DialogFooter>
     </form>
@@ -159,6 +161,7 @@ export function TestimonialsManager({
   const [createOpen, setCreateOpen] = useState(false);
   const [deletePending, startDelete] = useTransition();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const d = useDictionary();
 
   function handleDelete(id: string) {
     setDeletingId(id);
@@ -166,7 +169,7 @@ export function TestimonialsManager({
       await deleteTestimonial(id);
       setItems((prev) => prev.filter((t) => t.id !== id));
       setDeletingId(null);
-      toast.success("Testimonial deleted");
+      toast.success(d.admin.settings.testimonials.toastDeleted);
     });
   }
 
@@ -175,9 +178,9 @@ export function TestimonialsManager({
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Testimonials</CardTitle>
+            <CardTitle>{d.admin.settings.testimonials.cardTitle}</CardTitle>
             <CardDescription>
-              Client testimonials shown on the home page.
+              {d.admin.settings.testimonials.cardDescription}
             </CardDescription>
           </div>
           <Dialog open={createOpen} onOpenChange={setCreateOpen}>
@@ -191,13 +194,13 @@ export function TestimonialsManager({
               }
             >
               <Plus className="size-3.5" />
-              Add
+              {d.admin.settings.testimonials.addButton}
             </DialogTrigger>
             <DialogContent className="sm:max-w-md">
               <DialogHeader>
-                <DialogTitle>New Testimonial</DialogTitle>
+                <DialogTitle>{d.admin.settings.testimonials.newTestimonial}</DialogTitle>
                 <DialogDescription>
-                  Add a new client testimonial.
+                  {d.admin.settings.testimonials.addDescription}
                 </DialogDescription>
               </DialogHeader>
               <TestimonialForm
@@ -213,7 +216,7 @@ export function TestimonialsManager({
       <CardContent>
         {items.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">
-            No testimonials yet. Click &quot;Add&quot; to create one.
+            {d.admin.settings.testimonials.noTestimonials}
           </p>
         ) : (
           <div className="space-y-3">
@@ -235,7 +238,7 @@ export function TestimonialsManager({
                   )}
                   {t.isFeatured && (
                     <span className="mt-1 inline-block rounded bg-brand/15 px-1.5 py-0.5 text-xs font-medium text-brand-dark">
-                      Featured
+                      {d.common.featured}
                     </span>
                   )}
                 </div>
@@ -253,9 +256,9 @@ export function TestimonialsManager({
                     </DialogTrigger>
                     <DialogContent className="sm:max-w-md">
                       <DialogHeader>
-                        <DialogTitle>Edit Testimonial</DialogTitle>
+                        <DialogTitle>{d.admin.settings.testimonials.editTestimonial}</DialogTitle>
                         <DialogDescription>
-                          Update this testimonial.
+                          {d.admin.settings.testimonials.editDescription}
                         </DialogDescription>
                       </DialogHeader>
                       <TestimonialForm

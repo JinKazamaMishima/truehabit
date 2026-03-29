@@ -33,6 +33,7 @@ import {
   type SupplementInput,
   type HydrationInput,
 } from "@/actions/meal-plans";
+import { useDictionary } from "@/lib/i18n/context";
 
 interface Client {
   id: string;
@@ -83,13 +84,6 @@ interface DayState {
   meals: MealState[];
 }
 
-const STEPS = [
-  { label: "Client & Template", icon: UtensilsCrossed },
-  { label: "Macro Targets", icon: UtensilsCrossed },
-  { label: "Days & Meals", icon: UtensilsCrossed },
-  { label: "Recommendations", icon: UtensilsCrossed },
-];
-
 function makeMeal(slotName = ""): MealState {
   return {
     key: crypto.randomUUID(),
@@ -103,17 +97,13 @@ function makeMeal(slotName = ""): MealState {
   };
 }
 
-function makeDay(dayNumber: number): DayState {
+function makeDay(dayNumber: number, dayPrefix: string, defaultSlotNames: string[]): DayState {
   return {
     key: crypto.randomUUID(),
     dayNumber,
-    dayLabel: `Day ${dayNumber}`,
+    dayLabel: `${dayPrefix} ${dayNumber}`,
     dayType: "training",
-    meals: [
-      makeMeal("Desayuno"),
-      makeMeal("Comida"),
-      makeMeal("Cena"),
-    ],
+    meals: defaultSlotNames.map((name) => makeMeal(name)),
   };
 }
 
@@ -136,6 +126,32 @@ export function PlanBuilderForm({
   templates: Template[];
   recipes: Recipe[];
 }) {
+  const d = useDictionary();
+  const b = d.admin.mealPlans.builder;
+  const s1 = b.step1;
+  const s2 = b.step2;
+  const s3 = b.step3;
+  const s4 = b.step4;
+
+  const defaultSlotNames = [
+    b.defaultSlots.breakfast,
+    b.defaultSlots.lunch,
+    b.defaultSlots.dinner,
+  ];
+
+  const dayTypeLabels: Record<string, string> = {
+    training: s3.training,
+    rest: s3.rest,
+    competition: s3.competition,
+  };
+
+  const steps = [
+    { label: b.steps.clientTemplate, icon: UtensilsCrossed },
+    { label: b.steps.macroTargets, icon: UtensilsCrossed },
+    { label: b.steps.daysMeals, icon: UtensilsCrossed },
+    { label: b.steps.recommendations, icon: UtensilsCrossed },
+  ];
+
   const [isPending, startTransition] = useTransition();
   const [step, setStep] = useState(0);
 
@@ -153,7 +169,9 @@ export function PlanBuilderForm({
   const [endDate, setEndDate] = useState("");
 
   // Step 3
-  const [days, setDays] = useState<DayState[]>([makeDay(1)]);
+  const [days, setDays] = useState<DayState[]>(() => [
+    makeDay(1, s3.dayN, defaultSlotNames),
+  ]);
 
   // Step 4
   const [generalRecommendations, setGeneralRecommendations] = useState("");
@@ -178,27 +196,27 @@ export function PlanBuilderForm({
     const tpl = templates.find((t) => t.id === tplId);
     if (!tpl) return;
 
-    const dayTypes = tpl.dayTypes ?? ["training"];
-    const newDays: DayState[] = dayTypes.map((dt, idx) => {
+    const dtypes = tpl.dayTypes ?? ["training"];
+    const newDays: DayState[] = dtypes.map((dt, idx) => {
       const slotsForDay = tpl.slots
         .filter((s) => s.dayType === dt)
         .sort((a, b) => a.displayOrder - b.displayOrder);
       return {
         key: crypto.randomUUID(),
         dayNumber: idx + 1,
-        dayLabel: `${dt.charAt(0).toUpperCase() + dt.slice(1)} Day`,
+        dayLabel: dayTypeLabels[dt] ?? dt,
         dayType: dt as DayState["dayType"],
         meals:
           slotsForDay.length > 0
             ? slotsForDay.map((s) => makeMeal(s.slotName))
-            : [makeMeal("Desayuno"), makeMeal("Comida"), makeMeal("Cena")],
+            : defaultSlotNames.map((name) => makeMeal(name)),
       };
     });
     setDays(newDays);
   }
 
   function addDay() {
-    setDays((prev) => [...prev, makeDay(prev.length + 1)]);
+    setDays((prev) => [...prev, makeDay(prev.length + 1, s3.dayN, defaultSlotNames)]);
   }
 
   function removeDay(key: string) {
@@ -367,7 +385,7 @@ export function PlanBuilderForm({
     <div className="space-y-6">
       {/* Step indicator */}
       <nav className="flex items-center gap-2 overflow-x-auto">
-        {STEPS.map((s, i) => (
+        {steps.map((s, i) => (
           <button
             key={i}
             onClick={() => i < step && setStep(i)}
@@ -391,15 +409,15 @@ export function PlanBuilderForm({
       {step === 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Select Client & Template</CardTitle>
+            <CardTitle>{s1.cardTitle}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label>Client</Label>
+                <Label>{s1.client}</Label>
                 <Select value={clientId} onValueChange={(v) => setClientId(v ?? "")}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select client" />
+                    <SelectValue placeholder={s1.selectClient} />
                   </SelectTrigger>
                   <SelectContent>
                     {clients.map((c) => (
@@ -412,14 +430,14 @@ export function PlanBuilderForm({
               </div>
               <div className="space-y-2">
                 <Label>
-                  Template{" "}
+                  {s1.template}{" "}
                   <span className="font-normal text-muted-foreground">
-                    (optional)
+                    ({d.common.optional})
                   </span>
                 </Label>
                 <Select value={templateId} onValueChange={(v) => v && applyTemplate(v)}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select template" />
+                    <SelectValue placeholder={s1.selectTemplate} />
                   </SelectTrigger>
                   <SelectContent>
                     {templates.map((t) => (
@@ -432,12 +450,12 @@ export function PlanBuilderForm({
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="plan-name">Plan Name</Label>
+              <Label htmlFor="plan-name">{s1.planName}</Label>
               <Input
                 id="plan-name"
                 value={planName}
                 onChange={(e) => setPlanName(e.target.value)}
-                placeholder="e.g. Pre-Season Nutrition Plan"
+                placeholder={s1.planNamePlaceholder}
                 required
               />
             </div>
@@ -449,12 +467,12 @@ export function PlanBuilderForm({
       {step === 1 && (
         <Card>
           <CardHeader>
-            <CardTitle>Macro Targets</CardTitle>
+            <CardTitle>{s2.cardTitle}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="start-date">Start Date</Label>
+                <Label htmlFor="start-date">{s2.startDate}</Label>
                 <Input
                   id="start-date"
                   type="date"
@@ -463,7 +481,7 @@ export function PlanBuilderForm({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="end-date">End Date</Label>
+                <Label htmlFor="end-date">{s2.endDate}</Label>
                 <Input
                   id="end-date"
                   type="date"
@@ -477,7 +495,7 @@ export function PlanBuilderForm({
 
             <div className="grid gap-4 sm:grid-cols-4">
               <div className="space-y-2">
-                <Label htmlFor="client-weight">Client Weight (kg)</Label>
+                <Label htmlFor="client-weight">{s2.clientWeight}</Label>
                 <Input
                   id="client-weight"
                   type="number"
@@ -487,7 +505,7 @@ export function PlanBuilderForm({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="protein">Protein (g/kg)</Label>
+                <Label htmlFor="protein">{s2.proteinGPerKg}</Label>
                 <Input
                   id="protein"
                   type="number"
@@ -497,7 +515,7 @@ export function PlanBuilderForm({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="carbs">Carbs (g/kg)</Label>
+                <Label htmlFor="carbs">{s2.carbsGPerKg}</Label>
                 <Input
                   id="carbs"
                   type="number"
@@ -507,7 +525,7 @@ export function PlanBuilderForm({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="fat">Fat (g/kg)</Label>
+                <Label htmlFor="fat">{s2.fatGPerKg}</Label>
                 <Input
                   id="fat"
                   type="number"
@@ -520,7 +538,7 @@ export function PlanBuilderForm({
 
             <div className="rounded-lg border bg-brand/10 p-4 dark:bg-brand/10">
               <p className="mb-3 text-sm font-medium text-brand-dark dark:text-brand">
-                Computed Daily Targets
+                {s2.computedTargets}
               </p>
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <div>
@@ -533,19 +551,19 @@ export function PlanBuilderForm({
                   <p className="text-2xl font-bold">
                     {macros.proteinG}g
                   </p>
-                  <p className="text-xs text-muted-foreground">Protein</p>
+                  <p className="text-xs text-muted-foreground">{s2.protein}</p>
                 </div>
                 <div>
                   <p className="text-2xl font-bold">
                     {macros.carbsG}g
                   </p>
-                  <p className="text-xs text-muted-foreground">Carbs</p>
+                  <p className="text-xs text-muted-foreground">{s2.carbs}</p>
                 </div>
                 <div>
                   <p className="text-2xl font-bold">
                     {macros.fatG}g
                   </p>
-                  <p className="text-xs text-muted-foreground">Fat</p>
+                  <p className="text-xs text-muted-foreground">{s2.fat}</p>
                 </div>
               </div>
             </div>
@@ -557,10 +575,10 @@ export function PlanBuilderForm({
       {step === 2 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Days & Meals</h2>
+            <h2 className="text-lg font-semibold">{s3.cardTitle}</h2>
             <Button variant="outline" size="sm" onClick={addDay}>
               <Plus className="size-4" />
-              Add Day
+              {s3.addDay}
             </Button>
           </div>
 
@@ -569,7 +587,7 @@ export function PlanBuilderForm({
               <CardHeader className="flex-row items-center justify-between gap-2">
                 <div className="flex items-center gap-3">
                   <CardTitle className="text-base">
-                    Day {day.dayNumber}
+                    {s3.dayN} {day.dayNumber}
                   </CardTitle>
                   <Input
                     value={day.dayLabel}
@@ -577,7 +595,7 @@ export function PlanBuilderForm({
                       updateDay(day.key, "dayLabel", e.target.value)
                     }
                     className="w-40"
-                    placeholder="Day label"
+                    placeholder={s3.dayLabelPlaceholder}
                   />
                   <Select
                     value={day.dayType}
@@ -587,9 +605,9 @@ export function PlanBuilderForm({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="training">Training</SelectItem>
-                      <SelectItem value="rest">Rest</SelectItem>
-                      <SelectItem value="competition">Competition</SelectItem>
+                      <SelectItem value="training">{s3.training}</SelectItem>
+                      <SelectItem value="rest">{s3.rest}</SelectItem>
+                      <SelectItem value="competition">{s3.competition}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -600,7 +618,7 @@ export function PlanBuilderForm({
                     onClick={() => addMealToDay(day.key)}
                   >
                     <Plus className="size-4" />
-                    Meal
+                    {s3.addMeal}
                   </Button>
                   {days.length > 1 && (
                     <Button
@@ -623,7 +641,7 @@ export function PlanBuilderForm({
                     <div className="flex items-start gap-2">
                       <div className="grid flex-1 gap-3 sm:grid-cols-5">
                         <div className="space-y-1">
-                          <Label className="text-xs">Slot</Label>
+                          <Label className="text-xs">{s3.slot}</Label>
                           <Input
                             value={meal.slotName}
                             onChange={(e) =>
@@ -634,11 +652,11 @@ export function PlanBuilderForm({
                                 e.target.value
                               )
                             }
-                            placeholder="Meal name"
+                            placeholder={s3.mealNamePlaceholder}
                           />
                         </div>
                         <div className="space-y-1">
-                          <Label className="text-xs">Cereals</Label>
+                          <Label className="text-xs">{s3.cereals}</Label>
                           <Input
                             type="number"
                             min="0"
@@ -656,7 +674,7 @@ export function PlanBuilderForm({
                           />
                         </div>
                         <div className="space-y-1">
-                          <Label className="text-xs">Proteins</Label>
+                          <Label className="text-xs">{s3.proteins}</Label>
                           <Input
                             type="number"
                             min="0"
@@ -674,7 +692,7 @@ export function PlanBuilderForm({
                           />
                         </div>
                         <div className="space-y-1">
-                          <Label className="text-xs">Fats</Label>
+                          <Label className="text-xs">{s3.fats}</Label>
                           <Input
                             type="number"
                             min="0"
@@ -692,7 +710,7 @@ export function PlanBuilderForm({
                           />
                         </div>
                         <div className="space-y-1">
-                          <Label className="text-xs">Veggies</Label>
+                          <Label className="text-xs">{s3.veggies}</Label>
                           <Input
                             type="number"
                             min="0"
@@ -721,7 +739,7 @@ export function PlanBuilderForm({
                     </div>
 
                     <div className="space-y-1">
-                      <Label className="text-xs">Notes</Label>
+                      <Label className="text-xs">{s3.mealNotes}</Label>
                       <Input
                         value={meal.notes}
                         onChange={(e) =>
@@ -732,21 +750,21 @@ export function PlanBuilderForm({
                             e.target.value
                           )
                         }
-                        placeholder="Optional notes for this meal"
+                        placeholder={s3.mealNotesPlaceholder}
                       />
                     </div>
 
                     {/* Recipe selector */}
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
-                        <Label className="text-xs">Recipe Options</Label>
+                        <Label className="text-xs">{s3.recipeOptions}</Label>
                         <Select
                           onValueChange={(v) =>
                             v && addRecipeToMeal(day.key, meal.key, v as string)
                           }
                         >
                           <SelectTrigger className="h-7 w-48 text-xs">
-                            <SelectValue placeholder="Add recipe…" />
+                            <SelectValue placeholder={s3.addRecipe} />
                           </SelectTrigger>
                           <SelectContent>
                             {recipes
@@ -795,7 +813,7 @@ export function PlanBuilderForm({
 
                 {day.meals.length === 0 && (
                   <p className="py-4 text-center text-sm text-muted-foreground">
-                    No meals. Click "Meal" to add one.
+                    {s3.noMeals}
                   </p>
                 )}
               </CardContent>
@@ -809,14 +827,14 @@ export function PlanBuilderForm({
         <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>General Recommendations</CardTitle>
+              <CardTitle>{s4.cardTitle}</CardTitle>
             </CardHeader>
             <CardContent>
               <Textarea
                 value={generalRecommendations}
                 onChange={(e) => setGeneralRecommendations(e.target.value)}
                 rows={5}
-                placeholder="Add general nutrition recommendations, dietary guidelines, cooking tips..."
+                placeholder={s4.placeholder}
               />
             </CardContent>
           </Card>
@@ -825,17 +843,17 @@ export function PlanBuilderForm({
             <CardHeader className="flex-row items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <Pill className="size-4 text-brand" />
-                Supplements
+                {s4.supplements}
               </CardTitle>
               <Button variant="outline" size="sm" onClick={addSupplement}>
                 <Plus className="size-4" />
-                Add
+                {d.common.add}
               </Button>
             </CardHeader>
             <CardContent className="space-y-3">
               {supplements.length === 0 && (
                 <p className="py-4 text-center text-sm text-muted-foreground">
-                  No supplements added.
+                  {s4.noSupplements}
                 </p>
               )}
               {supplements.map((supp, idx) => (
@@ -845,43 +863,43 @@ export function PlanBuilderForm({
                 >
                   <div className="grid flex-1 gap-3 sm:grid-cols-4">
                     <div className="space-y-1">
-                      <Label className="text-xs">Name</Label>
+                      <Label className="text-xs">{s4.supplementName}</Label>
                       <Input
                         value={supp.supplementName}
                         onChange={(e) =>
                           updateSupplement(idx, "supplementName", e.target.value)
                         }
-                        placeholder="e.g. Creatine"
+                        placeholder={s4.supplementNamePlaceholder}
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Dose</Label>
+                      <Label className="text-xs">{s4.dose}</Label>
                       <Input
                         value={supp.dose}
                         onChange={(e) =>
                           updateSupplement(idx, "dose", e.target.value)
                         }
-                        placeholder="e.g. 5g"
+                        placeholder={s4.dosePlaceholder}
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Frequency</Label>
+                      <Label className="text-xs">{s4.frequency}</Label>
                       <Input
                         value={supp.frequency}
                         onChange={(e) =>
                           updateSupplement(idx, "frequency", e.target.value)
                         }
-                        placeholder="e.g. Daily"
+                        placeholder={s4.frequencyPlaceholder}
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label className="text-xs">Timing</Label>
+                      <Label className="text-xs">{s4.timing}</Label>
                       <Input
                         value={supp.timing}
                         onChange={(e) =>
                           updateSupplement(idx, "timing", e.target.value)
                         }
-                        placeholder="e.g. Post-workout"
+                        placeholder={s4.timingPlaceholder}
                       />
                     </div>
                   </div>
@@ -902,13 +920,13 @@ export function PlanBuilderForm({
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Droplets className="size-4 text-blue-600" />
-                Hydration
+                {s4.hydration}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="daily-water">Daily Water (mL)</Label>
+                  <Label htmlFor="daily-water">{s4.dailyWater}</Label>
                   <Input
                     id="daily-water"
                     type="number"
@@ -924,7 +942,7 @@ export function PlanBuilderForm({
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="electrolyte-brand">Electrolyte Brand</Label>
+                  <Label htmlFor="electrolyte-brand">{s4.electrolyteBrand}</Label>
                   <Input
                     id="electrolyte-brand"
                     value={hydration.electrolyteBrand}
@@ -934,12 +952,12 @@ export function PlanBuilderForm({
                         electrolyteBrand: e.target.value,
                       }))
                     }
-                    placeholder="e.g. LMNT, Liquid IV"
+                    placeholder={s4.electrolytePlaceholder}
                   />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="during-training">During Training</Label>
+                <Label htmlFor="during-training">{s4.duringTraining}</Label>
                 <Textarea
                   id="during-training"
                   value={hydration.duringTraining}
@@ -950,11 +968,11 @@ export function PlanBuilderForm({
                     }))
                   }
                   rows={2}
-                  placeholder="Hydration strategy during training sessions..."
+                  placeholder={s4.duringTrainingPlaceholder}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="hydration-notes">Notes</Label>
+                <Label htmlFor="hydration-notes">{s4.hydrationNotes}</Label>
                 <Textarea
                   id="hydration-notes"
                   value={hydration.notes}
@@ -965,7 +983,7 @@ export function PlanBuilderForm({
                     }))
                   }
                   rows={2}
-                  placeholder="Additional hydration notes..."
+                  placeholder={s4.hydrationNotesPlaceholder}
                 />
               </div>
             </CardContent>
@@ -981,15 +999,15 @@ export function PlanBuilderForm({
           disabled={step === 0}
         >
           <ChevronLeft className="size-4" />
-          Back
+          {d.common.back}
         </Button>
         <div className="flex gap-2">
-          {step < STEPS.length - 1 ? (
+          {step < steps.length - 1 ? (
             <Button
               onClick={() => setStep((s) => s + 1)}
               disabled={!canProceed[step]()}
             >
-              Next
+              {d.common.next}
               <ChevronRight className="size-4" />
             </Button>
           ) : (
@@ -998,7 +1016,7 @@ export function PlanBuilderForm({
               disabled={isPending || !clientId || !planName.trim()}
               className="bg-brand hover:bg-brand-dark"
             >
-              {isPending ? "Saving…" : "Create Meal Plan"}
+              {isPending ? d.common.saving : b.createMealPlan}
             </Button>
           )}
         </div>

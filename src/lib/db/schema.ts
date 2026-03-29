@@ -72,6 +72,7 @@ export const users = pgTable("users", {
   name: varchar("name", { length: 255 }).notNull(),
   passwordHash: text("password_hash").notNull(),
   role: userRoleEnum("role").notNull().default("nutritionist"),
+  locale: varchar("locale", { length: 5 }).notNull().default("es"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

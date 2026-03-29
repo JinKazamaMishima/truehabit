@@ -20,6 +20,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useDictionary } from "@/lib/i18n/context";
 
 export function EditFoodDeleteSection({
   foodId,
@@ -28,14 +29,15 @@ export function EditFoodDeleteSection({
   foodId: string;
   foodName: string;
 }) {
+  const d = useDictionary();
   const [open, setOpen] = useState(false);
 
   return (
     <Card className="border-destructive/20 bg-destructive/[0.02]">
       <CardHeader>
-        <CardTitle className="text-base">Danger zone</CardTitle>
+        <CardTitle className="text-base">{d.common.dangerZone}</CardTitle>
         <CardDescription>
-          Permanently remove this food from the database.
+          {d.admin.foods.deleteFood.dangerDescription}
         </CardDescription>
       </CardHeader>
       <CardFooter className="border-t border-destructive/10 pt-4">
@@ -46,24 +48,24 @@ export function EditFoodDeleteSection({
             }
           >
             <Trash2 className="size-4" />
-            Delete food
+            {d.admin.foods.deleteFood.deleteButton}
           </DialogTrigger>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Delete food</DialogTitle>
+              <DialogTitle>{d.admin.foods.deleteFood.confirmTitle}</DialogTitle>
               <DialogDescription>
-                Remove{" "}
-                <span className="font-medium text-foreground">{foodName}</span>?
-                Recipes or plans referencing this item may need updates.
+                {d.admin.foods.foodGroupsPage.removePrefix}
+                <span className="font-medium text-foreground">{foodName}</span>
+                {d.admin.foods.deleteFood.confirmDetail}
               </DialogDescription>
             </DialogHeader>
             <DialogFooter className="gap-2 sm:gap-0">
               <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-                Cancel
+                {d.common.cancel}
               </Button>
               <form action={deleteFood.bind(null, foodId)}>
                 <Button type="submit" variant="destructive">
-                  Delete permanently
+                  {d.admin.foods.deleteFood.deletePermanently}
                 </Button>
               </form>
             </DialogFooter>

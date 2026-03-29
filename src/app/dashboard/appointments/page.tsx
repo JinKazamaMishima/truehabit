@@ -14,29 +14,25 @@ import {
   AlertCircle,
   CalendarCheck,
 } from "lucide-react";
+import { getLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n";
+import type { Dictionary } from "@/lib/i18n";
 
-const serviceLabels: Record<string, string> = {
-  personalized_nutrition: "Nutrición Personalizada",
-  weight_loss: "Pérdida de Peso",
-  sports_nutrition: "Nutrición Deportiva",
-  body_composition: "Composición Corporal",
-  pre_competition: "Pre-competencia",
-  individual_coaching: "Coaching Individual",
-};
-
-const statusConfig: Record<
-  string,
-  { label: string; variant: "default" | "secondary" | "outline" | "destructive"; icon: typeof CheckCircle2 }
-> = {
-  pending: { label: "Pendiente", variant: "secondary", icon: AlertCircle },
-  confirmed: { label: "Confirmada", variant: "default", icon: CalendarCheck },
-  completed: { label: "Completada", variant: "outline", icon: CheckCircle2 },
-  cancelled: { label: "Cancelada", variant: "destructive", icon: XCircle },
-};
+function getStatusConfig(d: Dictionary) {
+  return {
+    pending: { label: d.common.pending, variant: "secondary" as const, icon: AlertCircle },
+    confirmed: { label: d.common.confirmed, variant: "default" as const, icon: CalendarCheck },
+    completed: { label: d.common.completed, variant: "outline" as const, icon: CheckCircle2 },
+    cancelled: { label: d.common.cancelled, variant: "destructive" as const, icon: XCircle },
+  };
+}
 
 export default async function AppointmentsPage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
+
+  const locale = await getLocale();
+  const d = await getDictionary(locale);
 
   const client = await getClientByLinkedUser(session.user.id!);
   if (!client) redirect("/dashboard");
@@ -50,12 +46,15 @@ export default async function AppointmentsPage() {
     (a) => a.status === "completed" || a.status === "cancelled"
   );
 
+  const statusConfig = getStatusConfig(d);
+  const serviceLabels = d.dashboard.appointments.serviceLabels;
+
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="font-heading text-2xl font-bold text-charcoal">Citas</h1>
+        <h1 className="font-heading text-2xl font-bold text-charcoal">{d.dashboard.appointments.title}</h1>
         <p className="text-sm text-muted-foreground">
-          Tus citas programadas y el historial de consultas anteriores.
+          {d.dashboard.appointments.subtitle}
         </p>
       </div>
 
@@ -64,9 +63,9 @@ export default async function AppointmentsPage() {
           <div className="mb-4 rounded-full bg-purple-50 p-4">
             <CalendarDays className="size-8 text-purple-600" />
           </div>
-          <p className="text-lg font-semibold text-charcoal">Sin citas registradas</p>
+          <p className="text-lg font-semibold text-charcoal">{d.dashboard.appointments.noAppointments}</p>
           <p className="mt-1 max-w-md text-sm text-muted-foreground">
-            Agenda una cita con tu nutriólogo a través de la página de contacto.
+            {d.dashboard.appointments.noAppointmentsMessage}
           </p>
         </div>
       ) : (
@@ -75,7 +74,7 @@ export default async function AppointmentsPage() {
           <div className="space-y-4">
             <h2 className="flex items-center gap-2 text-lg font-semibold text-charcoal">
               <CalendarCheck className="size-5 text-brand" />
-              Próximas Citas
+              {d.dashboard.appointments.upcoming}
               {upcoming.length > 0 && (
                 <Badge variant="default" className="ml-1 bg-brand text-white">
                   {upcoming.length}
@@ -86,7 +85,7 @@ export default async function AppointmentsPage() {
             {upcoming.length > 0 ? (
               <div className="grid gap-3 sm:grid-cols-2">
                 {upcoming.map((apt) => (
-                  <AppointmentCard key={apt.id} appointment={apt} />
+                  <AppointmentCard key={apt.id} appointment={apt} statusConfig={statusConfig} serviceLabels={serviceLabels} />
                 ))}
               </div>
             ) : (
@@ -94,7 +93,7 @@ export default async function AppointmentsPage() {
                 <CardContent className="flex flex-col items-center py-8 text-center">
                   <CalendarDays className="mb-2 size-6 text-muted-foreground/40" />
                   <p className="text-sm text-muted-foreground">
-                    No hay citas programadas
+                    {d.dashboard.appointments.noUpcoming}
                   </p>
                 </CardContent>
               </Card>
@@ -106,11 +105,11 @@ export default async function AppointmentsPage() {
             <div className="space-y-4">
               <h2 className="flex items-center gap-2 text-lg font-semibold text-charcoal">
                 <Clock className="size-5 text-muted-foreground" />
-                Historial
+                {d.dashboard.appointments.history}
               </h2>
               <div className="grid gap-3 sm:grid-cols-2">
                 {past.map((apt) => (
-                  <AppointmentCard key={apt.id} appointment={apt} />
+                  <AppointmentCard key={apt.id} appointment={apt} statusConfig={statusConfig} serviceLabels={serviceLabels} />
                 ))}
               </div>
             </div>
@@ -123,6 +122,8 @@ export default async function AppointmentsPage() {
 
 function AppointmentCard({
   appointment,
+  statusConfig,
+  serviceLabels,
 }: {
   appointment: {
     id: string;
@@ -133,8 +134,10 @@ function AppointmentCard({
     status: string;
     message: string | null;
   };
+  statusConfig: ReturnType<typeof getStatusConfig>;
+  serviceLabels: Record<string, string>;
 }) {
-  const config = statusConfig[appointment.status] ?? statusConfig.pending;
+  const config = statusConfig[appointment.status as keyof typeof statusConfig] ?? statusConfig.pending;
   const Icon = config.icon;
 
   return (
@@ -163,7 +166,7 @@ function AppointmentCard({
           <div className="min-w-0 flex-1">
             <div className="flex items-center justify-between gap-2">
               <p className="truncate font-semibold text-charcoal">
-                {serviceLabels[appointment.serviceType] ??
+                {serviceLabels[appointment.serviceType as keyof typeof serviceLabels] ??
                   appointment.serviceType.replace(/_/g, " ")}
               </p>
               <Badge variant={config.variant} className="shrink-0 text-xs">

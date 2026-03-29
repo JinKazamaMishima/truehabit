@@ -6,8 +6,13 @@ import { foodGroups } from "@/lib/db/schema";
 import { asc } from "drizzle-orm";
 import { createFood } from "@/actions/foods";
 import { FoodForm } from "../_components/food-form";
+import { getLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n";
 
 export default async function NewFoodPage() {
+  const locale = await getLocale();
+  const d = await getDictionary(locale);
+
   const groups = await db
     .select({ id: foodGroups.id, name: foodGroups.name })
     .from(foodGroups)
@@ -23,17 +28,17 @@ export default async function NewFoodPage() {
           render={<Link href="/admin/foods" />}
         >
           <ArrowLeft className="size-4" />
-          <span className="sr-only">Back to foods</span>
+          <span className="sr-only">{d.admin.foods.newFood.backToFoods}</span>
         </Button>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">New food</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{d.admin.foods.newFood.title}</h1>
           <p className="text-muted-foreground">
-            Add an item to the food database with macros per base serving.
+            {d.admin.foods.newFood.subtitle}
           </p>
         </div>
       </div>
 
-      <FoodForm groups={groups} action={createFood} submitLabel="Create food" />
+      <FoodForm groups={groups} action={createFood} submitLabel={d.admin.foods.newFood.createFood} />
     </div>
   );
 }

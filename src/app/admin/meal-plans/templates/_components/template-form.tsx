@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { createTemplate, type CreateTemplateInput } from "@/actions/meal-plans";
+import { useDictionary } from "@/lib/i18n/context";
 
 interface FoodGroup {
   id: string;
@@ -34,29 +35,6 @@ interface SlotState {
 }
 
 const DAY_TYPES = ["training", "rest", "competition"] as const;
-const DAY_TYPE_LABELS: Record<string, string> = {
-  training: "Training",
-  rest: "Rest",
-  competition: "Competition",
-};
-
-const GOAL_OPTIONS = [
-  { value: "fat_loss", label: "Fat Loss" },
-  { value: "muscle_gain", label: "Muscle Gain" },
-  { value: "weight_cut", label: "Weight Cut" },
-  { value: "maintenance", label: "Maintenance" },
-  { value: "pre_competition", label: "Pre-Competition" },
-];
-
-const DEFAULT_SLOT_NAMES = [
-  "Desayuno",
-  "Colación 1",
-  "Comida",
-  "Colación 2",
-  "Pre-entreno",
-  "Recovery",
-  "Cena",
-];
 
 function makeSlot(slotName = ""): SlotState {
   return {
@@ -69,6 +47,39 @@ function makeSlot(slotName = ""): SlotState {
 }
 
 export function TemplateForm({ foodGroups }: { foodGroups: FoodGroup[] }) {
+  const d = useDictionary();
+  const f = d.admin.mealPlans.templates.form;
+
+  const DAY_TYPE_LABELS: Record<string, string> = {
+    training: f.training,
+    rest: f.rest,
+    competition: f.competition,
+  };
+
+  const GOAL_OPTIONS = [
+    { value: "fat_loss", label: f.goalLabels.fat_loss },
+    { value: "muscle_gain", label: f.goalLabels.muscle_gain },
+    { value: "weight_cut", label: f.goalLabels.weight_cut },
+    { value: "maintenance", label: f.goalLabels.maintenance },
+    { value: "pre_competition", label: f.goalLabels.pre_competition },
+  ];
+
+  const DEFAULT_SLOT_NAMES = [
+    f.defaultSlotNames.breakfast,
+    f.defaultSlotNames.snack1,
+    f.defaultSlotNames.lunch,
+    f.defaultSlotNames.snack2,
+    f.defaultSlotNames.preWorkout,
+    f.defaultSlotNames.recovery,
+    f.defaultSlotNames.dinner,
+  ];
+
+  const defaultInitialSlots = [
+    f.defaultSlotNames.breakfast,
+    f.defaultSlotNames.lunch,
+    f.defaultSlotNames.dinner,
+  ];
+
   const [isPending, startTransition] = useTransition();
   const [name, setName] = useState("");
   const [goalType, setGoalType] = useState<string>("");
@@ -79,11 +90,11 @@ export function TemplateForm({ foodGroups }: { foodGroups: FoodGroup[] }) {
 
   const [slotsByDayType, setSlotsByDayType] = useState<
     Record<string, SlotState[]>
-  >({
-    training: [makeSlot("Desayuno"), makeSlot("Comida"), makeSlot("Cena")],
+  >(() => ({
+    training: defaultInitialSlots.map((name) => makeSlot(name)),
     rest: [],
     competition: [],
-  });
+  }));
 
   function toggleDayType(dt: string) {
     setSelectedDayTypes((prev) => {
@@ -95,7 +106,7 @@ export function TemplateForm({ foodGroups }: { foodGroups: FoodGroup[] }) {
         if (!slotsByDayType[dt] || slotsByDayType[dt].length === 0) {
           setSlotsByDayType((s) => ({
             ...s,
-            [dt]: [makeSlot("Desayuno"), makeSlot("Comida"), makeSlot("Cena")],
+            [dt]: defaultInitialSlots.map((name) => makeSlot(name)),
           }));
         }
       }
@@ -187,25 +198,25 @@ export function TemplateForm({ foodGroups }: { foodGroups: FoodGroup[] }) {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Template Details</CardTitle>
+          <CardTitle>{f.cardTitle}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="template-name">Template Name</Label>
+              <Label htmlFor="template-name">{f.templateName}</Label>
               <Input
                 id="template-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="e.g. Athlete Base Plan"
+                placeholder={f.templateNamePlaceholder}
                 required
               />
             </div>
             <div className="space-y-2">
-              <Label>Goal Type</Label>
+              <Label>{f.goalType}</Label>
               <Select value={goalType} onValueChange={(v) => setGoalType(v ?? "")}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select goal" />
+                  <SelectValue placeholder={f.selectGoal} />
                 </SelectTrigger>
                 <SelectContent>
                   {GOAL_OPTIONS.map((opt) => (
@@ -218,17 +229,17 @@ export function TemplateForm({ foodGroups }: { foodGroups: FoodGroup[] }) {
             </div>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="template-desc">Description</Label>
+            <Label htmlFor="template-desc">{f.description}</Label>
             <Textarea
               id="template-desc"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
-              placeholder="Describe the purpose of this template..."
+              placeholder={f.descriptionPlaceholder}
             />
           </div>
           <div className="space-y-2">
-            <Label>Day Types</Label>
+            <Label>{f.dayTypes}</Label>
             <div className="flex flex-wrap gap-4">
               {DAY_TYPES.map((dt) => (
                 <label key={dt} className="flex items-center gap-2 text-sm">
@@ -251,7 +262,7 @@ export function TemplateForm({ foodGroups }: { foodGroups: FoodGroup[] }) {
               <Badge variant="outline" className="capitalize">
                 {DAY_TYPE_LABELS[dayType]}
               </Badge>
-              Meal Slots
+              {f.slotsCard}
             </CardTitle>
             <Button
               variant="outline"
@@ -259,13 +270,13 @@ export function TemplateForm({ foodGroups }: { foodGroups: FoodGroup[] }) {
               onClick={() => addSlot(dayType)}
             >
               <Plus className="size-4" />
-              Add Slot
+              {f.addSlot}
             </Button>
           </CardHeader>
           <CardContent className="space-y-4">
             {(slotsByDayType[dayType] || []).length === 0 && (
               <p className="py-6 text-center text-sm text-muted-foreground">
-                No meal slots defined. Click "Add Slot" to get started.
+                {f.noSlots}
               </p>
             )}
             {(slotsByDayType[dayType] || []).map((slot, idx) => (
@@ -276,7 +287,7 @@ export function TemplateForm({ foodGroups }: { foodGroups: FoodGroup[] }) {
                 <div className="flex items-start justify-between gap-2">
                   <div className="grid flex-1 gap-4 sm:grid-cols-3">
                     <div className="space-y-2">
-                      <Label>Slot Name</Label>
+                      <Label>{f.slotName}</Label>
                       <div className="flex gap-2">
                         <Select
                           value={
@@ -293,7 +304,7 @@ export function TemplateForm({ foodGroups }: { foodGroups: FoodGroup[] }) {
                           }}
                         >
                           <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select slot" />
+                            <SelectValue placeholder={f.selectSlot} />
                           </SelectTrigger>
                           <SelectContent>
                             {DEFAULT_SLOT_NAMES.map((sn) => (
@@ -301,7 +312,7 @@ export function TemplateForm({ foodGroups }: { foodGroups: FoodGroup[] }) {
                                 {sn}
                               </SelectItem>
                             ))}
-                            <SelectItem value="__custom__">Custom…</SelectItem>
+                            <SelectItem value="__custom__">{f.customSlot}</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -316,12 +327,12 @@ export function TemplateForm({ foodGroups }: { foodGroups: FoodGroup[] }) {
                               e.target.value
                             )
                           }
-                          placeholder="Custom slot name"
+                          placeholder={f.customSlotName}
                         />
                       )}
                     </div>
                     <div className="space-y-2">
-                      <Label>Time Range</Label>
+                      <Label>{f.timeRange}</Label>
                       <Input
                         value={slot.timeRange}
                         onChange={(e) =>
@@ -332,11 +343,11 @@ export function TemplateForm({ foodGroups }: { foodGroups: FoodGroup[] }) {
                             e.target.value
                           )
                         }
-                        placeholder="e.g. 7:00–8:00"
+                        placeholder={f.timeRangePlaceholder}
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>Notes</Label>
+                      <Label>{f.slotNotes}</Label>
                       <Input
                         value={slot.notes}
                         onChange={(e) =>
@@ -347,7 +358,7 @@ export function TemplateForm({ foodGroups }: { foodGroups: FoodGroup[] }) {
                             e.target.value
                           )
                         }
-                        placeholder="Optional notes"
+                        placeholder={f.slotNotesPlaceholder}
                       />
                     </div>
                   </div>
@@ -366,7 +377,7 @@ export function TemplateForm({ foodGroups }: { foodGroups: FoodGroup[] }) {
                     <Separator />
                     <div>
                       <Label className="mb-2">
-                        Food Group Portions
+                        {f.foodGroupPortions}
                       </Label>
                       <div className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-3 md:grid-cols-4">
                         {foodGroups.map((fg) => (
@@ -410,7 +421,7 @@ export function TemplateForm({ foodGroups }: { foodGroups: FoodGroup[] }) {
           onClick={handleSubmit}
           disabled={isPending || !name.trim()}
         >
-          {isPending ? "Saving…" : "Create Template"}
+          {isPending ? d.common.saving : f.createTemplate}
         </Button>
       </div>
     </div>

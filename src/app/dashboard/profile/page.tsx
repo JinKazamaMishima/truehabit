@@ -14,14 +14,8 @@ import {
   Scale,
   Ruler,
 } from "lucide-react";
-
-const goalLabels: Record<string, string> = {
-  fat_loss: "Pérdida de grasa",
-  muscle_gain: "Ganancia muscular",
-  weight_cut: "Corte de peso",
-  maintenance: "Mantenimiento",
-  pre_competition: "Pre-competencia",
-};
+import { getLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n";
 
 const goalColors: Record<string, string> = {
   fat_loss: "bg-red-50 text-red-700 border-red-200",
@@ -35,6 +29,9 @@ export default async function ProfilePage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
 
+  const locale = await getLocale();
+  const d = await getDictionary(locale);
+
   const client = await getClientByLinkedUser(session.user.id!);
   if (!client) redirect("/dashboard");
 
@@ -45,10 +42,10 @@ export default async function ProfilePage() {
     <div className="space-y-6">
       <div>
         <h1 className="font-heading text-2xl font-bold text-charcoal">
-          Mi Perfil
+          {d.dashboard.profile.title}
         </h1>
         <p className="text-sm text-muted-foreground">
-          Tu información personal y objetivos de salud.
+          {d.dashboard.profile.subtitle}
         </p>
       </div>
 
@@ -65,11 +62,11 @@ export default async function ProfilePage() {
                 className={`mt-2 border ${goalColors[client.goal] ?? "bg-muted"}`}
               >
                 <Target className="mr-1 size-3" />
-                {goalLabels[client.goal] ?? client.goal}
+                {d.dashboard.goalLabels[client.goal as keyof typeof d.dashboard.goalLabels] ?? client.goal}
               </Badge>
             )}
             <Badge variant="outline" className="mt-1.5 text-xs capitalize">
-              {client.status === "active" ? "Activo" : "Inactivo"}
+              {client.status === "active" ? d.common.active : d.common.inactive}
             </Badge>
           </CardContent>
         </Card>
@@ -79,51 +76,51 @@ export default async function ProfilePage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <UserCircle className="size-5 text-brand" />
-              Información Personal
+              {d.dashboard.profile.personalInfo}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid gap-4 sm:grid-cols-2">
               <InfoRow
                 icon={<Mail className="size-4 text-muted-foreground" />}
-                label="Email"
+                label={d.common.email}
                 value={client.email}
               />
               <InfoRow
                 icon={<Phone className="size-4 text-muted-foreground" />}
-                label="Teléfono"
+                label={d.common.phone}
                 value={client.phone}
               />
               <InfoRow
                 icon={<Cake className="size-4 text-muted-foreground" />}
-                label="Fecha de Nacimiento"
+                label={d.dashboard.profile.dateOfBirth}
                 value={client.dateOfBirth}
               />
               <InfoRow
                 icon={<UserCircle className="size-4 text-muted-foreground" />}
-                label="Sexo"
+                label={d.dashboard.profile.sex}
                 value={
                   client.sex === "male"
-                    ? "Masculino"
+                    ? d.dashboard.profile.male
                     : client.sex === "female"
-                      ? "Femenino"
+                      ? d.dashboard.profile.female
                       : null
                 }
               />
               <InfoRow
                 icon={<Activity className="size-4 text-muted-foreground" />}
-                label="Nivel de Actividad"
+                label={d.dashboard.profile.activityLevel}
                 value={client.activityLevel}
               />
               <InfoRow
                 icon={<Medal className="size-4 text-muted-foreground" />}
-                label="Deporte"
+                label={d.dashboard.profile.sport}
                 value={client.sport}
               />
             </div>
             {client.notes && (
               <div className="mt-4 rounded-lg bg-muted/50 p-3">
-                <p className="text-xs font-medium text-muted-foreground mb-1">Notas</p>
+                <p className="text-xs font-medium text-muted-foreground mb-1">{d.common.notes}</p>
                 <p className="text-sm text-charcoal">{client.notes}</p>
               </div>
             )}
@@ -137,7 +134,7 @@ export default async function ProfilePage() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Target className="size-5 text-brand" />
-              Objetivo Actual
+              {d.dashboard.profile.currentGoal}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -148,9 +145,9 @@ export default async function ProfilePage() {
                 <Target className="size-8" />
                 <div>
                   <p className="text-lg font-bold">
-                    {goalLabels[client.goal] ?? client.goal}
+                    {d.dashboard.goalLabels[client.goal as keyof typeof d.dashboard.goalLabels] ?? client.goal}
                   </p>
-                  <p className="text-xs opacity-70">Meta de nutrición activa</p>
+                  <p className="text-xs opacity-70">{d.dashboard.profile.goalDescription}</p>
                 </div>
               </div>
 
@@ -158,25 +155,25 @@ export default async function ProfilePage() {
                 <div className="flex flex-wrap gap-4">
                   <MeasurementPill
                     icon={<Scale className="size-4" />}
-                    label="Peso"
+                    label={d.dashboard.profile.weight}
                     value={
                       latest.weightKg
-                        ? `${Number(latest.weightKg).toFixed(1)} kg`
+                        ? `${Number(latest.weightKg).toFixed(1)}${d.dashboard.kgSuffix}`
                         : null
                     }
                   />
                   <MeasurementPill
                     icon={<Ruler className="size-4" />}
-                    label="Estatura"
+                    label={d.dashboard.height}
                     value={
                       latest.heightCm
-                        ? `${Number(latest.heightCm).toFixed(0)} cm`
+                        ? `${Number(latest.heightCm).toFixed(0)}${d.dashboard.cmSuffix}`
                         : null
                     }
                   />
                   <MeasurementPill
                     icon={<Activity className="size-4" />}
-                    label="IMC"
+                    label={d.dashboard.bmi}
                     value={latest.bmi ? Number(latest.bmi).toFixed(1) : null}
                   />
                 </div>

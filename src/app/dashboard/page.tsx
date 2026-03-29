@@ -23,18 +23,15 @@ import {
   Droplets,
   Clock,
 } from "lucide-react";
-
-const goalLabels: Record<string, string> = {
-  fat_loss: "Pérdida de grasa",
-  muscle_gain: "Ganancia muscular",
-  weight_cut: "Corte de peso",
-  maintenance: "Mantenimiento",
-  pre_competition: "Pre-competencia",
-};
+import { getLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n";
 
 export default async function DashboardHome() {
   const session = await auth();
   if (!session?.user) redirect("/login");
+
+  const locale = await getLocale();
+  const d = await getDictionary(locale);
 
   const client = await getClientByLinkedUser(session.user.id!);
 
@@ -45,11 +42,10 @@ export default async function DashboardHome() {
           <UtensilsCrossed className="size-8 text-brand" />
         </div>
         <h1 className="font-heading text-2xl font-bold text-charcoal">
-          Bienvenido a TrueHabit
+          {d.dashboard.welcomeTitle}
         </h1>
         <p className="mt-2 max-w-md text-muted-foreground">
-          Tu cuenta aún no está vinculada a un perfil de cliente. Contacta a tu
-          nutriólogo para completar la configuración.
+          {d.dashboard.notLinkedMessage}
         </p>
       </div>
     );
@@ -82,19 +78,19 @@ export default async function DashboardHome() {
       {/* Welcome Banner */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand to-brand-dark p-6 text-white sm:p-8">
         <div className="relative z-10">
-          <p className="text-sm font-medium text-white/80">Buenos días</p>
+          <p className="text-sm font-medium text-white/80">{d.dashboard.greeting}</p>
           <h1 className="mt-1 font-heading text-3xl font-bold sm:text-4xl">
-            ¡Hola, {firstName}!
+            {d.dashboard.greetingHello}{firstName}{d.dashboard.greetingEnd}
           </h1>
           <p className="mt-2 max-w-lg text-sm text-white/80">
             {activePlan
-              ? `Tu plan "${activePlan.name}" está activo. ¡Sigue con el buen trabajo!`
-              : "No tienes un plan activo en este momento. Consulta con tu nutriólogo."}
+              ? `${d.dashboard.activePlanPart1}${activePlan.name}${d.dashboard.activePlanPart2}`
+              : d.dashboard.noPlanMessage}
           </p>
           {client.goal && (
             <Badge className="mt-3 border-white/20 bg-white/15 text-white hover:bg-white/25">
               <Target className="mr-1.5 size-3" />
-              {goalLabels[client.goal] ?? client.goal}
+              {d.dashboard.goalLabels[client.goal as keyof typeof d.dashboard.goalLabels] ?? client.goal}
             </Badge>
           )}
         </div>
@@ -110,11 +106,11 @@ export default async function DashboardHome() {
               <Scale className="size-6" />
             </div>
             <div>
-              <p className="text-xs font-medium text-muted-foreground">Peso Actual</p>
+              <p className="text-xs font-medium text-muted-foreground">{d.dashboard.currentWeight}</p>
               <p className="text-2xl font-bold text-charcoal">
                 {latestMeasurement?.weightKg
-                  ? `${Number(latestMeasurement.weightKg).toFixed(1)} kg`
-                  : "—"}
+                  ? `${Number(latestMeasurement.weightKg).toFixed(1)}${d.dashboard.kgSuffix}`
+                  : d.common.emDash}
               </p>
               {weightChange !== null && (
                 <p
@@ -127,7 +123,7 @@ export default async function DashboardHome() {
                   ) : (
                     <TrendingUp className="size-3" />
                   )}
-                  {Math.abs(weightChange).toFixed(1)} kg
+                  {Math.abs(weightChange).toFixed(1)}{d.dashboard.kgSuffix}
                 </p>
               )}
             </div>
@@ -140,9 +136,9 @@ export default async function DashboardHome() {
               <Target className="size-6" />
             </div>
             <div>
-              <p className="text-xs font-medium text-muted-foreground">Objetivo</p>
+              <p className="text-xs font-medium text-muted-foreground">{d.dashboard.goal}</p>
               <p className="text-lg font-bold text-charcoal">
-                {client.goal ? goalLabels[client.goal] ?? client.goal : "Sin definir"}
+                {client.goal ? d.dashboard.goalLabels[client.goal as keyof typeof d.dashboard.goalLabels] ?? client.goal : d.dashboard.undefined}
               </p>
             </div>
           </CardContent>
@@ -154,9 +150,9 @@ export default async function DashboardHome() {
               <UtensilsCrossed className="size-6" />
             </div>
             <div>
-              <p className="text-xs font-medium text-muted-foreground">Plan Activo</p>
+              <p className="text-xs font-medium text-muted-foreground">{d.dashboard.activePlan}</p>
               <p className="text-lg font-bold text-charcoal truncate max-w-[140px]">
-                {activePlan?.name ?? "Ninguno"}
+                {activePlan?.name ?? d.common.none}
               </p>
             </div>
           </CardContent>
@@ -168,7 +164,7 @@ export default async function DashboardHome() {
               <CalendarDays className="size-6" />
             </div>
             <div>
-              <p className="text-xs font-medium text-muted-foreground">Próximas Citas</p>
+              <p className="text-xs font-medium text-muted-foreground">{d.dashboard.upcomingAppointments}</p>
               <p className="text-2xl font-bold text-charcoal">
                 {upcomingAppointments.length}
               </p>
@@ -181,7 +177,7 @@ export default async function DashboardHome() {
         {/* Today's Meals */}
         <Card className="border-0 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-3">
-            <CardTitle className="text-lg">Comidas de Hoy</CardTitle>
+            <CardTitle className="text-lg">{d.dashboard.todayMeals}</CardTitle>
             {activePlan && (
               <Button
                 variant="ghost"
@@ -189,7 +185,7 @@ export default async function DashboardHome() {
                 className="gap-1 text-brand hover:text-brand-dark"
                 render={<Link href="/dashboard/meal-plans" />}
               >
-                Ver plan
+                {d.dashboard.viewPlan}
                 <ArrowRight className="size-3.5" />
               </Button>
             )}
@@ -217,20 +213,20 @@ export default async function DashboardHome() {
                               variant="secondary"
                               className="text-xs font-normal"
                             >
-                              {opt.recipe?.name ?? "Receta"}
+                              {opt.recipe?.name ?? d.dashboard.recipe}
                             </Badge>
                           ))}
                         </div>
                       ) : (
                         <p className="mt-0.5 text-xs text-muted-foreground">
                           {[
-                            meal.cerealPortions && `${meal.cerealPortions} cereal`,
-                            meal.proteinPortions && `${meal.proteinPortions} proteína`,
-                            meal.fatPortions && `${meal.fatPortions} grasa`,
-                            meal.veggiePortions && `${meal.veggiePortions} vegetal`,
+                            meal.cerealPortions && `${meal.cerealPortions}${d.dashboard.cereal}`,
+                            meal.proteinPortions && `${meal.proteinPortions}${d.dashboard.protein}`,
+                            meal.fatPortions && `${meal.fatPortions}${d.dashboard.fat}`,
+                            meal.veggiePortions && `${meal.veggiePortions}${d.dashboard.vegetable}`,
                           ]
                             .filter(Boolean)
-                            .join(" · ") || "Sin detalles"}
+                            .join(" · ") || d.dashboard.noPortionDetails}
                         </p>
                       )}
                     </div>
@@ -241,7 +237,7 @@ export default async function DashboardHome() {
               <div className="flex flex-col items-center py-8 text-center">
                 <UtensilsCrossed className="mb-2 size-8 text-muted-foreground/40" />
                 <p className="text-sm text-muted-foreground">
-                  No hay comidas para mostrar
+                  {d.dashboard.noMealsToShow}
                 </p>
               </div>
             )}
@@ -253,14 +249,14 @@ export default async function DashboardHome() {
           {/* Body Composition Snapshot */}
           <Card className="border-0 shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <CardTitle className="text-lg">Composición Corporal</CardTitle>
+              <CardTitle className="text-lg">{d.dashboard.bodyComposition}</CardTitle>
               <Button
                 variant="ghost"
                 size="sm"
                 className="gap-1 text-brand hover:text-brand-dark"
                 render={<Link href="/dashboard/progress" />}
               >
-                Ver todo
+                {d.dashboard.viewAll}
                 <ArrowRight className="size-3.5" />
               </Button>
             </CardHeader>
@@ -268,35 +264,35 @@ export default async function DashboardHome() {
               {latestMeasurement ? (
                 <div className="grid grid-cols-2 gap-3">
                   <div className="rounded-lg bg-muted/50 p-3 text-center">
-                    <p className="text-xs text-muted-foreground">Grasa Corporal</p>
+                    <p className="text-xs text-muted-foreground">{d.dashboard.bodyFat}</p>
                     <p className="mt-1 text-xl font-bold text-charcoal">
                       {latestMeasurement.bodyFatPct
                         ? `${Number(latestMeasurement.bodyFatPct).toFixed(1)}%`
-                        : "—"}
+                        : d.common.emDash}
                     </p>
                   </div>
                   <div className="rounded-lg bg-muted/50 p-3 text-center">
-                    <p className="text-xs text-muted-foreground">Masa Muscular</p>
+                    <p className="text-xs text-muted-foreground">{d.dashboard.muscleMass}</p>
                     <p className="mt-1 text-xl font-bold text-charcoal">
                       {latestMeasurement.muscleMassPct
                         ? `${Number(latestMeasurement.muscleMassPct).toFixed(1)}%`
-                        : "—"}
+                        : d.common.emDash}
                     </p>
                   </div>
                   <div className="rounded-lg bg-muted/50 p-3 text-center">
-                    <p className="text-xs text-muted-foreground">IMC</p>
+                    <p className="text-xs text-muted-foreground">{d.dashboard.bmi}</p>
                     <p className="mt-1 text-xl font-bold text-charcoal">
                       {latestMeasurement.bmi
                         ? Number(latestMeasurement.bmi).toFixed(1)
-                        : "—"}
+                        : d.common.emDash}
                     </p>
                   </div>
                   <div className="rounded-lg bg-muted/50 p-3 text-center">
-                    <p className="text-xs text-muted-foreground">Estatura</p>
+                    <p className="text-xs text-muted-foreground">{d.dashboard.height}</p>
                     <p className="mt-1 text-xl font-bold text-charcoal">
                       {latestMeasurement.heightCm
-                        ? `${Number(latestMeasurement.heightCm).toFixed(0)} cm`
-                        : "—"}
+                        ? `${Number(latestMeasurement.heightCm).toFixed(0)}${d.dashboard.cmSuffix}`
+                        : d.common.emDash}
                     </p>
                   </div>
                 </div>
@@ -304,7 +300,7 @@ export default async function DashboardHome() {
                 <div className="flex flex-col items-center py-6 text-center">
                   <Dumbbell className="mb-2 size-8 text-muted-foreground/40" />
                   <p className="text-sm text-muted-foreground">
-                    Aún no hay mediciones registradas
+                    {d.dashboard.noMeasurementsYet}
                   </p>
                 </div>
               )}
@@ -314,14 +310,14 @@ export default async function DashboardHome() {
           {/* Upcoming Appointments */}
           <Card className="border-0 shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between pb-3">
-              <CardTitle className="text-lg">Próximas Citas</CardTitle>
+              <CardTitle className="text-lg">{d.dashboard.upcomingAppointments}</CardTitle>
               <Button
                 variant="ghost"
                 size="sm"
                 className="gap-1 text-brand hover:text-brand-dark"
                 render={<Link href="/dashboard/appointments" />}
               >
-                Ver todas
+                {d.dashboard.viewAllAppointments}
                 <ArrowRight className="size-3.5" />
               </Button>
             </CardHeader>
@@ -341,7 +337,7 @@ export default async function DashboardHome() {
                           {apt.serviceType.replace(/_/g, " ")}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          {apt.preferredDate ?? "Fecha por confirmar"}
+                          {apt.preferredDate ?? d.dashboard.dateToBeConfirmed}
                           {apt.preferredTime ? ` · ${apt.preferredTime}` : ""}
                         </p>
                       </div>
@@ -349,7 +345,7 @@ export default async function DashboardHome() {
                         variant={apt.status === "confirmed" ? "default" : "secondary"}
                         className="shrink-0 text-xs"
                       >
-                        {apt.status === "confirmed" ? "Confirmada" : "Pendiente"}
+                        {apt.status === "confirmed" ? d.common.confirmed : d.common.pending}
                       </Badge>
                     </div>
                   ))}
@@ -358,7 +354,7 @@ export default async function DashboardHome() {
                 <div className="flex flex-col items-center py-6 text-center">
                   <CalendarDays className="mb-2 size-8 text-muted-foreground/40" />
                   <p className="text-sm text-muted-foreground">
-                    No hay citas programadas
+                    {d.dashboard.noAppointmentsScheduled}
                   </p>
                 </div>
               )}

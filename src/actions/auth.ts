@@ -3,6 +3,7 @@
 import { signIn } from "@/lib/auth";
 import { AuthError } from "next-auth";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { db } from "@/lib/db";
 import { users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -26,7 +27,7 @@ export async function loginAction(
   }
 
   const [user] = await db
-    .select({ role: users.role })
+    .select({ role: users.role, locale: users.locale })
     .from(users)
     .where(eq(users.email, trimmedEmail))
     .limit(1);
@@ -45,6 +46,15 @@ export async function loginAction(
       return { error: "Invalid email or password." };
     }
     throw error;
+  }
+
+  if (user?.locale) {
+    const cookieStore = await cookies();
+    cookieStore.set("NEXT_LOCALE", user.locale, {
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: "lax",
+    });
   }
 
   redirect(destination);

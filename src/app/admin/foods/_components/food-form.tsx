@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useDictionary } from "@/lib/i18n/context";
 
 export type FoodGroupOption = { id: string; name: string };
 
@@ -49,18 +50,19 @@ export function FoodForm({
   defaults,
   submitLabel,
 }: FoodFormProps) {
+  const d = useDictionary();
   const [isFree, setIsFree] = useState(defaults?.isFree ?? false);
 
   return (
     <Card className="border-brand/15">
       <CardHeader className="border-b border-brand/10">
-        <CardTitle>Food details</CardTitle>
+        <CardTitle>{d.admin.foods.form.cardTitle}</CardTitle>
       </CardHeader>
       <CardContent className="pt-6">
         <form action={action} className="space-y-6">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2 sm:col-span-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">{d.admin.foods.form.name}</Label>
               <Input
                 id="name"
                 name="name"
@@ -71,16 +73,16 @@ export function FoodForm({
             </div>
 
             <div className="space-y-2 sm:col-span-2">
-              <Label>Food group</Label>
+              <Label>{d.admin.foods.form.foodGroup}</Label>
               <Select
                 name="food_group_id"
                 defaultValue={defaults?.foodGroupId ?? "__none__"}
               >
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="No group" />
+                  <SelectValue placeholder={d.admin.foods.form.noGroup} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="__none__">No group</SelectItem>
+                  <SelectItem value="__none__">{d.admin.foods.form.noGroup}</SelectItem>
                   {groups.map((g) => (
                     <SelectItem key={g.id} value={g.id}>
                       {g.name}
@@ -91,7 +93,7 @@ export function FoodForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="base_serving_qty">Base serving quantity</Label>
+              <Label htmlFor="base_serving_qty">{d.admin.foods.form.baseServingQty}</Label>
               <Input
                 id="base_serving_qty"
                 name="base_serving_qty"
@@ -102,17 +104,17 @@ export function FoodForm({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="base_serving_unit">Base serving unit</Label>
+              <Label htmlFor="base_serving_unit">{d.admin.foods.form.baseServingUnit}</Label>
               <Input
                 id="base_serving_unit"
                 name="base_serving_unit"
-                placeholder="g, ml, cup…"
+                placeholder={d.admin.foods.form.baseServingUnitPlaceholder}
                 defaultValue={defaults?.baseServingUnit ?? ""}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="calories">Calories (per serving)</Label>
+              <Label htmlFor="calories">{d.admin.foods.form.caloriesPerServing}</Label>
               <Input
                 id="calories"
                 name="calories"
@@ -123,7 +125,7 @@ export function FoodForm({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="protein_g">Protein (g)</Label>
+              <Label htmlFor="protein_g">{d.admin.foods.form.proteinG}</Label>
               <Input
                 id="protein_g"
                 name="protein_g"
@@ -134,7 +136,7 @@ export function FoodForm({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="carbs_g">Carbs (g)</Label>
+              <Label htmlFor="carbs_g">{d.admin.foods.form.carbsG}</Label>
               <Input
                 id="carbs_g"
                 name="carbs_g"
@@ -145,7 +147,7 @@ export function FoodForm({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="fat_g">Fat (g)</Label>
+              <Label htmlFor="fat_g">{d.admin.foods.form.fatG}</Label>
               <Input
                 id="fat_g"
                 name="fat_g"
@@ -156,7 +158,7 @@ export function FoodForm({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="fiber_g">Fiber (g)</Label>
+              <Label htmlFor="fiber_g">{d.admin.foods.form.fiberG}</Label>
               <Input
                 id="fiber_g"
                 name="fiber_g"
@@ -176,17 +178,17 @@ export function FoodForm({
             />
             <input type="hidden" name="is_free" value={isFree ? "true" : "false"} />
             <Label htmlFor="is_free" className="cursor-pointer font-normal">
-              Free food (unlimited portion)
+              {d.admin.foods.form.freeFood}
             </Label>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="notes">Notes</Label>
+            <Label htmlFor="notes">{d.admin.foods.form.notes}</Label>
             <Textarea
               id="notes"
               name="notes"
               rows={4}
-              placeholder="Optional preparation or sourcing notes…"
+              placeholder={d.admin.foods.form.notesPlaceholder}
               defaultValue={defaults?.notes ?? ""}
             />
           </div>
@@ -197,7 +199,7 @@ export function FoodForm({
               variant="outline"
               render={<Link href="/admin/foods" />}
             >
-              Cancel
+              {d.common.cancel}
             </Button>
             <Button
               type="submit"

@@ -7,6 +7,8 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { db } from "@/lib/db";
 import { recipes } from "@/lib/db/schema";
 import { and, arrayContains, desc, like } from "drizzle-orm";
+import { getLocale } from "@/lib/i18n/server";
+import { getDictionary } from "@/lib/i18n";
 
 const MEAL_FILTER_VALUES = [
   "breakfast",
@@ -17,7 +19,7 @@ const MEAL_FILTER_VALUES = [
   "recovery",
 ] as const;
 
-const MEAL_LABELS: Record<string, string> = {
+const MEAL_KEY_MAP: Record<string, string> = {
   breakfast: "Breakfast",
   lunch: "Lunch",
   dinner: "Dinner",
@@ -33,6 +35,9 @@ export default async function AdminRecipesPage({
   searchParams: Promise<{ q?: string; meal?: string }>;
 }) {
   const { q, meal } = await searchParams;
+  const locale = await getLocale();
+  const d = await getDictionary(locale);
+  const mealLabels = d.admin.recipes.mealLabels as Record<string, string>;
 
   const mealFilter =
     meal && MEAL_FILTER_VALUES.includes(meal as (typeof MEAL_FILTER_VALUES)[number])
@@ -66,9 +71,9 @@ export default async function AdminRecipesPage({
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Recipes</h1>
+          <h1 className="text-2xl font-bold tracking-tight">{d.admin.recipes.title}</h1>
           <p className="text-muted-foreground">
-            Build and manage recipes for meal plans.
+            {d.admin.recipes.subtitle}
           </p>
         </div>
         <Button
@@ -76,7 +81,7 @@ export default async function AdminRecipesPage({
           render={<Link href="/admin/recipes/new" />}
         >
           <Plus className="size-4" />
-          New Recipe
+          {d.admin.recipes.newRecipe}
         </Button>
       </div>
 
@@ -85,14 +90,14 @@ export default async function AdminRecipesPage({
           <Search className="absolute left-2.5 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             name="q"
-            placeholder="Search recipes..."
+            placeholder={d.admin.recipes.searchPlaceholder}
             defaultValue={q ?? ""}
             className="pl-9"
           />
         </div>
         <div className="flex w-full flex-col gap-1.5 sm:w-48">
           <label htmlFor="meal" className="text-xs font-medium text-muted-foreground">
-            Meal type
+            {d.admin.recipes.mealTypeLabel}
           </label>
           <select
             id="meal"
@@ -100,16 +105,16 @@ export default async function AdminRecipesPage({
             defaultValue={meal ?? ""}
             className="h-8 w-full rounded-lg border border-input bg-background px-2.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
           >
-            <option value="">All meal types</option>
+            <option value="">{d.admin.recipes.allMealTypes}</option>
             {MEAL_FILTER_VALUES.map((m) => (
               <option key={m} value={m}>
-                {MEAL_LABELS[m] ?? m}
+                {mealLabels[MEAL_KEY_MAP[m]] ?? m}
               </option>
             ))}
           </select>
         </div>
         <Button type="submit" variant="secondary" size="sm" className="w-full sm:w-auto">
-          Apply
+          {d.admin.recipes.apply}
         </Button>
       </form>
 
@@ -118,8 +123,8 @@ export default async function AdminRecipesPage({
           <ChefHat className="mb-3 size-10 text-muted-foreground/50" />
           <p className="text-sm font-medium text-muted-foreground">
             {q || mealFilter
-              ? "No recipes match your filters."
-              : "No recipes yet."}
+              ? d.admin.recipes.noMatch
+              : d.admin.recipes.noRecipesYet}
           </p>
           {!q && !mealFilter && (
             <Button
@@ -128,7 +133,7 @@ export default async function AdminRecipesPage({
               render={<Link href="/admin/recipes/new" />}
             >
               <Plus className="size-4" />
-              Create your first recipe
+              {d.admin.recipes.createFirstRecipe}
             </Button>
           )}
         </div>
@@ -148,14 +153,14 @@ export default async function AdminRecipesPage({
                     </h2>
                     {recipe.prepTimeMin != null && (
                       <span className="shrink-0 text-xs text-muted-foreground">
-                        {recipe.prepTimeMin} min
+                        {recipe.prepTimeMin}{d.admin.recipes.minSuffix}
                       </span>
                     )}
                   </div>
                   <div className="flex flex-wrap gap-1 pt-1">
                     {(recipe.mealTypes ?? []).length === 0 ? (
                       <Badge variant="outline" className="text-xs font-normal">
-                        Any meal
+                        {d.admin.recipes.anyMeal}
                       </Badge>
                     ) : (
                       recipe.mealTypes!.map((m) => (
@@ -164,7 +169,7 @@ export default async function AdminRecipesPage({
                           variant="secondary"
                           className="bg-brand/10 text-xs font-normal text-brand-dark dark:bg-brand/10 dark:text-brand"
                         >
-                          {MEAL_LABELS[m] ?? m}
+                          {mealLabels[MEAL_KEY_MAP[m]] ?? m}
                         </Badge>
                       ))
                     )}
@@ -174,7 +179,7 @@ export default async function AdminRecipesPage({
                   <p className="line-clamp-2 text-sm text-muted-foreground">
                     {recipe.description?.trim()
                       ? recipe.description
-                      : "No description."}
+                      : d.admin.recipes.noDescription}
                   </p>
                 </CardContent>
               </Card>
