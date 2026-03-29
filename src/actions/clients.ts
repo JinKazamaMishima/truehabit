@@ -5,12 +5,14 @@ import { clients, clientMeasurements } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-
-const HARDCODED_USER_ID = "00000000-0000-0000-0000-000000000001";
+import { auth } from "@/lib/auth";
 
 export async function createClient(formData: FormData) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
   await db.insert(clients).values({
-    userId: HARDCODED_USER_ID,
+    userId: session.user.id,
     name: formData.get("name") as string,
     email: (formData.get("email") as string) || null,
     phone: (formData.get("phone") as string) || null,

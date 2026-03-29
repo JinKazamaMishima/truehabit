@@ -15,8 +15,7 @@ import {
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-
-const HARDCODED_USER_ID = "00000000-0000-0000-0000-000000000001";
+import { auth } from "@/lib/auth";
 
 // ─── Template Actions ───────────────────────────────────────────────────────
 
@@ -44,6 +43,9 @@ export interface CreateTemplateInput {
 }
 
 export async function createTemplate(data: CreateTemplateInput) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
   const [template] = await db
     .insert(mealPlanTemplates)
     .values({
@@ -51,7 +53,7 @@ export async function createTemplate(data: CreateTemplateInput) {
       goalType: data.goalType,
       description: data.description || null,
       dayTypes: data.dayTypes,
-      createdBy: HARDCODED_USER_ID,
+      createdBy: session.user.id,
     })
     .returning({ id: mealPlanTemplates.id });
 
