@@ -323,8 +323,9 @@ function DeleteUserDialog({
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <DialogClose render={<Button variant="outline">{d.common.cancel}</Button>} />
+          <DialogClose render={<Button type="button" variant="outline">{d.common.cancel}</Button>} />
           <Button
+            type="button"
             variant="destructive"
             onClick={handleDelete}
             disabled={isPending}
