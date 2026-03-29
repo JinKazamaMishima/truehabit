@@ -34,6 +34,12 @@ export function ImageUpload({
     portrait: "aspect-[3/4]",
   }[aspectRatio];
 
+  const maxWidthClass = {
+    square: "max-w-xs",
+    landscape: "max-w-sm",
+    portrait: "max-w-xs",
+  }[aspectRatio];
+
   const handleFile = useCallback(
     async (file: File) => {
       if (!file.type.startsWith("image/")) {
@@ -120,7 +126,7 @@ export function ImageUpload({
 
   if (currentUrl) {
     return (
-      <div className={cn("relative overflow-hidden rounded-xl border border-gray-200", aspectClass, className)}>
+      <div className={cn("relative overflow-hidden rounded-xl border border-gray-200", aspectClass, maxWidthClass, className)}>
         <img
           src={currentUrl}
           alt="Imagen actual"
@@ -164,7 +170,6 @@ export function ImageUpload({
       <div
         className={cn(
           "relative flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed transition-colors",
-          aspectClass,
           dragOver
             ? "border-brand bg-brand/5"
             : "border-gray-200 bg-gray-50 hover:border-brand/50 hover:bg-brand/5",
