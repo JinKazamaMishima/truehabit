@@ -4,7 +4,6 @@ import { db } from "@/lib/db";
 import { clients, clientMeasurements, users } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
@@ -106,9 +105,20 @@ export async function updateClient(id: string, formData: FormData) {
 }
 
 export async function deleteClient(id: string) {
+  const [client] = await db
+    .select({ linkedUserId: clients.linkedUserId })
+    .from(clients)
+    .where(eq(clients.id, id))
+    .limit(1);
+
   await db.delete(clients).where(eq(clients.id, id));
+
+  if (client?.linkedUserId) {
+    await db.delete(users).where(eq(users.id, client.linkedUserId));
+  }
+
   revalidatePath("/admin/clients");
-  redirect("/admin/clients");
+  return { success: true };
 }
 
 export async function addMeasurement(clientId: string, formData: FormData) {

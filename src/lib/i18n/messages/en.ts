@@ -584,6 +584,10 @@ const en: Dictionary = {
         },
         profileCard: "Client Information",
         deleteClient: "Delete Client",
+        deleteClientConfirm: "Are you sure you want to delete",
+        deleteClientWarning: "This will permanently remove the client, all their data, and their linked user account. This action cannot be undone.",
+        toastClientDeleted: "Client deleted",
+        toastClientDeleteFailed: "Failed to delete client",
         measurementsTitle: "Body Measurements",
         addMeasurement: "Add Measurement",
         measurementHeaders: {

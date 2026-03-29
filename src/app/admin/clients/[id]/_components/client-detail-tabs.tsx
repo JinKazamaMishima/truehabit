@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,16 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogTrigger,
+  DialogClose,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -25,7 +36,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { updateClient, addMeasurement, deleteClient } from "@/actions/clients";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 import { useDictionary } from "@/lib/i18n/context";
 
 type Client = {
@@ -97,7 +109,6 @@ export function ClientDetailTabs({
 
   const updateClientWithId = updateClient.bind(null, client.id);
   const addMeasurementWithId = addMeasurement.bind(null, client.id);
-  const deleteClientWithId = deleteClient.bind(null, client.id);
 
   return (
     <Tabs defaultValue="profile">
@@ -217,12 +228,7 @@ export function ClientDetailTabs({
                 />
               </div>
               <div className="flex justify-between">
-                <form action={deleteClientWithId}>
-                  <Button type="submit" variant="destructive" size="sm">
-                    <Trash2 className="size-4" />
-                    {dt.deleteClient}
-                  </Button>
-                </form>
+                <DeleteClientDialog client={client} />
                 <Button type="submit">{d.common.saveChanges}</Button>
               </div>
             </form>
@@ -398,5 +404,61 @@ export function ClientDetailTabs({
         </Card>
       </TabsContent>
     </Tabs>
+  );
+}
+
+function DeleteClientDialog({ client }: { client: Client }) {
+  const [isPending, startTransition] = useTransition();
+  const [open, setOpen] = useState(false);
+  const router = useRouter();
+  const d = useDictionary();
+  const dt = d.admin.clients.detail;
+
+  function handleDelete() {
+    startTransition(async () => {
+      try {
+        await deleteClient(client.id);
+        toast.success(dt.toastClientDeleted);
+        setOpen(false);
+        router.push("/admin/clients");
+      } catch {
+        toast.error(dt.toastClientDeleteFailed);
+      }
+    });
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger
+        render={
+          <Button type="button" variant="destructive" size="sm">
+            <Trash2 className="size-4" />
+            {dt.deleteClient}
+          </Button>
+        }
+      />
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{dt.deleteClient}</DialogTitle>
+          <DialogDescription>
+            {dt.deleteClientConfirm} <strong>{client.name}</strong>?
+            {" "}{dt.deleteClientWarning}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <DialogClose render={<Button type="button" variant="outline">{d.common.cancel}</Button>} />
+          <Button
+            type="button"
+            variant="destructive"
+            onClick={handleDelete}
+            disabled={isPending}
+            className="gap-2"
+          >
+            {isPending && <Loader2 className="size-4 animate-spin" />}
+            {dt.deleteClient}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

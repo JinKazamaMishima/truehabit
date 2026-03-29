@@ -582,6 +582,10 @@ const es = {
         },
         profileCard: "Información del Cliente",
         deleteClient: "Eliminar Cliente",
+        deleteClientConfirm: "¿Estás seguro de que deseas eliminar a",
+        deleteClientWarning: "Esto eliminará permanentemente al cliente, todos sus datos y su cuenta de usuario vinculada. Esta acción no se puede deshacer.",
+        toastClientDeleted: "Cliente eliminado",
+        toastClientDeleteFailed: "Error al eliminar cliente",
         measurementsTitle: "Mediciones Corporales",
         addMeasurement: "Agregar Medición",
         measurementHeaders: {
