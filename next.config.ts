@@ -12,6 +12,14 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "*.storage.railway.app",
       },
+      {
+        protocol: "https",
+        hostname: "t3.storageapi.dev",
+      },
+      {
+        protocol: "https",
+        hostname: "*.storageapi.dev",
+      },
     ],
   },
 };
