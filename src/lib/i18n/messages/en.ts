@@ -565,6 +565,15 @@ const en: Dictionary = {
         notes: "Notes",
         notesPlaceholder: "Any additional notes about this client...",
         createButton: "Create Client",
+        emailRequired: "Required for customer login",
+        successTitle: "Client Created",
+        successMessage:
+          "The client account has been created with the following temporary password:",
+        copyPassword: "Copy Password",
+        copied: "Copied!",
+        done: "Done",
+        emailAlreadyExists: "A user with this email already exists.",
+        emailMissing: "Email is required to create a customer login.",
       },
       detail: {
         noEmail: "No email",

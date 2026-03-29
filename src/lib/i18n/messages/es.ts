@@ -563,6 +563,15 @@ const es = {
         notes: "Notas",
         notesPlaceholder: "Notas adicionales sobre este cliente...",
         createButton: "Crear Cliente",
+        emailRequired: "Requerido para el inicio de sesión del cliente",
+        successTitle: "Cliente Creado",
+        successMessage:
+          "La cuenta del cliente ha sido creada con la siguiente contraseña temporal:",
+        copyPassword: "Copiar Contraseña",
+        copied: "¡Copiado!",
+        done: "Listo",
+        emailAlreadyExists: "Ya existe un usuario con este email.",
+        emailMissing: "El email es obligatorio para crear un acceso de cliente.",
       },
       detail: {
         noEmail: "Sin email",
