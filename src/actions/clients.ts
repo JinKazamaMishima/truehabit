@@ -26,7 +26,8 @@ export async function createClient(
   formData: FormData,
 ): Promise<CreateClientResult> {
   const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
+  const staffUserId = session?.user?.id;
+  if (!staffUserId) throw new Error("Unauthorized");
 
   const name = formData.get("name") as string;
   const email = (formData.get("email") as string)?.trim();
@@ -46,7 +47,7 @@ export async function createClient(
         .returning({ id: users.id });
 
       await tx.insert(clients).values({
-        userId: session.user!.id,
+        userId: staffUserId,
         linkedUserId: newUser.id,
         name,
         email,
