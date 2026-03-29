@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,7 +37,6 @@ import {
 } from "@/actions/users";
 import {
   Loader2,
-  Plus,
   KeyRound,
   Trash2,
   UserPlus,
@@ -347,9 +347,13 @@ export function UserManagement({
   initialUsers: UserRow[];
   initialUnlinkedClients: UnlinkedClient[];
 }) {
+  const router = useRouter();
   const [userList, setUserList] = useState(initialUsers);
   const [unlinkedClients, setUnlinkedClients] = useState(initialUnlinkedClients);
   const d = useDictionary();
+
+  useEffect(() => { setUserList(initialUsers); }, [initialUsers]);
+  useEffect(() => { setUnlinkedClients(initialUnlinkedClients); }, [initialUnlinkedClients]);
 
   const roleLabels: Record<string, string> = {
     admin: d.admin.settings.users.roleAdmin,
@@ -357,14 +361,8 @@ export function UserManagement({
     customer: d.admin.settings.users.roleCustomer,
   };
 
-  async function refresh() {
-    const { getUsers, getUnlinkedClients } = await import("@/actions/users");
-    const [freshUsers, freshClients] = await Promise.all([
-      getUsers(),
-      getUnlinkedClients(),
-    ]);
-    setUserList(freshUsers);
-    setUnlinkedClients(freshClients);
+  function refresh() {
+    router.refresh();
   }
 
   return (
