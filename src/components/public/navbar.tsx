@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, Leaf, Phone, Mail, Camera, Globe, MessageCircle } from "lucide-react";
+import { Menu, Leaf, Phone, Mail, Camera, Globe, MessageCircle, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -101,7 +101,15 @@ export function Navbar({ businessName }: { businessName?: string }) {
             ))}
           </nav>
 
-          <div className="hidden lg:block">
+          <div className="hidden items-center gap-3 lg:flex">
+            <Button
+              variant="outline"
+              className="h-11 gap-2 rounded-md border-brand/30 px-5 text-sm font-medium text-brand transition-all hover:bg-brand-light hover:text-brand-dark"
+              render={<Link href="/login" />}
+            >
+              <LogIn className="size-4" />
+              Iniciar Sesión
+            </Button>
             <Button
               className="h-11 rounded-md bg-brand px-6 text-sm font-semibold text-white shadow-md transition-all hover:bg-brand-dark hover:shadow-lg"
               render={<Link href="/contact" />}
@@ -153,7 +161,16 @@ export function Navbar({ businessName }: { businessName?: string }) {
                 ))}
               </nav>
 
-              <div className="mt-4 px-4">
+              <div className="mt-4 space-y-2 px-4">
+                <Button
+                  variant="outline"
+                  className="w-full gap-2 border-brand/30 text-brand hover:bg-brand-light hover:text-brand-dark"
+                  size="lg"
+                  render={<Link href="/login" onClick={() => setOpen(false)} />}
+                >
+                  <LogIn className="size-4" />
+                  Iniciar Sesión
+                </Button>
                 <Button
                   className="w-full bg-brand text-white hover:bg-brand-dark"
                   size="lg"

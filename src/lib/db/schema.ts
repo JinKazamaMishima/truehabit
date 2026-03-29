@@ -15,7 +15,11 @@ import { relations } from "drizzle-orm";
 
 // ─── Enums ───────────────────────────────────────────────────────────────────
 
-export const userRoleEnum = pgEnum("user_role", ["admin", "nutritionist"]);
+export const userRoleEnum = pgEnum("user_role", [
+  "admin",
+  "nutritionist",
+  "customer",
+]);
 
 export const clientGoalEnum = pgEnum("client_goal", [
   "fat_loss",
@@ -72,7 +76,8 @@ export const users = pgTable("users", {
 });
 
 export const usersRelations = relations(users, ({ many }) => ({
-  clients: many(clients),
+  clients: many(clients, { relationName: "managingUser" }),
+  linkedClient: many(clients, { relationName: "linkedUser" }),
   recipes: many(recipes),
 }));
 
@@ -92,12 +97,24 @@ export const clients = pgTable("clients", {
   activityLevel: varchar("activity_level", { length: 100 }),
   sport: varchar("sport", { length: 100 }),
   notes: text("notes"),
+  linkedUserId: uuid("linked_user_id").references(() => users.id, {
+    onDelete: "set null",
+  }),
   status: clientStatusEnum("status").notNull().default("active"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const clientsRelations = relations(clients, ({ one, many }) => ({
-  user: one(users, { fields: [clients.userId], references: [users.id] }),
+  user: one(users, {
+    fields: [clients.userId],
+    references: [users.id],
+    relationName: "managingUser",
+  }),
+  linkedUser: one(users, {
+    fields: [clients.linkedUserId],
+    references: [users.id],
+    relationName: "linkedUser",
+  }),
   measurements: many(clientMeasurements),
   mealPlans: many(mealPlans),
   supplementProtocols: many(supplementProtocols),

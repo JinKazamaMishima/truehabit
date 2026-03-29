@@ -3,6 +3,9 @@
 import { signIn } from "@/lib/auth";
 import { AuthError } from "next-auth";
 import { redirect } from "next/navigation";
+import { db } from "@/lib/db";
+import { users } from "@/lib/db/schema";
+import { eq } from "drizzle-orm";
 
 export type LoginState = { error: string | null };
 
@@ -22,14 +25,21 @@ export async function loginAction(
     return { error: "Email and password are required." };
   }
 
-  let callbackUrl = "/admin";
+  const [user] = await db
+    .select({ role: users.role })
+    .from(users)
+    .where(eq(users.email, trimmedEmail))
+    .limit(1);
+
+  const destination = user?.role === "customer" ? "/dashboard" : "/admin";
+
   try {
-    callbackUrl = (await signIn("credentials", {
+    await signIn("credentials", {
       email: trimmedEmail,
       password,
       redirect: false,
-      redirectTo: "/admin",
-    })) as string;
+      redirectTo: destination,
+    });
   } catch (error) {
     if (error instanceof AuthError) {
       return { error: "Invalid email or password." };
@@ -37,5 +47,5 @@ export async function loginAction(
     throw error;
   }
 
-  redirect(callbackUrl);
+  redirect(destination);
 }
