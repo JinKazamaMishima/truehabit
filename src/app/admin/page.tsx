@@ -185,6 +185,10 @@ export default async function AdminDashboardPage() {
               <CalendarClock className="size-4" />
               {d.admin.dashboard.viewAppointments}
             </Button>
+            <Button variant="outline" className="justify-start gap-2 border-brand/20 hover:bg-brand/5 hover:text-brand" render={<Link href="/admin/appointments" />}>
+              <Plus className="size-4" />
+              {d.admin.dashboard.newAppointment}
+            </Button>
           </CardContent>
         </Card>
       </div>

@@ -12,10 +12,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { CalendarClock } from "lucide-react";
+import { CalendarClock, Pencil, Plus } from "lucide-react";
 import { updateAppointmentStatus } from "@/actions/appointments-admin";
 import { cn } from "@/lib/utils";
 import { useDictionary } from "@/lib/i18n/context";
+import { AppointmentFormDialog } from "./appointment-form-dialog";
 
 type Appointment = {
   id: string;
@@ -25,6 +26,7 @@ type Appointment = {
   serviceType: string;
   preferredDate: string | null;
   preferredTime: string | null;
+  message: string | null;
   status: "pending" | "confirmed" | "completed" | "cancelled";
   createdAt: Date;
 };
@@ -66,8 +68,9 @@ export function AppointmentsTable({
 
   return (
     <>
-      <div className="flex gap-1 rounded-lg bg-muted p-1">
-        {filterTabs.map((tab) => (
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex gap-1 rounded-lg bg-muted p-1">
+          {filterTabs.map((tab) => (
           <Link
             key={tab.value}
             href={
@@ -85,6 +88,14 @@ export function AppointmentsTable({
             {tab.label}
           </Link>
         ))}
+        </div>
+
+        <AppointmentFormDialog>
+          <Button className="bg-brand text-white hover:bg-brand-dark">
+            <Plus className="size-4" />
+            {d.admin.appointments.newAppointment}
+          </Button>
+        </AppointmentFormDialog>
       </div>
 
       {appointments.length === 0 ? (
@@ -133,6 +144,12 @@ export function AppointmentsTable({
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1">
+                      <AppointmentFormDialog appointment={apt}>
+                        <Button size="xs" variant="outline">
+                          <Pencil className="size-3" />
+                          {d.admin.appointments.editButton}
+                        </Button>
+                      </AppointmentFormDialog>
                       {apt.status === "pending" && (
                         <Button
                           size="xs"
