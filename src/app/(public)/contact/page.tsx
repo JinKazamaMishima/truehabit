@@ -290,6 +290,7 @@ function ContactPageContent() {
                         onValueChange={(val) =>
                           setValue("serviceType", val as FormValues["serviceType"])
                         }
+                        items={Object.fromEntries(serviceOptions.map((o) => [o.value, o.label]))}
                       >
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder={d.public.contact.servicePlaceholder} />

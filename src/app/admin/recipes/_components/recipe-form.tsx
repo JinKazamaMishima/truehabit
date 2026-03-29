@@ -530,6 +530,7 @@ export function RecipeForm(props: RecipeFormProps) {
                         )
                       )
                     }
+                    items={Object.fromEntries(RATIO_VALUES.map((v) => [v, ratioGroups[v] ?? v]))}
                   >
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder={f.groupPlaceholder} />

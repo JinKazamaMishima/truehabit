@@ -1222,6 +1222,14 @@ const en: Dictionary = {
     },
   },
 
+  pwa: {
+    installTitle: "Install TrueHabit",
+    installDescription: "Add to your home screen for quick access",
+    installButton: "Install",
+    iosInstructions: "Tap {shareIcon} then \"Add to Home Screen\"",
+    dismiss: "Not now",
+  },
+
   metadata: {
     defaultTitle: "TrueHabit — Science-based Nutrition",
     titleTemplate: "%s | TrueHabit",

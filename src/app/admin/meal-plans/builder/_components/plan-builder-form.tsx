@@ -415,7 +415,11 @@ export function PlanBuilderForm({
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
                 <Label>{s1.client}</Label>
-                <Select value={clientId} onValueChange={(v) => setClientId(v ?? "")}>
+                <Select
+                  value={clientId}
+                  onValueChange={(v) => setClientId(v ?? "")}
+                  items={Object.fromEntries(clients.map((c) => [c.id, c.name]))}
+                >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder={s1.selectClient} />
                   </SelectTrigger>
@@ -435,7 +439,11 @@ export function PlanBuilderForm({
                     ({d.common.optional})
                   </span>
                 </Label>
-                <Select value={templateId} onValueChange={(v) => v && applyTemplate(v)}>
+                <Select
+                  value={templateId}
+                  onValueChange={(v) => v && applyTemplate(v)}
+                  items={Object.fromEntries(templates.map((t) => [t.id, t.name]))}
+                >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder={s1.selectTemplate} />
                   </SelectTrigger>
@@ -600,6 +608,7 @@ export function PlanBuilderForm({
                   <Select
                     value={day.dayType}
                     onValueChange={(v) => v && updateDay(day.key, "dayType", v)}
+                    items={{ training: s3.training, rest: s3.rest, competition: s3.competition }}
                   >
                     <SelectTrigger className="w-32">
                       <SelectValue />
@@ -762,6 +771,7 @@ export function PlanBuilderForm({
                           onValueChange={(v) =>
                             v && addRecipeToMeal(day.key, meal.key, v as string)
                           }
+                          items={Object.fromEntries(recipes.map((r) => [r.id, r.name]))}
                         >
                           <SelectTrigger className="h-7 w-48 text-xs">
                             <SelectValue placeholder={s3.addRecipe} />

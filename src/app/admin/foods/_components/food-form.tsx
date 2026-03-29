@@ -77,6 +77,10 @@ export function FoodForm({
               <Select
                 name="food_group_id"
                 defaultValue={defaults?.foodGroupId ?? "__none__"}
+                items={{
+                  __none__: d.admin.foods.form.noGroup,
+                  ...Object.fromEntries(groups.map((g) => [g.id, g.name])),
+                }}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder={d.admin.foods.form.noGroup} />

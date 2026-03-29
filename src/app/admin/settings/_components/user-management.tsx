@@ -151,7 +151,15 @@ function AddUserDialog({
           </div>
           <div className="flex flex-col gap-2">
             <Label>{d.admin.settings.users.roleLabel}</Label>
-            <Select value={role} onValueChange={(v) => { if (v) setRole(v as typeof role); }}>
+            <Select
+              value={role}
+              onValueChange={(v) => { if (v) setRole(v as typeof role); }}
+              items={{
+                customer: d.admin.settings.users.roleCustomer,
+                admin: d.admin.settings.users.roleAdmin,
+                nutritionist: d.admin.settings.users.roleNutritionist,
+              }}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -165,7 +173,11 @@ function AddUserDialog({
           {role === "customer" && unlinkedClients.length > 0 && (
             <div className="flex flex-col gap-2">
               <Label>{d.admin.settings.users.linkToClient}</Label>
-              <Select value={linkedClientId} onValueChange={(v) => setLinkedClientId(v ?? "")}>
+              <Select
+                value={linkedClientId}
+                onValueChange={(v) => setLinkedClientId(v ?? "")}
+                items={Object.fromEntries(unlinkedClients.map((c) => [c.id, `${c.name}${c.email ? ` (${c.email})` : ""}`]))}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder={d.admin.settings.users.selectClient} />
                 </SelectTrigger>

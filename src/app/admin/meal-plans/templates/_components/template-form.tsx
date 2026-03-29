@@ -214,7 +214,11 @@ export function TemplateForm({ foodGroups }: { foodGroups: FoodGroup[] }) {
             </div>
             <div className="space-y-2">
               <Label>{f.goalType}</Label>
-              <Select value={goalType} onValueChange={(v) => setGoalType(v ?? "")}>
+              <Select
+                value={goalType}
+                onValueChange={(v) => setGoalType(v ?? "")}
+                items={Object.fromEntries(GOAL_OPTIONS.map((o) => [o.value, o.label]))}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder={f.selectGoal} />
                 </SelectTrigger>
@@ -301,6 +305,10 @@ export function TemplateForm({ foodGroups }: { foodGroups: FoodGroup[] }) {
                             } else {
                               updateSlot(dayType, slot.key, "slotName", v);
                             }
+                          }}
+                          items={{
+                            ...Object.fromEntries(DEFAULT_SLOT_NAMES.map((sn) => [sn, sn])),
+                            __custom__: f.customSlot,
                           }}
                         >
                           <SelectTrigger className="w-full">

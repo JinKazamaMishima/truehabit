@@ -27,7 +27,10 @@ export function NewClientFormSelects() {
     <>
       <div className="space-y-2">
         <Label>{nc.sex}</Label>
-        <Select name="sex">
+        <Select
+          name="sex"
+          items={Object.fromEntries(sexOptions.map((o) => [o.value, o.label]))}
+        >
           <SelectTrigger className="w-full">
             <SelectValue placeholder={nc.selectSex} />
           </SelectTrigger>
@@ -42,7 +45,10 @@ export function NewClientFormSelects() {
       </div>
       <div className="space-y-2">
         <Label>{nc.goal}</Label>
-        <Select name="goal">
+        <Select
+          name="goal"
+          items={Object.fromEntries(goalOptions.map((o) => [o.value, o.label]))}
+        >
           <SelectTrigger className="w-full">
             <SelectValue placeholder={nc.selectGoal} />
           </SelectTrigger>

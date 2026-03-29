@@ -1,9 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Poppins, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { getLocale } from "@/lib/i18n/server";
 import { getDictionary } from "@/lib/i18n";
 import { LocaleProvider } from "@/lib/i18n/context";
+import { InstallPrompt } from "@/components/pwa/install-prompt";
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -26,6 +27,10 @@ const jetbrainsMono = JetBrains_Mono({
   display: "swap",
 });
 
+export const viewport: Viewport = {
+  themeColor: "#8bc34a",
+};
+
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale();
   const dict = await getDictionary(locale);
@@ -35,6 +40,11 @@ export async function generateMetadata(): Promise<Metadata> {
       template: dict.metadata.titleTemplate,
     },
     description: dict.metadata.defaultDescription,
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: "default",
+      title: "TrueHabit",
+    },
   };
 }
 
@@ -54,6 +64,7 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col">
         <LocaleProvider locale={locale} dictionary={dictionary}>
           {children}
+          <InstallPrompt />
         </LocaleProvider>
       </body>
     </html>

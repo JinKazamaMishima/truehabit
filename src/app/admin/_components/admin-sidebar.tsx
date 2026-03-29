@@ -159,8 +159,6 @@ export function AdminSidebar({
         <span className="text-base font-semibold">TrueHabit</span>
       </div>
 
-      <div className="h-14 shrink-0 md:hidden" />
-
       <aside className="hidden w-64 shrink-0 flex-col border-r bg-background md:flex">
         {sidebarContent}
       </aside>

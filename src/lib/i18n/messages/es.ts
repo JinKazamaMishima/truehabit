@@ -1220,6 +1220,14 @@ const es = {
     },
   },
 
+  pwa: {
+    installTitle: "Instalar TrueHabit",
+    installDescription: "Agrega a tu pantalla de inicio para acceso rápido",
+    installButton: "Instalar",
+    iosInstructions: "Toca {shareIcon} y luego \"Agregar a inicio\"",
+    dismiss: "Ahora no",
+  },
+
   metadata: {
     defaultTitle: "TrueHabit — Nutrición basada en ciencia",
     titleTemplate: "%s | TrueHabit",
